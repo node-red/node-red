@@ -1095,41 +1095,33 @@ module.exports = function (RED) {
     // Add this new endpoint for fetching devices by EVM address
     RED.httpAdmin.get('/buyer/fetch-device-by-evm/:evmAddress', async function (req, res) {
         const evmAddress = req.params.evmAddress;
-                 
         try {
-
-          const smartContract = req.query.smartContract || 'jetvision';
-
+            const smartContract = req.query.smartContract || 'jetvision';
             if (!smartContract) {
                 return res.status(400).json({
                     success: false,
                     error: 'Smart contract not configured for buyer node'
                 });
             }
-            
             // Import global contract monitor functions
-            const { 
-                searchDeviceInCache, 
-                triggerCacheUpdate 
+            const {
+                searchDeviceInCache,
+                triggerCacheUpdate
             } = require('./global-contract-monitor.js');
-            
             // Search cache first
             let device = searchDeviceInCache(smartContract, evmAddress);
-            
             if (!device) {
                 console.log(`[DEBUG] Device not found in cache, triggering update for ${smartContract}`);
                 // Trigger cache update and retry
                 const updateResult = await triggerCacheUpdate(smartContract);
-                
                 if (updateResult.success) {
                     device = searchDeviceInCache(smartContract, evmAddress);
                 }
             }
-            
             if (device) {
                 console.log(`[DEBUG] Device found:`, device);
-                res.json({ 
-                    success: true, 
+                return res.json({
+                    success: true,
                     device: {
                         evmAddress: device.contract,
                         deviceName: device.deviceName || 'Unknown Device',
@@ -1139,19 +1131,93 @@ module.exports = function (RED) {
                         stdErrTopic: device.stdErrTopic
                     }
                 });
-            } else {
-                console.log(`[DEBUG] Device not found after cache update`);
-                res.json({ 
-                    success: false, 
-                    error: 'Device not found in smart contract' 
+            }
+            // If not found, try direct contract fetch with retry logic
+            const { HederaContractService } = require('neuron-js-registration-sdk');
+            const contractEVM = process.env[`${smartContract.toUpperCase()}_CONTRACT_EVM`];
+            if (!contractEVM) {
+                return res.json({
+                    success: false,
+                    error: 'Contract ID not configured for smart contract'
                 });
             }
-            
+            const contractService = new HederaContractService({
+                network: process.env.HEDERA_NETWORK || 'testnet',
+                operatorId: process.env.HEDERA_OPERATOR_ID,
+                operatorKey: process.env.HEDERA_OPERATOR_KEY,
+                contractEVM
+            });
+            let foundDevice = null;
+            let lastError = null;
+            for (let attempt = 1; attempt <= 3; attempt++) {
+                try {
+                    console.log(`[DEBUG] Direct contract fetch attempt ${attempt} for EVM: ${evmAddress}`);
+                    const devices = await contractService.getDevicesByOwner(contractEVM,evmAddress);
+                    if (devices && devices.length > 0) {
+                        foundDevice = devices[0];
+                        foundDevice.contract = evmAddress;
+                       // console.log(`[DEBUG] Device found in contract:`, foundDevice);
+                        break;
+                    }
+                } catch (err) {
+                    lastError = err;
+                 //   console.error(`[DEBUG] Direct contract fetch failed (attempt ${attempt}):`, err);
+                }
+                if (attempt < 3) {
+                    await new Promise(resolve => setTimeout(resolve, 5000));
+                }
+            }
+            if (foundDevice) {
+                // Update cache for future use
+                try {
+                    const { globalAllDevices, globalPeerCounts, saveContractDataToCache, searchDeviceInCache } = require('./global-contract-monitor.js');
+                    if (!globalAllDevices[smartContract]) globalAllDevices[smartContract] = [];
+                 //   console.log(`[DEBUG] Attempting to update cache for smartContract: ${smartContract}`);
+                  //  console.log(`[DEBUG] foundDevice:`, JSON.stringify(foundDevice, (key, value) => typeof value === 'bigint' ? value.toString() : value));
+                    // Use the evmAddress used in getDevicesByOwner for duplicate check
+                    const exists = globalAllDevices[smartContract].some(d => {
+                        const dAddress = d.contract || d.evmAddress || d.address;
+                        return dAddress && evmAddress && dAddress.toLowerCase() === evmAddress.toLowerCase();
+                    });
+                    if (!exists) {
+                      //  console.log(`[DEBUG] Device not found in cache, adding to globalAllDevices[${smartContract}]`);
+                        globalAllDevices[smartContract].push(foundDevice);
+                        globalPeerCounts[smartContract] = globalAllDevices[smartContract].length;
+                        saveContractDataToCache(smartContract);
+                        // Confirm device is now in cache
+                        const check = searchDeviceInCache(smartContract, evmAddress);
+                       // console.log(`[DEBUG] After save, device in cache:`, check ? 'YES' : 'NO', check ? JSON.stringify(check, (key, value) => typeof value === 'bigint' ? value.toString() : value) : '');
+                        // Log the cache file path
+                        const { cacheFiles } = require('./global-contract-monitor.js');
+                        //console.log(`[DEBUG] Cache file path:`, cacheFiles[smartContract]);
+                        //console.log(`[DEBUG] Updated cache for ${smartContract} with new device`);
+                    } else {
+                        console.log(`[DEBUG] Device already exists in cache for ${smartContract}`);
+                    }
+                } catch (cacheErr) {
+                    console.error(`[DEBUG] Failed to update cache after direct contract fetch:`, cacheErr);
+                }
+                return res.json({
+                    success: true,
+                    device: {
+                        evmAddress: foundDevice.contract || foundDevice.evmAddress || foundDevice.address,
+                        deviceName: foundDevice.deviceName || 'Unknown Device',
+                        deviceType: foundDevice.deviceType || 'Unknown Type',
+                        stdInTopic: foundDevice.stdInTopic,
+                        stdOutTopic: foundDevice.stdOutTopic,
+                        stdErrTopic: foundDevice.stdErrTopic
+                    }
+                });
+            }
+            return res.json({
+                success: false,
+                error: 'Device not found in smart contract'
+            });
         } catch (error) {
             console.error(`[DEBUG] Error fetching device:`, error);
-            res.status(500).json({ 
-                success: false, 
-                error: 'Internal server error: ' + error.message 
+            res.status(500).json({
+                success: false,
+                error: 'Internal server error: ' + error.message
             });
         }
     });

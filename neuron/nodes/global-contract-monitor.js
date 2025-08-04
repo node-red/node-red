@@ -464,5 +464,8 @@ module.exports = {
     isContractLoading,
     isMonitoringActive,
     searchDeviceInCache,
-    triggerCacheUpdate
-}; 
+    triggerCacheUpdate,
+    globalAllDevices,
+    globalPeerCounts,
+    saveContractDataToCache
+};
