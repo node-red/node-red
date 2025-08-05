@@ -632,7 +632,7 @@ module.exports = function (RED) {
     RED.httpAdmin.get('/seller/connection-status/:nodeId', function (req, res) {
         const nodeId = req.params.nodeId;
         const { getConnectionMonitor } = require('./connection-monitor.js');
-        console.log(`[DEBUG] Seller connection status requested for node ID: ${nodeId}`);
+      //  console.log(`[DEBUG] Seller connection status requested for node ID: ${nodeId}`);
 
         try {
             let sellerNode = RED.nodes.getNode(nodeId);
@@ -648,10 +648,10 @@ module.exports = function (RED) {
                 }
             }
             
-            console.log(`[DEBUG] Using seller node ID: ${actualNodeId}, Found node:`, sellerNode ? sellerNode.type : 'none');
+           // console.log(`[DEBUG] Using seller node ID: ${actualNodeId}, Found node:`, sellerNode ? sellerNode.type : 'none');
             
             if (!sellerNode || sellerNode.type !== 'seller config') {
-                console.log(`[DEBUG] Seller node not found or wrong type`);
+              //  console.log(`[DEBUG] Seller node not found or wrong type`);
                 return res.status(404).json({ 
                     error: 'Seller node not found',
                     debug: {
@@ -664,7 +664,7 @@ module.exports = function (RED) {
             }
 
             if (!sellerNode.deviceInfo || !sellerNode.deviceInfo.wsPort) {
-                console.log(`[DEBUG] Seller node not ready - no WebSocket port`);
+              //  console.log(`[DEBUG] Seller node not ready - no WebSocket port`);
                 return res.status(400).json({ 
                     error: 'Node not ready - no WebSocket port available',
                     debug: {
@@ -678,7 +678,7 @@ module.exports = function (RED) {
             const connectionMonitor = getConnectionMonitor(actualNodeId, 'seller', sellerNode.deviceInfo.wsPort);
             const status = connectionMonitor.getStatus();
 
-            console.log(`[DEBUG] Returning seller connection status for ${actualNodeId}:`, status);
+          //  console.log(`[DEBUG] Returning seller connection status for ${actualNodeId}:`, status);
             res.json(status);
             
         } catch (error) {

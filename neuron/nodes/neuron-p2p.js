@@ -1,5 +1,6 @@
 const WebSocket = require('ws');
 const waitForEnvReady = require('../services/WaitForEnvReady');
+const http = require('http');
 
 module.exports = function(RED) {
 
@@ -200,6 +201,63 @@ module.exports = function(RED) {
                 return;
             }
 
+            function broadcastToPeers(peerKeys, label) {
+                if (!peerKeys || peerKeys.length === 0) {
+                  //  node.status({ fill: "red", shape: "ring", text: `No available peers` });
+                   // node.error(`No available peers to broadcast to`);
+                    return;
+                }
+              //  node.status({ fill: "yellow", shape: "ring", text: `Broadcasting to ${peerKeys.length} ${label}...` });
+                peerKeys.forEach((peerKey, index) => {
+                    const payload = JSON.stringify(msg.payload || msg.message || msg.data || '');
+                    const message = {
+                        type: msg.type || 'p2p',
+                        data: payload,
+                        timestamp: msg.timestamp || Date.now(),
+                        publicKey: peerKey,
+                    };
+                  //  logDebug(`Broadcasting to peer ${index + 1}/${peerKeys.length}:`, peerKey);
+                    ws.send(JSON.stringify(message), (err) => {
+                        if (err) {
+                            logDebug(`Broadcast to peer ${index + 1} failed:`, err);
+                            node.warn(`Failed to send to peer ${index + 1}: ${err.message}`);
+                        } else {
+                            logDebug(`Broadcast to peer ${index + 1} successful`);
+                            logDebug("message", message);
+                        }
+                    });
+                });
+                setTimeout(() => {
+                    if (ws && ws.readyState === WebSocket.OPEN) {
+                        node.status({ fill: "green", shape: "dot", text: `Broadcast sent to ${peerKeys.length} peers` });
+                    }
+                }, 1000);
+            }
+
+            function fetchAndBroadcastPeers(endpoint, label) {
+                const url = `http://localhost:1880${endpoint}`;
+              //  logDebug('Fetching peers from:', url);
+                http.get(url, (res) => {
+                    let data = '';
+                    res.on('data', chunk => { data += chunk; });
+                    res.on('end', () => {
+                        try {
+                            const json = JSON.parse(data);
+                            const peers = Array.isArray(json.peers) ? json.peers : [];
+                            const peerKeys = peers.map(p => p.publicKey).filter(Boolean);
+                            logDebug('Fetched peerKeys:', peerKeys);
+                            broadcastToPeers(peerKeys, label);
+                        } catch (e) {
+                            node.status({ fill: "red", shape: "ring", text: `Peer fetch error` });
+                            node.error('Failed to parse peers from connection-status:', e);
+                        }
+                    });
+                }).on('error', (e) => {
+                    node.status({ fill: "red", shape: "ring", text: `Peer fetch error` });
+                    node.error('Failed to fetch peers from connection-status:', e);
+                });
+            }
+
             try {
                 const { publicKey: senderKey } = getTargetInfo();
                 const targetNode = RED.nodes.getNode(node.selectedNodeId);
@@ -246,7 +304,6 @@ module.exports = function(RED) {
                     const adminKeys = nodeType === 'buyer config' 
                         ? targetNode.deviceInfo.sellerAdminKeys 
                         : targetNode.deviceInfo.buyerAdminKeys;
-                    
                     logDebug('Broadcast debug info:', {
                         nodeType: nodeType,
                         adminKeys: adminKeys,
@@ -254,51 +311,16 @@ module.exports = function(RED) {
                         sellerAdminKeys: targetNode.deviceInfo.sellerAdminKeys,
                         buyerAdminKeys: targetNode.deviceInfo.buyerAdminKeys
                     });
-                    
                     if (adminKeys && adminKeys.length > 0) {
+                        node.status({ fill: "yellow", shape: "ring", text: `Broadcasting to ${adminKeys.length} peers...` });
                         const availablePeers = adminKeys.filter(key => key !== null && key !== undefined);
-                        
-                        if (availablePeers.length > 0) {
-                            node.status({ fill: "yellow", shape: "ring", text: `Broadcasting to ${availablePeers.length} ${nodeType === 'buyer config' ? 'sellers' : 'buyers'}...` });
-                            
-                            // Send message to all available peers
-                            availablePeers.forEach((peerKey, index) => {
-                                const payload = JSON.stringify(msg.payload || msg.message || msg.data || '');
-                                const message = {
-                                    type: msg.type || 'p2p',
-                                    data: payload,
-                                    timestamp: msg.timestamp || Date.now(),
-                                    publicKey: peerKey,
-                                   // sender: senderKey
-                                };
-
-                                logDebug(`Broadcasting to peer ${index + 1}/${availablePeers.length}:`, peerKey);
-                                
-                                ws.send(JSON.stringify(message), (err) => {
-                                    if (err) {
-                                        logDebug(`Broadcast to peer ${index + 1} failed:`, err);
-                                        node.warn(`Failed to send to peer ${index + 1}: ${err.message}`);
-                                    } else {
-                                        logDebug(`Broadcast to peer ${index + 1} successful`);
-                                        logDebug("message", message);
-                                    }
-                                });
-                            });
-                            
-                            // Update status after sending to all peers
-                            setTimeout(() => {
-                                if (ws && ws.readyState === WebSocket.OPEN) {
-                                    node.status({ fill: "green", shape: "dot", text: `Broadcast sent to ${availablePeers.length} peers` });
-                                }
-                            }, 1000);
-                            
-                        } else {
-                            node.status({ fill: "red", shape: "ring", text: `No available ${nodeType === 'buyer config' ? 'sellers' : 'buyers'}` });
-                            node.error(`No available ${nodeType === 'buyer config' ? 'sellers' : 'buyers'} to broadcast to`);
-                        }
+                        broadcastToPeers(availablePeers, nodeType === 'buyer config' ? 'sellers' : 'buyers');
                     } else {
-                        node.status({ fill: "red", shape: "ring", text: `No ${nodeType === 'buyer config' ? 'sellers' : 'buyers'} configured` });
-                        node.error(`No ${nodeType === 'buyer config' ? 'sellers' : 'buyers'} configured for broadcasting`);
+                        // Fallback: fetch connected peers from /connection-status/
+                        const endpoint = nodeType === 'buyer config'
+                            ? `/buyer/connection-status/${targetNode.id}`
+                            : `/seller/connection-status/${targetNode.id}`;
+                        fetchAndBroadcastPeers(endpoint, nodeType === 'buyer config' ? 'sellers' : 'buyers');
                     }
                 }
             } catch (err) {
