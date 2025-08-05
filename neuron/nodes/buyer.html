@@ -1,4 +1,5 @@
 <script type="text/html" data-template-name="buyer config">
+<div class="neuron-buyer-config">
 
     <div class="form-row">
         <label for="node-input-name"> <span>Name</span></label>
@@ -157,6 +158,7 @@
 
 
     <!-- The seller-modal div is no longer needed -->
+</div>
 </script>
 
 
@@ -1121,109 +1123,82 @@
 </script>
 
 <style>
-      
-    /* Form layout */
-    .form-row {
-        display: flex;
-        margin-bottom: 8px;
-        align-items: center;
-        min-width: 430px;
-    }
-    
-    /* Table container */
-    #devices-table-container {
-        padding: 8px;
-        width: 100%;
-        box-sizing: border-box;
-        overflow-x: auto;
-        min-width: 430px;
-    }
-    
-    /* Table styling */
-    #devices-table {
-        table-layout: auto;
-        width: 100%;
-    }
-
-    
-    #devices-table th {
+.neuron-buyer-config .form-row {
+    display: flex;
+    margin-bottom: 8px;
+    align-items: center;
+    min-width: 430px;
+}
+.neuron-buyer-config #devices-table-container {
+    padding: 8px;
+    width: 100%;
+    box-sizing: border-box;
+    overflow-x: auto;
+    min-width: 430px;
+}
+.neuron-buyer-config #devices-table {
+    table-layout: auto;
+    width: 100%;
+}
+.neuron-buyer-config #devices-table th {
+    background-color: #2d2d2d !important;
+    color: white !important;
+    padding: 4px 6px;
+}
+.neuron-buyer-config #devices-table td {
+    background-color: #3c3c3c;
+    color: white;
+    padding: 4px 6px;
+}
+.neuron-buyer-config #devices-table tbody tr:hover {
+    background-color: #4a4a4a;
+}
+.neuron-buyer-config #evm-address-input {
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    padding: 6px 8px;
+}
+.neuron-buyer-config #evm-address-input:focus {
+    border-color: #4d90fe;
+    outline: none;
+    box-shadow: 0 0 3px rgba(77, 144, 254, 0.3);
+}
+.neuron-buyer-config .remove-device-btn {
+    background-color: #ff6b6b !important;
+    border-color: #ff6b6b !important;
+}
+.neuron-buyer-config .remove-device-btn:hover {
+    background-color: #ff5252 !important;
+    border-color: #ff5252 !important;
+}
+.neuron-buyer-config .connection-status-connected { background-color: #4CAF50 !important; }
+.neuron-buyer-config .connection-status-disconnected { background-color: #f44336 !important; }
+.neuron-buyer-config .connection-status-connecting { background-color: #ff9800 !important; }
+.neuron-buyer-config .connection-status-unknown { background-color: #9e9e9e !important; }
+@keyframes fa-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+.neuron-buyer-config .fa-spin {
+    animation: fa-spin 1s infinite linear !important;
+}
+.neuron-buyer-config #devices-summary {
+    padding-top: 8px;
+    margin-top: 8px;
+    font-size: 12px;
+}
+.neuron-buyer-config #no-device-message {
+    background-color: #f8f9fa !important;
+    border: 1px solid #dee2e6 !important;
+    color: #6c757d !important;
+}
+@media (prefers-color-scheme: dark) {
+    .neuron-buyer-config #no-device-message {
         background-color: #2d2d2d !important;
-        color: white !important;
-        padding: 4px 6px;
+        border-color: #555 !important;
+        color: #adb5bd !important;
     }
-    
-    #devices-table td {
-        background-color: #3c3c3c;
-        color: white;
-        padding: 4px 6px;
-    }
-    
-    #devices-table tbody tr:hover {
-        background-color: #4a4a4a;
-    }
-
-    /* Input styling */
-    #evm-address-input {
-        border: 1px solid #ccc;
-        border-radius: 3px;
-        padding: 6px 8px;
-    }
-    
-    #evm-address-input:focus {
-        border-color: #4d90fe;
-        outline: none;
-        box-shadow: 0 0 3px rgba(77, 144, 254, 0.3);
-    }
-
-    /* Button styling */
-    .remove-device-btn {
-        background-color: #ff6b6b !important;
-        border-color: #ff6b6b !important;
-    }
-    
-    .remove-device-btn:hover {
-        background-color: #ff5252 !important;
-        border-color: #ff5252 !important;
-    }
-
-    /* Status indicators */
-    .connection-status-connected { background-color: #4CAF50 !important; }
-    .connection-status-disconnected { background-color: #f44336 !important; }
-    .connection-status-connecting { background-color: #ff9800 !important; }
-    .connection-status-unknown { background-color: #9e9e9e !important; }
-
-    /* Spinner animations */
-    @keyframes fa-spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-    }
-    
-    .fa-spin {
-        animation: fa-spin 1s infinite linear !important;
-    }
-
-    /* Summary text */
-    #devices-summary {
-        padding-top: 8px;
-        margin-top: 8px;
-        font-size: 12px;
-    }
-    
-    /* No device message styling */
-    #no-device-message {
-        background-color: #f8f9fa !important;
-        border: 1px solid #dee2e6 !important;
-        color: #6c757d !important;
-    }
-    
-    /* Dark theme compatibility for no device message */
-    @media (prefers-color-scheme: dark) {
-        #no-device-message {
-            background-color: #2d2d2d !important;
-            border-color: #555 !important;
-            color: #adb5bd !important;
-        }
-    }
+}
 </style>
 
 
