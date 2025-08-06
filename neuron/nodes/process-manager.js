@@ -439,7 +439,7 @@ class ProcessManager {
             setTimeout(() => {
                 if (this.restartAttempts.get(nodeId) === newAttemptCount) {
                     console.log(`Resetting restart attempt count for node ${nodeId} after cooldown`);
-                     node.status({ fill: "orange", shape: "ring", text: "SDK Process exited - restarting" });
+                   //  node.status({ fill: "orange", shape: "ring", text: "SDK Process exited - restarting" });
 
                     this.restartAttempts.delete(nodeId);
                 }
