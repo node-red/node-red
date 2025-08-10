@@ -295,6 +295,7 @@ class ProcessManager {
             const args = [
                 `--port=${port}`,
                // '--use-local-address',
+               '--enable-upnp',
                 '--mode=peer',
                 `--buyer-or-seller=${nodeType}`,
                 nodeType === 'seller' ? '--list-of-buyers-source=env' : '--list-of-sellers-source=env',
@@ -685,7 +686,7 @@ class ProcessManager {
                 `unique_port=${uniquePort}`,
                 `ws_port=${uniquePort}`,
                 `eth_rpc_url=https://testnet.hashio.io/api`,
-                `location={"lat":-2.1574851,"lon":101.7108034,"alt":0.000000}`,
+                `location={"lat":-0.017242692537968975,"lon":51.50139017153912,"alt":0.000000}`,  
                 `mirror_api_url=https://testnet.mirrornode.hedera.com/api/v1`
             ];
 

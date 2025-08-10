@@ -271,6 +271,8 @@ async function initializeGlobalContractMonitoring() {
                         const contractService = contractServices[contract];
                         if (!contractService) {
                             console.warn(`No service available for ${contract} contract`);
+                            console.log('\x1b[1m\x1b[33m===========>Go to http://localhost:1880 <===========\x1b[0m');
+
                             continue;
                         }
                         
