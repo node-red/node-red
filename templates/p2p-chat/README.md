@@ -1,3 +1,4 @@
+# Neuron P2P Chat Demo
 This flow demonstrates how to build a **decentralized peer-to-peer (P2P) chat application** inside Node-RED using the [Neuron-Node-Builder](https://github.com/NeuronInnovations/neuron-node-builder) custom nodes.  
 It showcases how a **Seller node** can broadcast chat messages into the Neuron network, while a **Buyer node** subscribes and exchanges data securely via Hedera Hashgraph and the Neuron P2P SDK.
 

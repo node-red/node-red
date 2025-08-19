@@ -294,7 +294,7 @@ class ProcessManager {
             
             const args = [
                 `--port=${port}`,
-                '--use-local-address',
+               // '--use-local-address',
                '--enable-upnp',
                 '--mode=peer',
                 `--buyer-or-seller=${nodeType}`,

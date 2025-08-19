@@ -1,3 +1,4 @@
+# Buyer node flow
 This flow demonstrates how to configure a **Buyer Node** in the [Neuron-Node-Builder](https://github.com/NeuronInnovations/neuron-node-builder) ecosystem.  
 It connects to one or more sellers (by their EVM addresses) and receives their streamed data through the **Neuron P2P network**.  
 
