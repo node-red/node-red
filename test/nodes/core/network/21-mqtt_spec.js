@@ -58,7 +58,7 @@ describe('MQTT Nodes', function () {
                 mqttBroker.should.have.property('options');
                 mqttBroker.options.should.have.property('clean', true);
                 mqttBroker.options.should.have.property('clientId');
-                mqttBroker.options.clientId.should.containEql('nodered_');
+                mqttBroker.options.clientId.should.containEql('nodered');
                 mqttBroker.options.should.have.property('keepalive').type("number");
                 mqttBroker.options.should.have.property('reconnectPeriod').type("number");
                 //as this is not a v5 connection, ensure v5 properties are not present

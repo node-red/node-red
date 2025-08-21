@@ -25,7 +25,7 @@ describe('status Node', function() {
     });
 
     it('should output a message when called', function(done) {
-        var flow = [ { id:"n1", type:"status", name:"status", wires:[["n2"]] },
+        var flow = [ { id:"n1", type:"status", name:"status", wires:[["n2"]], scope:[] },
             {id:"n2", type:"helper"} ];
         helper.load(catchNode, flow, function() {
             var n1 = helper.getNode("n1");
