@@ -78,7 +78,8 @@ module.exports = function (RED) {
                 const messages = await hederaService.getTopicMessages(
                     deviceInfo.topics[0],
                     1,
-                    config.numMessages
+                    config.numMessages,
+                    "desc"
                 );
 
                // console.log(messages);

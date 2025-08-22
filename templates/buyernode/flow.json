@@ -1,0 +1,126 @@
+[
+    {
+        "id": "a27fd9986f4d2073",
+        "type": "tab",
+        "label": "Buyer node",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "115da7c518f0301c",
+        "type": "group",
+        "z": "a27fd9986f4d2073",
+        "style": {
+            "stroke": "#3e404a",
+            "stroke-opacity": "1",
+            "fill": "#21222c",
+            "fill-opacity": "0.5",
+            "label": true,
+            "label-position": "nw",
+            "color": "#f8f8f2"
+        },
+        "nodes": [
+            "bd718524af993229",
+            "b7ea702786b46709",
+            "199d83a4ae5d582a",
+            "ac64f29010267c48",
+            "c33f79cd4e51b14d",
+            "d952598f16c47877"
+        ],
+        "x": 174,
+        "y": 79,
+        "w": 692,
+        "h": 302
+    },
+    {
+        "id": "bd718524af993229",
+        "type": "buyer config",
+        "z": "a27fd9986f4d2073",
+        "g": "115da7c518f0301c",
+        "name": "Buyer Config",
+        "sellerEvmAddress": "[]",
+        "sellerDevices": [],
+        "smartContract": "jetvision",
+        "deviceType": "cloud",
+        "description": "",
+        "evmAddress": "EVM address not intialised",
+        "balance": "Error loading balance",
+        "publicKey": "Public key not intialised",
+        "stdInTopic": "StdIn topic not intialised",
+        "stdOutTopic": "StdOut topic not intialised",
+        "stdErrTopic": "StdErr topic not intialised",
+        "x": 290,
+        "y": 160,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "b7ea702786b46709",
+        "type": "neuron-p2p",
+        "z": "a27fd9986f4d2073",
+        "g": "115da7c518f0301c",
+        "name": "",
+        "selectedNode": "",
+        "description": "",
+        "x": 300,
+        "y": 260,
+        "wires": [
+            [
+                "199d83a4ae5d582a"
+            ]
+        ]
+    },
+    {
+        "id": "199d83a4ae5d582a",
+        "type": "debug",
+        "z": "a27fd9986f4d2073",
+        "g": "115da7c518f0301c",
+        "name": "Print messages received from seller",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 620,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "ac64f29010267c48",
+        "type": "comment",
+        "z": "a27fd9986f4d2073",
+        "g": "115da7c518f0301c",
+        "name": "[ACTION] Double click and add Seller EVM addresses that you wish to buy from",
+        "info": "",
+        "x": 500,
+        "y": 120,
+        "wires": []
+    },
+    {
+        "id": "c33f79cd4e51b14d",
+        "type": "comment",
+        "z": "a27fd9986f4d2073",
+        "g": "115da7c518f0301c",
+        "name": "[ACTION] Double click and select \"Buyer Config\"",
+        "info": "",
+        "x": 400,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "d952598f16c47877",
+        "type": "comment",
+        "z": "a27fd9986f4d2073",
+        "g": "115da7c518f0301c",
+        "name": "[IMPORTANT] - You need to access your router and add portforwarding for ports 61336-61346",
+        "info": "",
+        "x": 520,
+        "y": 340,
+        "wires": []
+    }
+]

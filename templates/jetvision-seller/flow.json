@@ -1,0 +1,248 @@
+[
+    {
+        "id": "2b95464b7e018148",
+        "type": "tab",
+        "label": "Jetvision flow",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "ffe1d5fd7dc11fa6",
+        "type": "group",
+        "z": "2b95464b7e018148",
+        "style": {
+            "stroke": "#3d3e46",
+            "stroke-opacity": "1",
+            "fill": "#21222c",
+            "fill-opacity": "0.5",
+            "label": true,
+            "label-position": "nw",
+            "color": "#f8f8f2"
+        },
+        "nodes": [
+            "a1b2c3d4.56789",
+            "b2c3d4e5.67890",
+            "c3d4e5f6.78901",
+            "d4e5f6g7.89012",
+            "6560f40d30a3acb2"
+        ],
+        "x": 14,
+        "y": 39,
+        "w": 952,
+        "h": 142
+    },
+    {
+        "id": "3e981082cbc3f1e8",
+        "type": "group",
+        "z": "2b95464b7e018148",
+        "style": {
+            "stroke": "#3e404a",
+            "stroke-opacity": "1",
+            "fill": "#21222c",
+            "fill-opacity": "0.5",
+            "label": true,
+            "label-position": "nw",
+            "color": "#f8f8f2"
+        },
+        "nodes": [
+            "e342771110bbd0f5",
+            "d2c423705865ae27",
+            "63cbfabea001c026",
+            "e25863429a98b3d3",
+            "d1ef97296a32d4e6"
+        ],
+        "x": 54,
+        "y": 259,
+        "w": 772,
+        "h": 182
+    },
+    {
+        "id": "a1b2c3d4.56789",
+        "type": "inject",
+        "z": "2b95464b7e018148",
+        "g": "ffe1d5fd7dc11fa6",
+        "name": "Trigger Stream",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "5",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 140,
+        "y": 140,
+        "wires": [
+            [
+                "b2c3d4e5.67890"
+            ]
+        ]
+    },
+    {
+        "id": "b2c3d4e5.67890",
+        "type": "function",
+        "z": "2b95464b7e018148",
+        "g": "ffe1d5fd7dc11fa6",
+        "name": "Create Message Stream",
+        "func": "// Sample data array\nconst flightData = [\n    {\"uti\":1729178284,\"ns\":284211687,\"hex\":\"43C563\",\"fli\":\"AXIS41\",\"src\":\"?\",\"ava\":\"\",\"lat\":null,\"lon\":null,\"alt\":18025,\"gda\":\"A\",\"spd\":null,\"trk\":null,\"vrt\":null,\"tmp\":null,\"wsp\":null,\"wdi\":null,\"cat\":\"A6\",\"org\":null,\"dst\":null,\"opr\":\"HAWK\",\"typ\":\"HAWK\",\"reg\":\"ZK032\",\"dis\":null,\"dbm\":-71,\"cou\":\"U.K.\",\"squ\":\"6440\",\"tru\":820,\"lla\":null,\"alr\":0,\"spi\":false,\"timeRecorded\":1729178284613},\n    {\"uti\":1729178284,\"ns\":296999671,\"hex\":\"4079F4\",\"fli\":\"GLDGF\",\"src\":\"A\",\"ava\":\"A\",\"lat\":51.52923,\"lon\":-2.36961,\"alt\":2625,\"gda\":\"A\",\"spd\":134,\"trk\":223,\"vrt\":-128,\"tmp\":null,\"wsp\":null,\"wdi\":null,\"cat\":\"A1\",\"org\":null,\"dst\":null,\"opr\":\"LDG\",\"typ\":\"DA42\",\"reg\":\"G-LDGF\",\"dis\":42.7,\"dbm\":-74,\"cou\":\"U.K.\",\"squ\":\"3737\",\"tru\":476,\"lla\":1,\"mop\":2,\"alr\":0,\"spi\":false,\"tcm\":0,\"ape\":false,\"pic\":11,\"nacp\":10,\"sil\":3,\"sda\":2,\"altg\":2825,\"qnhs\":1010.4,\"alts\":2496,\"timeRecorded\":1729178284613},\n    {\"uti\":1729178284,\"ns\":313035437,\"hex\":\"40792E\",\"fli\":\"SHT7P\",\"src\":\"A\",\"ava\":\"A\",\"lat\":54.47077,\"lon\":-3.16548,\"alt\":36925,\"gda\":\"A\",\"spd\":436,\"trk\":154,\"vrt\":640,\"tmp\":-51,\"wsp\":49,\"wdi\":223,\"cat\":\"A3\",\"org\":\"EGPF\",\"dst\":\"EGLL\",\"opr\":\"BAW\",\"typ\":\"A20N\",\"reg\":\"G-TTNK\",\"dis\":289.9,\"dbm\":-81,\"cou\":\"U.K.\",\"squ\":\"1165\",\"tru\":177,\"lla\":4,\"mop\":2,\"alr\":0,\"spi\":false,\"tcm\":1,\"ape\":false,\"pic\":11,\"nacp\":9,\"sil\":3,\"sda\":3,\"altg\":37050,\"qnhs\":1012.8,\"alts\":36992,\"hdgs\":159,\"timeRecorded\":1729178284613},\n    {\"uti\":1729178283,\"ns\":517067031,\"hex\":\"AB84AB\",\"fli\":\"DAL37\",\"src\":\"A\",\"ava\":\"A\",\"lat\":52.18414,\"lon\":-0.79842,\"alt\":14025,\"gda\":\"A\",\"spd\":436,\"trk\":328,\"vrt\":2112,\"tmp\":-5,\"wsp\":25,\"wdi\":197,\"cat\":\"A5\",\"org\":\"EGLL\",\"dst\":\"KPDX\",\"opr\":null,\"typ\":null,\"reg\":\"N841MH\",\"dis\":107.9,\"dbm\":-79,\"cou\":\"USA \",\"squ\":\"7662\",\"tru\":134,\"lla\":4,\"mop\":2,\"alr\":0,\"spi\":false,\"tcm\":1,\"ape\":false,\"pic\":11,\"nacp\":11,\"sil\":3,\"sda\":2,\"altg\":14100,\"qnhs\":1013.6,\"alts\":16000,\"hdgs\":325,\"timeRecorded\":1729178284613}\n];\n\n// Configure stream behavior\nconst config = {\n    messagesPerSecond: 2,  // Adjust speed\n    loop: true,           // Continuous stream\n    randomOrder: false    // Send in file order\n};\n\n// Initialize counter\nif (!context.counter) {\n    context.counter = 0;\n    context.lastSend = 0;\n}\n\n// Get next message\nlet msgIndex;\nif (config.randomOrder) {\n    msgIndex = Math.floor(Math.random() * flightData.length);\n} else {\n    msgIndex = context.counter % flightData.length;\n    context.counter++;\n}\n\n// Prepare message\nconst message = flightData[msgIndex];\n\n// Set up next trigger if looping\nif (config.loop) {\n    const now = Date.now();\n    const delay = 1000 / config.messagesPerSecond;\n    \n    if (now - context.lastSend >= delay) {\n        context.lastSend = now;\n        return { payload: JSON.stringify(message) };\n    } else {\n        node.send(null); // Skip this cycle\n        return null;\n    }\n}\n\nreturn { payload: JSON.stringify(message) };",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 390,
+        "y": 140,
+        "wires": [
+            [
+                "c3d4e5f6.78901"
+            ]
+        ]
+    },
+    {
+        "id": "c3d4e5f6.78901",
+        "type": "delay",
+        "z": "2b95464b7e018148",
+        "g": "ffe1d5fd7dc11fa6",
+        "name": "Throttle Stream",
+        "pauseType": "rate",
+        "timeout": "5",
+        "timeoutUnits": "100",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 640,
+        "y": 140,
+        "wires": [
+            [
+                "d4e5f6g7.89012"
+            ]
+        ]
+    },
+    {
+        "id": "d4e5f6g7.89012",
+        "type": "udp out",
+        "z": "2b95464b7e018148",
+        "g": "ffe1d5fd7dc11fa6",
+        "name": "UDP Output",
+        "addr": "127.0.0.1",
+        "iface": "",
+        "port": "5005",
+        "ipv": "udp4",
+        "outport": "",
+        "base64": false,
+        "multicast": "false",
+        "x": 870,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "6560f40d30a3acb2",
+        "type": "comment",
+        "z": "2b95464b7e018148",
+        "g": "ffe1d5fd7dc11fa6",
+        "name": "Simulate Jetvision, send data to UDP PORT 5005",
+        "info": "",
+        "x": 220,
+        "y": 80,
+        "wires": []
+    },
+    {
+        "id": "63cbfabea001c026",
+        "type": "udp in",
+        "z": "2b95464b7e018148",
+        "g": "3e981082cbc3f1e8",
+        "name": "UDP IN (JETVISION IN)",
+        "iface": "",
+        "port": "5005",
+        "ipv": "udp4",
+        "multicast": "false",
+        "group": "",
+        "datatype": "utf8",
+        "x": 180,
+        "y": 400,
+        "wires": [
+            [
+                "e25863429a98b3d3"
+            ]
+        ]
+    },
+    {
+        "id": "d2c423705865ae27",
+        "type": "seller config",
+        "z": "2b95464b7e018148",
+        "g": "3e981082cbc3f1e8",
+        "name": "Jetvision seller config",
+        "deviceRole": "Home Sensor",
+        "deviceName": "Jetvision",
+        "smartContract": "jetvision",
+        "serialNumber": "serial number",
+        "deviceType": "Sensor",
+        "price": "1",
+        "description": "",
+        "evmAddress": "EVM address not initialized yet",
+        "balance": "Not initialized yet",
+        "buyerEvmAddress": [],
+        "buyerDevices": [],
+        "publicKey": "Not initialized yet",
+        "stdInTopic": "StdIn topic not initialized yet",
+        "stdOutTopic": "StdOut topic not initialized yet",
+        "stdErrTopic": "StdErr topic not initialized yet",
+        "x": 200,
+        "y": 340,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "e25863429a98b3d3",
+        "type": "neuron-p2p",
+        "z": "2b95464b7e018148",
+        "g": "3e981082cbc3f1e8",
+        "name": "",
+        "selectedNode": "",
+        "description": "",
+        "x": 480,
+        "y": 400,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "e342771110bbd0f5",
+        "type": "comment",
+        "z": "2b95464b7e018148",
+        "g": "3e981082cbc3f1e8",
+        "name": "seller listening to local udp  5005 and sends data to all connected buyers",
+        "info": "",
+        "x": 360,
+        "y": 300,
+        "wires": []
+    },
+    {
+        "id": "d1ef97296a32d4e6",
+        "type": "comment",
+        "z": "2b95464b7e018148",
+        "g": "3e981082cbc3f1e8",
+        "name": "[ACTION] Double click and select \"Jetvision Seller Config\"",
+        "info": "",
+        "x": 590,
+        "y": 360,
+        "wires": []
+    }
+]

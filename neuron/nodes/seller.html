@@ -1,4 +1,5 @@
 <script type="text/html" data-template-name="seller config">
+<div class="neuron-seller-config">
     <div class="form-row">
         <label for="node-input-name"> <span>Name</span></label>
         <input type="text" id="node-input-name" placeholder="Node name">
@@ -32,12 +33,12 @@
         <label for="node-input-price"><span>Price</span></label>
         <input type="number" id="node-input-price" placeholder="Enter Price" min="0" step="any">
     </div>
-    <div class="form-row">
+    <div class="form-row" style="display: none;">
         <label> <span>Buyer EVM Addresses</span></label>
         <input type="hidden" id="node-input-buyerEvmAddress" />
         <button type="button" id="select-buyers-btn" class="red-ui-button">Select Buyers</button>
     </div>
-    <div class="form-row">
+    <div class="form-row" style="display: none;">
         <label for="node-input-selectedAddresses"> <span>Selected Buyers</span></label>
         <textarea id="node-input-selectedAddresses" rows="3" readonly style="width: 100%;"></textarea>
     </div>
@@ -45,156 +46,192 @@
         <label for="node-input-description"><span>Description</span></label>
         <input type="text" id="node-input-description" placeholder="Description (optional)">
     </div>
-    
-    <!-- Separator line between configuration and runtime information -->
-    <hr style="margin: 15px 0; border: none; border-top: 1px solid #ccc;">
-    
     <div class="form-row">
-        <label for="node-input-evmAddress"><span>EVM</span></label>
-        <input type="text" id="node-input-evmAddress" placeholder="EVM Address will appear here after initialization" readonly>
+        <div width="100%"><span>Allowed buyers: Everyone</span></div>
+        <button class="red-ui-button disabled" style="margin-left: 10px; float:right;">Setup buyer whitelist</button>
     </div>
-    <div class="form-row">
-        <label for="node-input-balance"><span>Balance</span></label>
-        <input type="text" id="node-input-balance" placeholder="Account balance will appear here after initialization" readonly>
+    <i style="color: #ffc107;">Click <span style="color: red">Done</span> then click <span style="color: red">Deploy</span> to create/update device</i>
+    
+    <div id="no-device-message" style="margin: 15px 0; padding: 10px; background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 5px; color: #6c757d; font-style: italic;">
+        <i class="fa fa-info-circle" style="margin-right: 5px;"></i>
+        Runtime information will appear here after the device is created (after first deployment).
     </div>
 
-    <!-- Add PublicKey field here -->
-    <div class="form-row">
-        <label for="node-input-publicKey"><span>Public Key</span></label>
-        <input type="text" id="node-input-publicKey" placeholder="Public key will appear here after initialization" readonly style="font-family: monospace; font-size: 11px;">
+    <!-- Separator line between configuration and runtime information -->
+    <hr style="margin: 15px 0; border: none; border-top: 1px solid #ccc;">
+
+    <!-- Runtime Information Section -->
+    <div id="runtime-information-section" style="display: none;">
+        <h4 style="margin: 10px 0; color:#28a745;">Runtime Information</h4>
+
+        <div class="form-row">
+            <label for="node-input-evmAddress"><span>EVM</span></label>
+            <input type="text" id="node-input-evmAddress" placeholder="EVM Address will appear here after initialization" readonly>
+        </div>
+        <div class="form-row">
+            <label for="node-input-balance"><span>Balance</span></label>
+            <input type="text" id="node-input-balance" placeholder="Account balance will appear here after initialization" readonly>
+        </div>
+
+        <!-- Add PublicKey field here -->
+        <div class="form-row">
+            <label for="node-input-publicKey"><span>Public Key</span></label>
+            <input type="text" id="node-input-publicKey" placeholder="Public key will appear here after initialization" readonly style="font-family: monospace; font-size: 11px;">
+        </div>
+
+        <!-- Topic Fields -->
+        <div class="form-row">
+            <label for="node-input-stdInTopic"><span>StdIn Topic</span></label>
+            <input type="text" id="node-input-stdInTopic" placeholder="StdIn topic will appear here after initialization" readonly style="font-family: monospace; font-size: 11px;">
+        </div>
+        
+        <div class="form-row">
+            <label for="node-input-stdOutTopic"><span>StdOut Topic</span></label>
+            <input type="text" id="node-input-stdOutTopic" placeholder="StdOut topic will appear here after initialization" readonly style="font-family: monospace; font-size: 11px;">
+        </div>
+        
+        <div class="form-row">
+            <label for="node-input-stdErrTopic"><span>StdErr Topic</span></label>
+            <input type="text" id="node-input-stdErrTopic" placeholder="StdErr topic will appear here after initialization" readonly style="font-family: monospace; font-size: 11px;">
+        </div>
+
+        <div class="form-row" style="display: none;">
+            <label style="display: none;"><span>Connection Status</span></label>
+            <div id="connection-status-indicator" style="display: none; margin-left: 10px;">
+                <span id="status-dot" style="display: inline-block; width: 12px; height: 12px; border-radius: 50%; background-color: #ccc; margin-right: 5px;"></span>
+                <span id="status-text" style="color: white">Unknown</span>
+            </div>
+        </div>
+     
+
+        <div class="form-row">
+            <div id="connected-peers-container" style="margin-top: 10px; width:90%">
+               <!-- Refresh button positioned on the right -->
+               <div style="text-align: right; margin-bottom: 10px;">
+                   <button type="button" id="refresh-connections-btn" class="red-ui-button">
+                       <i class="fa fa-refresh"></i> Refresh
+                   </button>
+               </div>
+               
+               <div id="peers-loading" style="text-align: center; padding: 20px; display: none;">
+                   <i class="fa fa-spinner fa-spin"></i> Loading connection status...
+               </div>
+               
+               <div id="peers-content">
+                   <div id="peers-summary" style="margin-bottom: 10px; font-weight: bold; color: white; display: none;">
+                       <span id="connected-count">0</span> connected, <span id="total-count">0</span> total peers
+                   </div>
+                   <div id="peers-list" style="max-height: 200px; overflow-y: auto; border: 1px solid #ddd; border-radius: 4px; padding: 10px;">
+                       <div id="no-peers-message" style="text-align: center;  font-style: italic;">
+                           No peers connected
+                       </div>
+                       <table id="peers-table" style="width: 100%;">
+                           <thead>
+                               <tr>
+                                   <th style="text-align: left; padding: 5px; border-bottom: 1px solid #ddd;">EVM Address</th>
+                                   <th style="text-align: center; padding: 5px; border-bottom: 1px solid #ddd;">Status</th>
+                                   <th style="text-align: center; padding: 5px; border-bottom: 1px solid #ddd;">Last Seen</th>
+                               </tr>
+                           </thead>
+                           <tbody id="peers-table-body">
+                           </tbody>
+                       </table>
+                   </div>
+                   <div id="last-update-info" style="margin-top: 5px; font-size: 12px;">
+                       Last updated: <span id="last-update-time">-</span>
+                   </div>
+               </div>
+           </div>
+       </div>
+   
+       <div id="buyer-modal" class="red-ui-dialog" style="display: none;" title="Select Buyer Devices">
+           <div class="red-ui-dialog-content" style="padding: 15px; overflow: hidden; display: flex; flex-direction: column; height: 100%;">
+               <div style="margin-bottom: 15px;">
+                   <label for="buyer-search-input" style="display: block; margin-bottom: 5px; font-weight: bold;">Search by Contract Address:</label>
+                   <input type="text" id="buyer-search-input" placeholder="Enter contract address to search..." style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+               </div>
+   
+               <div style="display: flex; justify-content: flex-end; gap: 10px; padding-top: 15px; border-top: 1px solid #eee;">
+                   <button type="button" class="red-ui-button" id="cancel-buyer-selection">Cancel</button>
+                   <button type="button" class="red-ui-button red-ui-button-primary" id="confirm-buyer-selection" style="border: 1px solid #DDD">OK</button>
+               </div>
+   
+               <div style="flex: 1; overflow: auto; margin-bottom: 15px;">
+                   <table id="buyer-table" class="buyer-table" style="width: 100%; border-collapse: collapse;">
+                       <colgroup>
+                           <col style="width: 80px;">  <!-- Select column -->
+                           <col style="width: 25%;">   <!-- Contract column -->
+                           <col style="width: 25%;">   <!-- StdOutTopic column -->
+                           <col style="width: 25%;">   <!-- StdInTopic column -->
+                           <col style="width: 25%;">   <!-- StdErrTopic column -->
+                       </colgroup>
+                       <thead>
+                           <tr style="border-bottom: 1px solid">
+                               <th style="text-align: left; padding: 8px 12px; font-weight: bold;">Select</th>
+                               <th style="text-align: left; padding: 8px 12px; font-weight: bold;">Contract</th>
+                               <th style="text-align: left; padding: 8px 12px; font-weight: bold;">StdOutTopic</th>
+                               <th style="text-align: left; padding: 8px 12px; font-weight: bold;">StdInTopic</th>
+                               <th style="text-align: left; padding: 8px 12px; font-weight: bold;">StdErrTopic</th>
+                           </tr>
+                       </thead>
+                       <tbody style="display: table-row-group; overflow-y: auto; max-height: 300px;"></tbody>
+                   </table>
+               </div>
+               <div style="display: flex; justify-content: flex-end; gap: 10px; padding-top: 15px; border-top: 1px solid #eee;">
+                   <button type="button" class="red-ui-button" id="cancel-buyer-selection">Cancel</button>
+                   <button type="button" class="red-ui-button red-ui-button-primary" id="confirm-buyer-selection">OK</button>
+               </div>
+           </div>
+       </div>
+
     </div>
 
     <!-- Connection Status Section - moved to bottom -->
-    <div class="form-row">
-        <label><span>Connection Status</span></label>
-        <div id="connection-status-indicator" style="display: inline-block; margin-left: 10px;">
-            <span id="status-dot" style="display: inline-block; width: 12px; height: 12px; border-radius: 50%; background-color: #ccc; margin-right: 5px;"></span>
-            <span id="status-text" style="color: white">Unknown</span>
-        </div>
-        <button type="button" id="refresh-connections-btn" class="red-ui-button" style="margin-left: 10px;">
-            <i class="fa fa-refresh"></i> Refresh
-        </button>
-    </div>
     
-    <div class="form-row">
-        <label><span>Connected Peers</span></label>
-        <div id="connected-peers-container" style="margin-top: 10px;">
-            <div id="peers-loading" style="text-align: center; color: black; padding: 20px;">
-                <i class="fa fa-spinner fa-spin"></i> Loading connection status...
-            </div>
-            <div id="peers-content" style="display: none;">
-                <div id="peers-summary" style="margin-bottom: 10px; font-weight: bold; color: white;">
-                    <span id="connected-count">0</span> connected, <span id="total-count">0</span> total peers
-                </div>
-                <div id="peers-list" style="max-height: 200px; overflow-y: auto; border: 1px solid #ddd; border-radius: 4px; padding: 10px; background-color: #f9f9f9;">
-                    <div id="no-peers-message" style="text-align: center; color: black; font-style: italic;">
-                        No peers connected
-                    </div>
-                    <table id="peers-table" style="width: 100%; display: none; color: black;">
-                        <thead>
-                            <tr>
-                                <th style="text-align: left; padding: 5px; border-bottom: 1px solid #ddd; color: black;">Public Key</th>
-                                <th style="text-align: center; padding: 5px; border-bottom: 1px solid #ddd; color: black;">Status</th>
-                                <th style="text-align: center; padding: 5px; border-bottom: 1px solid #ddd; color: black;">Last Update</th>
-                            </tr>
-                        </thead>
-                        <tbody id="peers-table-body">
-                        </tbody>
-                    </table>
-                </div>
-                <div id="last-update-info" style="margin-top: 5px; font-size: 12px; color: black;">
-                    Last updated: <span id="last-update-time">Never</span>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <div id="buyer-modal" class="red-ui-dialog" style="display: none;" title="Select Buyer Devices">
-        <div class="red-ui-dialog-content" style="padding: 15px; overflow: hidden; display: flex; flex-direction: column; height: 100%;">
-            <div style="margin-bottom: 15px;">
-                <label for="buyer-search-input" style="display: block; margin-bottom: 5px; font-weight: bold;">Search by Contract Address:</label>
-                <input type="text" id="buyer-search-input" placeholder="Enter contract address to search..." style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
-            </div>
-
-            <div style="display: flex; justify-content: flex-end; gap: 10px; padding-top: 15px; border-top: 1px solid #eee;">
-                <button type="button" class="red-ui-button" id="cancel-buyer-selection">Cancel</button>
-                <button type="button" class="red-ui-button red-ui-button-primary" id="confirm-buyer-selection" style="border: 1px solid #DDD">OK</button>
-            </div>
-
-            <div style="flex: 1; overflow: auto; margin-bottom: 15px;">
-                <table id="buyer-table" class="buyer-table" style="width: 100%; border-collapse: collapse;">
-                    <colgroup>
-                        <col style="width: 80px;">  <!-- Select column -->
-                        <col style="width: 25%;">   <!-- Contract column -->
-                        <col style="width: 25%;">   <!-- StdOutTopic column -->
-                        <col style="width: 25%;">   <!-- StdInTopic column -->
-                        <col style="width: 25%;">   <!-- StdErrTopic column -->
-                    </colgroup>
-                    <thead>
-                        <tr style="border-bottom: 1px solid">
-                            <th style="text-align: left; padding: 8px 12px; font-weight: bold;">Select</th>
-                            <th style="text-align: left; padding: 8px 12px; font-weight: bold;">Contract</th>
-                            <th style="text-align: left; padding: 8px 12px; font-weight: bold;">StdOutTopic</th>
-                            <th style="text-align: left; padding: 8px 12px; font-weight: bold;">StdInTopic</th>
-                            <th style="text-align: left; padding: 8px 12px; font-weight: bold;">StdErrTopic</th>
-                        </tr>
-                    </thead>
-                    <tbody style="display: table-row-group; overflow-y: auto; max-height: 300px;"></tbody>
-                </table>
-            </div>
-            <div style="display: flex; justify-content: flex-end; gap: 10px; padding-top: 15px; border-top: 1px solid #eee;">
-                <button type="button" class="red-ui-button" id="cancel-buyer-selection">Cancel</button>
-                <button type="button" class="red-ui-button red-ui-button-primary" id="confirm-buyer-selection">OK</button>
-            </div>
-        </div>
-    </div>
 
 </script>
 
 <script type="text/javascript">
-    RED.nodes.registerType('seller config',{
+    RED.nodes.registerType('seller config', {
         category: 'Neuron',
         color: '#b3e6ff',
         defaults: {
-            name: { value: "Seller"},
-            deviceRole: { value: null,required: true },
-            deviceName: { value: null,required: true  },
-            smartContract: { value: "jetvision",required: true  },
-            serialNumber: { value: null,required: true  },
-            deviceType: { value: null ,required: true },
-            price: { value: 0,required: true  },
+            name: { value: "Seller" },
+            deviceRole: { value: null, required: true },
+            deviceName: { value: null, required: true },
+            smartContract: { value: "jetvision", required: true },
+            serialNumber: { value: null, required: true },
+            deviceType: { value: null, required: true },
+            price: { value: 0, required: true },
             description: { value: "" },
             evmAddress: { value: "" },
             balance: { value: "" },
             buyerEvmAddress: { value: [] },
             buyerDevices: { value: [] },
-            publicKey: { value: "" }
+            publicKey: { value: "" },
+            stdInTopic: { value: "" },
+            stdOutTopic: { value: "" },
+            stdErrTopic: { value: "" }
         },
         inputs: 0,
         outputs: 1,
         icon: "sensor.svg",
-        label: function() {
+        label: function () {
             return this.name || "seller";
         },
-        labelStyle: function() {
+        labelStyle: function () {
             return this.name ? "node_label_italic" : "";
         },
         oneditprepare: function () {
             const node = this;
-            let selectedDevices = [];
-            
+
             // Store all intervals for cleanup
             const intervals = {};
 
             $('<style>')
                 .text(`
-                    .seller-table tr.selected {
-                        background-color: #DDD;
-                        color: black;
-                    }
-                    .seller-table tr:hover {
-                        outline: 2px solid #4d90fe;
-                    }
+                   
                     .buyer-modal-content {
                         display: flex;
                         flex-direction: column;
@@ -216,8 +253,7 @@
                     .buyer-table thead th {
                         position: sticky;
                         top: 0;
-                        background-color: black;
-                        color: white;
+                       
                         z-index: 1;
                     }
                     .buyer-modal-buttons {
@@ -229,49 +265,90 @@
                 `)
                 .appendTo('head');
 
-            const initialSelectedAddresses = typeof node.buyerEvmAddress === 'string'
-                ? JSON.parse(node.buyerEvmAddress || '[]')
-                : [];
+            // Initialize buyer addresses safely (fields are hidden but data might exist)
+            let initialSelectedAddresses = [];
+            try {
+                if (typeof node.buyerEvmAddress === 'string' && node.buyerEvmAddress.trim() !== '') {
+                    initialSelectedAddresses = JSON.parse(node.buyerEvmAddress || '[]');
+                }
+            } catch (e) {
+                console.warn('Error parsing initial buyerEvmAddress:', e);
+                initialSelectedAddresses = [];
+            }
+
+            if (!Array.isArray(initialSelectedAddresses)) {
+                initialSelectedAddresses = [];
+            }
+
             $('#node-input-selectedAddresses').val(initialSelectedAddresses.join('\n'));
 
-            if (node.buyerEvmAddress) {
+            // Initialize selectedDevices safely
+            let selectedDevices = [];
+            if (node.buyerEvmAddress && node.buyerEvmAddress !== '[]' && node.buyerEvmAddress !== '') {
                 try {
-                    const parsedAddresses = JSON.parse(node.buyerEvmAddress);
-                    selectedDevices = parsedAddresses.map(address => ({ address }));
+                    const parsedAddresses = JSON.parse(node.buyerEvmAddress || '[]');
+                    selectedDevices = Array.isArray(parsedAddresses) ? parsedAddresses.map(address => ({ address })) : [];
                 } catch (e) {
-                    console.error("Error parsing buyerEvmAddress on editprepare:", e);
+                    console.warn("Error parsing buyerEvmAddress on editprepare:", e);
                     selectedDevices = [];
                 }
+            } else {
+                selectedDevices = [];
             }
 
             // Fetch and populate EVM address and publicKey if available
-            function updateEvmAddressAndPublicKey() {
+            function updateEvmAddressAndPublicKeyAndTopics() {
                 if (node.id) {
                     console.log(`Fetching seller device info for node ID: ${node.id}`);
                     $.get(`/seller/device-info/${node.id}`)
-                        .done(function(data) {
+                        .done(function (data) {
                             console.log(`Seller device info received for ${node.id}:`, data);
                             if (data.evmAddress) {
                                 $('#node-input-evmAddress').val(data.evmAddress);
                             } else {
                                 $('#node-input-evmAddress').val('Not initialized yet');
                             }
-                            
+
                             // Handle publicKey
                             if (data.publicKey) {
                                 $('#node-input-publicKey').val(data.publicKey);
                             } else {
                                 $('#node-input-publicKey').val('Not initialized yet');
                             }
+
+                            // Handle Topics
+                            if (data.stdInTopic) {
+                                $('#node-input-stdInTopic').val(data.stdInTopic);
+                            } else {
+                                $('#node-input-stdInTopic').val('Not initialized yet');
+                            }
+
+                            if (data.stdOutTopic) {
+                                $('#node-input-stdOutTopic').val(data.stdOutTopic);
+                            } else {
+                                $('#node-input-stdOutTopic').val('Not initialized yet');
+                            }
+
+                            if (data.stdErrTopic) {
+                                $('#node-input-stdErrTopic').val(data.stdErrTopic);
+                            } else {
+                                $('#node-input-stdErrTopic').val('Not initialized yet');
+                            }
                         })
-                        .fail(function(xhr, status, error) {
+                        .fail(function (xhr, status, error) {
                             console.error(`Failed to fetch seller device info for ${node.id}:`, error);
-                            $('#node-input-evmAddress').val('Error loading EVM address');
-                            $('#node-input-publicKey').val('Error loading public key');
+                            $('#node-input-evmAddress').val('EVM address not initialized yet');
+                            $('#node-input-publicKey').val('public key not initialized yet');
+                            $('#node-input-stdInTopic').val('StdIn topic not initialized yet');
+                            $('#node-input-stdOutTopic').val('StdOut topic not initialized yet');
+                            $('#node-input-stdErrTopic').val('StdErr topic not initialized yet');
                         });
                 } else {
                     $('#node-input-evmAddress').val('New node - EVM address will be generated after deployment');
                     $('#node-input-publicKey').val('New node - Public key will be generated after deployment');
+                    $('#node-input-stdInTopic').val('New node - StdIn topic will be generated after deployment');
+                    $('#node-input-stdOutTopic').val('New node - StdOut topic will be generated after deployment');
+                    $('#node-input-stdErrTopic').val('New node - StdErr topic will be generated after deployment');
                 }
             }
 
@@ -279,15 +356,15 @@
             function updateDeviceBalance() {
                 if (node.id) {
                     $.get(`/seller/device-balance/${node.id}`)
-                        .done(function(data) {
+                        .done(function (data) {
                             if (data.success && data.balance) {
                                 $('#node-input-balance').val(data.balance + ' USDC');
                             } else {
                                 $('#node-input-balance').val('Not initialized yet');
                             }
                         })
-                        .fail(function() {
-                            $('#node-input-balance').val('Error loading balance');
+                        .fail(function () {
+                            $('#node-input-balance').val('Not initialized yet');
                         });
                 } else {
                     $('#node-input-balance').val('New node - balance will be available after deployment');
@@ -298,23 +375,59 @@
             function updatePublicKey() {
                 if (node.id) {
                     $.get(`/seller/device-info/${node.id}`)
-                        .done(function(data) {
+                        .done(function (data) {
                             if (data.publicKey) {
                                 $('#node-input-publicKey').val(data.publicKey);
                             } else {
                                 $('#node-input-publicKey').val('Not initialized yet');
                             }
                         })
-                        .fail(function() {
-                            $('#node-input-publicKey').val('Error loading public key');
+                        .fail(function () {
+                            $('#node-input-publicKey').val('Not initialized yet');
                         });
                 } else {
                     $('#node-input-publicKey').val('New node - Public key will be generated after deployment');
                 }
             }
 
+            // Check if device exists and show/hide runtime information section
+            function checkDeviceExistsAndShowRuntime() {
+                if (node.id) {
+                    console.log(`[SELLER DEVICE EXISTS] Checking device file for node ID: ${node.id}`);
+                    $.get(`/seller/device-exists/${node.id}`)
+                        .done(function (data) {
+                            console.log(`[SELLER DEVICE EXISTS] Response for ${node.id}:`, data);
+                            
+                            if (data.success && data.exists) {
+                                // Device file exists, show runtime information section and hide message
+                                $('#runtime-information-section').show();
+                                $('#no-device-message').hide();
+                                console.log(`[SELLER DEVICE EXISTS] Device file found, showing runtime information`);
+                            } else {
+                                // Device file doesn't exist, hide runtime information section and show message
+                                $('#runtime-information-section').hide();
+                                $('#no-device-message').show();
+                                console.log(`[SELLER DEVICE EXISTS] Device file not found, hiding runtime information`);
+                            }
+                        })
+                        .fail(function (xhr, status, error) {
+                            console.error(`[SELLER DEVICE EXISTS] Failed to check device file for ${node.id}:`, error);
+                            // On error, hide the runtime section and show message
+                            $('#runtime-information-section').hide();
+                            $('#no-device-message').show();
+                        });
+                } else {
+                    // No node ID available, hide runtime information section and show message
+                    $('#runtime-information-section').hide();
+                    $('#no-device-message').show();
+                    console.log(`[SELLER DEVICE EXISTS] No node ID available, hiding runtime information`);
+                }
+            }
+
+            checkDeviceExistsAndShowRuntime();
+
             // Update EVM address on dialog open
-            updateEvmAddressAndPublicKey();
+            updateEvmAddressAndPublicKeyAndTopics();
 
             // Update balance ONCE on dialog open (NO REFRESH)
             updateDeviceBalance();
@@ -324,14 +437,14 @@
 
             // Set up refresh intervals
             if (node.id) {
-                intervals.evmRefresh = setInterval(updateEvmAddressAndPublicKey, 5000);
+                intervals.evmRefresh = setInterval(updateEvmAddressAndPublicKeyAndTopics, 5000);
                 intervals.balanceRefresh = setInterval(updateDeviceBalance, 5000); // Add balance refresh
                 intervals.publicKeyRefresh = setInterval(updatePublicKey, 5000); // Add publicKey refresh
             }
 
             // Consolidated cleanup function
             function cleanup() {
-              //  console.log('Cleaning up seller node intervals...');
+                //  console.log('Cleaning up seller node intervals...');
                 Object.values(intervals).forEach(intervalId => {
                     if (intervalId) {
                         clearInterval(intervalId);
@@ -347,14 +460,14 @@
             // Function to load buyer devices for the selected contract
             function loadBuyerDevicesForCurrentContract() {
                 const selectedContract = $('#node-input-smartContract').val();
-             //   console.log('Loading buyer devices for contract:', selectedContract);
-                
+                //   console.log('Loading buyer devices for contract:', selectedContract);
+
                 $.get(`/buyer/devices?contract=${selectedContract}`)
-                    .done(function(data) {
-                     //   console.log('Buyer devices loaded:', data);
+                    .done(function (data) {
+                        //   console.log('Buyer devices loaded:', data);
                         const tableBody = $('#buyer-table tbody');
                         tableBody.empty();
-                        
+
                         if (data.loading) {
                             // Show loading message
                             tableBody.html(`
@@ -367,7 +480,7 @@
                             `);
                             return;
                         }
-                        
+
                         if (!data.monitoringActive) {
                             // Show monitoring inactive message
                             tableBody.html(`
@@ -380,11 +493,11 @@
                             `);
                             return;
                         }
-                        
+
                         if (data.devices && data.devices.length > 0) {
                             // Show devices in the table - all devices from global contract monitor are potential buyers
                             data.devices.forEach(device => {
-                              //  console.log('Processing buyer device:', device);
+                                //  console.log('Processing buyer device:', device);
                                 // Use the contract field (which is the owner address) for selection
                                 const isChecked = node.buyerEvmAddress?.includes(device.contract);
                                 const row = $(`
@@ -411,9 +524,9 @@
                                 row.data('device', device);
                                 tableBody.append(row);
                             });
-                            
-                          //  console.log(`Populated buyer table with ${data.devices.length} devices for contract ${selectedContract}`);
-                            
+
+                            //  console.log(`Populated buyer table with ${data.devices.length} devices for contract ${selectedContract}`);
+
                             $('#buyer-table tbody input[type="checkbox"]').change(function () {
                                 const row = $(this).closest('tr');
                                 if ($(this).is(':checked')) {
@@ -422,7 +535,7 @@
                                     row.removeClass('selected');
                                 }
                             });
-                            
+
                             // Restore from previous config
                             if (Array.isArray(node.buyerDevices)) {
                                 node.selectedDevices.push(...node.buyerDevices);
@@ -445,7 +558,7 @@
                             `);
                         }
                     })
-                    .fail(function(xhr, status, error) {
+                    .fail(function (xhr, status, error) {
                         console.error('Failed to load buyer devices:', error);
                         const tableBody = $('#buyer-table tbody');
                         tableBody.html(`
@@ -463,18 +576,18 @@
             function filterBuyerTableBySearch() {
                 const searchTerm = $('#buyer-search-input').val().toLowerCase().trim();
                 const tableRows = $('#buyer-table tbody tr');
-                
+
                 if (searchTerm === '') {
                     // Show all rows if search is empty
                     tableRows.show();
                     return;
                 }
-                
+
                 let visibleCount = 0;
-                tableRows.each(function() {
+                tableRows.each(function () {
                     const row = $(this);
                     const contractAddress = row.data('contract') || '';
-                    
+
                     if (contractAddress.toLowerCase().includes(searchTerm)) {
                         row.show();
                         visibleCount++;
@@ -482,7 +595,7 @@
                         row.hide();
                     }
                 });
-                
+
                 // Show message if no results found
                 if (visibleCount === 0) {
                     $('#buyer-table tbody').append(`
@@ -512,17 +625,17 @@
                         close: function () {
                             $(this).dialog("destroy");
                         },
-                        open: function() {
+                        open: function () {
                             // Load buyer devices for current contract when modal opens
                             loadBuyerDevicesForCurrentContract();
-                            
+
                             // Attach event handlers after dialog is created
                             $('#cancel-buyer-selection').off('click').on('click', function () {
                                 $("#buyer-modal").dialog("close");
                             });
 
                             $('#confirm-buyer-selection').off('click').on('click', function () {
-                              //  console.log('OK button clicked for buyer selection!');
+                                //  console.log('OK button clicked for buyer selection!');
                                 const selectedAddresses = [];
                                 const selectedDeviceObjects = [];
 
@@ -534,18 +647,18 @@
                                     selectedDeviceObjects.push(device);
                                 });
 
-                              //  console.log('Selected buyer addresses:', selectedAddresses);
-                               // console.log('Selected buyer devices:', selectedDeviceObjects);
+                                //  console.log('Selected buyer addresses:', selectedAddresses);
+                                // console.log('Selected buyer devices:', selectedDeviceObjects);
 
                                 $('#node-input-buyerEvmAddress').val(JSON.stringify(selectedAddresses));
                                 $('#node-input-selectedAddresses').val(selectedAddresses.join('\n'));
                                 node.selectedDevices.splice(0, node.selectedDevices.length, ...selectedDeviceObjects);
-                                
+
                                 $("#buyer-modal").dialog("close");
                             });
 
                             // Attach search functionality
-                            $('#buyer-search-input').off('input').on('input', function() {
+                            $('#buyer-search-input').off('input').on('input', function () {
                                 filterBuyerTableBySearch();
                             });
                         }
@@ -571,26 +684,30 @@
             });
 
             // Add event listener for smart contract changes
-            $('#node-input-smartContract').change(function() {
-              //  console.log('Smart contract changed to:', $(this).val());
+            $('#node-input-smartContract').change(function () {
+                //  console.log('Smart contract changed to:', $(this).val());
                 // Refresh buyer device list when contract changes
                 if ($("#buyer-modal").data("ui-dialog") && $("#buyer-modal").dialog("isOpen")) {
                     // If modal is open, refresh the buyer device list
                     loadBuyerDevicesForCurrentContract();
                 }
             });
-            
+
             // Store cleanup function for use in other methods
             node._cleanup = cleanup;
-            
+
             // Initialize connection status if node exists and add its cleanup to our tracking
             if (node.id) {
-                const statusCleanup = initializeSellerConnectionStatus(node.id);
-                // Store the status cleanup function
-                node._statusCleanup = statusCleanup;
+                // Add a small delay to ensure DOM elements are fully rendered
+                setTimeout(() => {
+                    console.log(`[DEBUG] Initializing seller connection status for node ${node.id}`);
+                    const statusCleanup = initializeSellerConnectionStatus(node.id, node.smartContract);
+                    // Store the status cleanup function
+                    node._statusCleanup = statusCleanup;
+                }, 100);
             }
         },
-        oneditcancel: function() {
+        oneditcancel: function () {
             // Clean up intervals when dialog is cancelled/closed
             if (this._cleanup) {
                 this._cleanup();
@@ -600,7 +717,7 @@
                 this._statusCleanup();
             }
         },
-        oneditsave: function() {
+        oneditsave: function () {
             // Clean up intervals when dialog is saved/closed
             if (this._cleanup) {
                 this._cleanup();
@@ -609,10 +726,10 @@
             if (this._statusCleanup) {
                 this._statusCleanup();
             }
-            
+
             // Get the selected buyer addresses from the hidden input field
             const buyerEvmAddressValue = $('#node-input-buyerEvmAddress').val();
-            
+
             if (buyerEvmAddressValue) {
                 try {
                     this.buyerEvmAddress = JSON.parse(buyerEvmAddressValue);
@@ -623,40 +740,97 @@
             } else {
                 this.buyerEvmAddress = [];
             }
-            
+
             // Save the current EVM address, balance, and publicKey
             this.evmAddress = $('#node-input-evmAddress').val();
             this.balance = $('#node-input-balance').val();
             this.publicKey = $('#node-input-publicKey').val();
-            
-          //  console.log('Saved buyer EVM addresses:', this.buyerEvmAddress);
+
+            //  console.log('Saved buyer EVM addresses:', this.buyerEvmAddress);
         }
     });
 </script>
 
 <script type="text/javascript">
-    // Connection status initialization function for seller
-    function initializeSellerConnectionStatus(nodeId) {
-        const statusDot = document.getElementById('status-dot');
-        const statusText = document.getElementById('status-text');
-        const refreshBtn = document.getElementById('refresh-connections-btn');
-        const peersLoading = document.getElementById('peers-loading');
-        const peersContent = document.getElementById('peers-content');
-        const connectedCount = document.getElementById('connected-count');
-        const totalCount = document.getElementById('total-count');
-        const noPeersMessage = document.getElementById('no-peers-message');
-        const peersTable = document.getElementById('peers-table');
-        const peersTableBody = document.getElementById('peers-table-body');
-        const lastUpdateTime = document.getElementById('last-update-time');
+    // Global DOM element references for seller connection status
+    let statusDot, statusText, refreshBtn, peersLoading, peersContent, connectedCount, 
+        totalCount, noPeersMessage, peersTable, peersTableBody, lastUpdateTime;
+    let isRefreshing = false;
+    let lastSeenInterval = null;
+    let peerRefreshInterval = null;
+    
+    // Debug flag for verbose auto-refresh logging (can be enabled in console)
+    window.SELLER_AUTO_REFRESH_DEBUG = false;
 
-        let isRefreshing = false;
+    // Connection status initialization function for seller
+    function initializeSellerConnectionStatus(nodeId, smartContract) {
+        console.log(`[DEBUG] Starting seller connection status initialization for node ${nodeId}`);
+        
+        // Initialize DOM element references with error checking
+        statusDot = document.getElementById('status-dot');
+        statusText = document.getElementById('status-text');
+        refreshBtn = document.getElementById('refresh-connections-btn');
+        peersLoading = document.getElementById('peers-loading');
+        peersContent = document.getElementById('peers-content');
+        connectedCount = document.getElementById('connected-count');
+        totalCount = document.getElementById('total-count');
+        noPeersMessage = document.getElementById('no-peers-message');
+        peersTable = document.getElementById('peers-table');
+        peersTableBody = document.getElementById('peers-table-body');
+        lastUpdateTime = document.getElementById('last-update-time');
+        
+        // Log which elements were found/not found
+        const elements = {
+            statusDot, statusText, refreshBtn, peersLoading, peersContent,
+            connectedCount, totalCount, noPeersMessage, peersTable, peersTableBody, lastUpdateTime
+        };
+        
+        const missingElements = Object.entries(elements)
+            .filter(([name, element]) => !element)
+            .map(([name]) => name);
+            
+        if (missingElements.length > 0) {
+            console.warn(`[DEBUG] Missing DOM elements:`, missingElements);
+        } else {
+            console.log(`[DEBUG] All DOM elements found successfully`);
+        }
+        
+        // Reset state variables
+        isRefreshing = false;
+        lastSeenInterval = null;
+        peerRefreshInterval = null;
+
+        // Function to refresh all visible last-seen data
+        function refreshAllLastSeen() {
+            const peerRows = document.querySelectorAll('.peers-table-row');
+            peerRows.forEach((row) => {
+                const publicKey = row.getAttribute('data-public-key');
+                const lastSeenCell = row.querySelector('.peers-table-cell:last-child');
+
+                if (publicKey && lastSeenCell && publicKey !== '') {
+                    const peer = { publicKey: publicKey };
+                    fetchLastSeen(peer, lastSeenCell, smartContract);
+                }
+            });
+
+            // Update the last update time when refreshing last-seen data
+            if (peerRows.length > 0) {
+                lastUpdateTime.textContent = new Date().toLocaleString();
+            }
+        }
 
         function updateStatusIndicator(status) {
+            // Check if DOM elements are initialized
+            if (!statusDot || !statusText) {
+                console.warn('Status DOM elements not initialized for updateStatusIndicator');
+                return;
+            }
+
             // Remove all status classes
             statusDot.classList.remove('connection-status-connected', 'connection-status-disconnected', 'connection-status-connecting', 'connection-status-unknown');
-            
+
             if (status.isConnected) {
-                if(status.connectedPeers > 0) {
+                if (status.connectedPeers > 0) {
                     statusDot.classList.add('connection-status-connected');
                 } else {
                     statusDot.classList.add('connection-status-connecting');
@@ -672,37 +846,80 @@
         }
 
         function updatePeersDisplay(status) {
+            // Check if DOM elements are initialized
+            if (!peersLoading || !peersContent || !peersTable || !noPeersMessage || 
+                !connectedCount || !totalCount || !peersTableBody) {
+                console.warn('DOM elements not initialized for updatePeersDisplay');
+                return;
+            }
+
             const peers = status.peers || [];
             const connectedPeers = peers.filter(p => p.connectionStatus === 'connected');
-            
+
             // Update summary
             connectedCount.textContent = connectedPeers.length;
             totalCount.textContent = peers.length;
-            
+
             // Show/hide content
             peersLoading.style.display = 'none';
             peersContent.style.display = 'block';
-            
+
+            // Always show the table so headers are visible
+            peersTable.style.display = 'table';
+            noPeersMessage.style.display = 'none';
+
+            // Clear existing rows
+            peersTableBody.innerHTML = '';
+
             if (peers.length === 0) {
-                noPeersMessage.style.display = 'block';
-                peersTable.style.display = 'none';
+                // Add a message row when no peers
+                const messageRow = document.createElement('tr');
+                const messageCell = document.createElement('td');
+                messageCell.colSpan = 3;
+                messageCell.style.textAlign = 'center';
+                messageCell.style.padding = '20px';
+                messageCell.style.fontStyle = 'italic';
+                messageCell.style.color = '#666';
+                messageCell.innerHTML = 'No buyer devices have connected to this seller yet<br><small>Buyers will appear here once they establish a connection</small>';
+                messageRow.appendChild(messageCell);
+                peersTableBody.appendChild(messageRow);
             } else {
-                noPeersMessage.style.display = 'none';
-                peersTable.style.display = 'table';
-                
-                // Clear existing rows
-                peersTableBody.innerHTML = '';
-                
                 // Add peer rows
                 peers.forEach(peer => {
                     const row = document.createElement('tr');
                     row.className = 'peers-table-row';
-                    
-                    const publicKeyCell = document.createElement('td');
-                    publicKeyCell.className = 'peers-table-cell peer-public-key';
-                    publicKeyCell.textContent = peer.publicKey || 'Unknown';
-                    publicKeyCell.title = peer.publicKey || 'Unknown';
-                    
+
+                    const evmCell = document.createElement('td');
+                    evmCell.className = 'peers-table-cell peer-evm-address';
+                    evmCell.textContent = 'Converting...';
+                    evmCell.title = 'Converting public key to EVM address...';
+
+                    // Store the original public key in data attribute for fetchLastSeen
+                    row.setAttribute('data-public-key', peer.publicKey || '');
+
+                    // Convert public key to EVM address
+                    if (peer.publicKey) {
+                        fetch(`/seller/publickey-to-evm/${peer.publicKey}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success && data.evmAddress) {
+                                    evmCell.textContent = data.evmAddress;
+                                    evmCell.title = data.evmAddress;
+                                } else {
+                                    evmCell.textContent = 'Conversion failed';
+                                    evmCell.title = 'Could not convert public key to EVM address';
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error converting public key to EVM:', error);
+                                evmCell.textContent = 'Error';
+                                evmCell.title = 'Error converting public key to EVM address';
+                            });
+                    } else {
+                        evmCell.textContent = 'Unknown';
+                        evmCell.title = 'No public key available';
+                    }
+
                     const statusCell = document.createElement('td');
                     statusCell.className = 'peers-table-cell';
                     statusCell.style.textAlign = 'center';
@@ -710,19 +927,21 @@
                     statusSpan.textContent = peer.connectionStatus || 'unknown';
                     statusSpan.className = `peer-status-${peer.connectionStatus || 'unknown'}`;
                     statusCell.appendChild(statusSpan);
-                    
+
                     const lastUpdateCell = document.createElement('td');
                     lastUpdateCell.className = 'peers-table-cell';
                     lastUpdateCell.style.textAlign = 'center';
-                    lastUpdateCell.textContent = peer.lastUpdate ? new Date(peer.lastUpdate).toLocaleTimeString() : 'N/A';
-                    
-                    row.appendChild(publicKeyCell);
+                    lastUpdateCell.innerHTML = '<span style="color: #666;">Checking...</span>';
+                    // Fetch last seen for this peer
+                    fetchLastSeen(peer, lastUpdateCell, smartContract);
+
+                    row.appendChild(evmCell);
                     row.appendChild(statusCell);
                     row.appendChild(lastUpdateCell);
                     peersTableBody.appendChild(row);
                 });
             }
-            
+
             // Update last update time
             if (status.lastUpdate) {
                 lastUpdateTime.textContent = new Date(status.lastUpdate).toLocaleString();
@@ -731,45 +950,74 @@
             }
         }
 
-        async function loadConnectionStatus() {
+        async function loadConnectionStatus(isInitialLoad = false) {
             try {
+                // Show loading state
+                if (peersLoading && peersContent) {
+                    peersLoading.style.display = 'block';
+                    peersContent.style.display = 'none';
+                }
+
+                console.log(`[DEBUG] Loading connection status for ${nodeId} (initial: ${isInitialLoad})`);
+                
                 const response = await fetch(`/seller/connection-status/${nodeId}`);
                 if (response.ok) {
                     const status = await response.json();
+                    console.log(`[DEBUG] Initial load response:`, {
+                        isConnected: status.isConnected,
+                        totalPeers: status.totalPeers,
+                        connectedPeers: status.connectedPeers,
+                        peers: status.peers
+                    });
+                    
                     updateStatusIndicator(status);
                     updatePeersDisplay(status);
+                    
+                    // If initial load has no peers but connection monitor shows connected, 
+                    // trigger a refresh to get fresh data
+                    if (isInitialLoad && status.isConnected && status.totalPeers === 0) {
+                        console.log(`[DEBUG] Initial load shows no peers despite being connected. Triggering refresh...`);
+                        setTimeout(() => {
+                            console.log(`[DEBUG] Performing automatic refresh to get fresh peer data...`);
+                            // Trigger a refresh instead of just reloading cached data
+                            performRefreshAndUpdate(false); // Don't show UI spinner for automatic refresh
+                        }, 1000);
+                    }
                 } else {
                     console.error('Failed to load connection status:', response.statusText);
-                    statusText.textContent = 'Error loading status';
-                    statusDot.classList.add('connection-status-unknown');
+                    if (statusText) statusText.textContent = 'Error loading status';
+                    if (statusDot) statusDot.classList.add('connection-status-unknown');
+                    
+                    // Hide loading, show content even on error
+                    if (peersLoading && peersContent) {
+                        peersLoading.style.display = 'none';
+                        peersContent.style.display = 'block';
+                    }
                 }
             } catch (error) {
                 console.error('Error loading connection status:', error);
-                statusText.textContent = 'Error loading status';
-                statusDot.classList.add('connection-status-unknown');
+                if (statusText) statusText.textContent = 'Error loading status';
+                if (statusDot) statusDot.classList.add('connection-status-unknown');
+                
+                // Hide loading, show content even on error
+                if (peersLoading && peersContent) {
+                    peersLoading.style.display = 'none';
+                    peersContent.style.display = 'block';
+                }
             }
         }
 
-        async function refreshConnections() {
-            if (isRefreshing) return;
-            
-            //console.log('[DEBUG] Starting seller refresh connections...');
-            isRefreshing = true;
-            
-            // Get button element directly and show spinner immediately
-            const btn = document.getElementById('refresh-connections-btn');
-            if (btn) {
-              //  console.log('[DEBUG] Seller button found, showing spinner');
-                btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Refreshing...';
-                btn.style.opacity = '0.6';
-                btn.disabled = true;
-            } else {
-                console.log('[DEBUG] Seller button NOT found');
-            }
-            
+        async function performRefreshAndUpdate(showSpinner = true) {
             try {
-                // Add delay so you can see the spinner
-                await new Promise(resolve => setTimeout(resolve, 1000));
+                if (showSpinner) {
+                    // Show loading state
+                    if (peersLoading && peersContent) {
+                        peersLoading.style.display = 'block';
+                        peersContent.style.display = 'none';
+                    }
+                }
+
+                console.log(`[DEBUG] Performing connection refresh (showSpinner: ${showSpinner})`);
                 
                 const response = await fetch(`/seller/refresh-connections/${nodeId}`, {
                     method: 'POST',
@@ -777,15 +1025,86 @@
                         'Content-Type': 'application/json'
                     }
                 });
-                
+
                 if (response.ok) {
                     const result = await response.json();
+                    console.log(`[DEBUG] Auto-refresh response:`, {
+                        isConnected: result.status.isConnected,
+                        totalPeers: result.status.totalPeers,
+                        connectedPeers: result.status.connectedPeers,
+                        peers: result.status.peers
+                    });
+                    
                     updateStatusIndicator(result.status);
                     updatePeersDisplay(result.status);
-                   // console.log('[DEBUG] Seller refresh completed successfully');
                 } else {
-                    console.error('Failed to refresh seller connections:', response.statusText);
+                    console.error('Failed to perform auto-refresh:', response.statusText);
                 }
+            } catch (error) {
+                console.error('Error performing auto-refresh:', error);
+            }
+        }
+
+        async function refreshPeersData() {
+            // Skip if manual refresh is in progress
+            if (isRefreshing) {
+                return;
+            }
+
+            try {
+                // Optional verbose logging (enable with: window.SELLER_AUTO_REFRESH_DEBUG = true)
+                if (window.SELLER_AUTO_REFRESH_DEBUG) {
+                    console.log(`[DEBUG] Auto-refreshing peer data every second...`);
+                }
+                
+                const response = await fetch(`/seller/connection-status/${nodeId}`);
+                if (response.ok) {
+                    const status = await response.json();
+                    
+                    if (window.SELLER_AUTO_REFRESH_DEBUG) {
+                        console.log(`[DEBUG] Auto-refresh response:`, {
+                            isConnected: status.isConnected,
+                            totalPeers: status.totalPeers,
+                            connectedPeers: status.connectedPeers
+                        });
+                    }
+                    
+                    // Only update if we have meaningful data (avoid showing empty briefly)
+                    if (status.isConnected || status.totalPeers > 0) {
+                        updateStatusIndicator(status);
+                        updatePeersDisplay(status);
+                    }
+                } else {
+                    console.warn('Auto-refresh failed:', response.statusText);
+                }
+            } catch (error) {
+                console.warn('Auto-refresh error:', error);
+            }
+        }
+
+        async function refreshConnections() {
+            if (isRefreshing) return;
+
+            console.log('[DEBUG] Starting seller refresh connections...');
+            isRefreshing = true;
+
+            // Get button element directly and show spinner immediately
+            const btn = document.getElementById('refresh-connections-btn');
+            if (btn) {
+                //  console.log('[DEBUG] Seller button found, showing spinner');
+                btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Refreshing...';
+                btn.style.opacity = '0.6';
+                btn.disabled = true;
+            } else {
+                console.log('[DEBUG] Seller button NOT found');
+            }
+
+            try {
+                // Add delay so you can see the spinner
+                await new Promise(resolve => setTimeout(resolve, 1000));
+
+                // Use the shared refresh function  
+                await performRefreshAndUpdate(true);
             } catch (error) {
                 console.error('Error refreshing seller connections:', error);
             } finally {
@@ -798,47 +1117,219 @@
                     //console.log('[DEBUG] Seller button restored');
                 }
                 isRefreshing = false;
-               // console.log('[DEBUG] Seller refresh process completed');
+                // console.log('[DEBUG] Seller refresh process completed');
             }
         }
 
         // Set up event listeners
         refreshBtn.addEventListener('click', refreshConnections);
 
-        // Load initial status (single call only)
-        loadConnectionStatus();
+        // Load initial status with a small delay to allow connection monitor to initialize
+        setTimeout(() => {
+            console.log(`[DEBUG] Starting initial connection status load with delay...`);
+            loadConnectionStatus(true).then(() => {
+                // Start 5-second auto-refresh for last-seen data
+                if (lastSeenInterval) {
+                    clearInterval(lastSeenInterval);
+                }
+                lastSeenInterval = setInterval(() => {
+                    const hasVisiblePeers = document.querySelectorAll('.peers-table-row').length > 0;
+                    if (hasVisiblePeers && !isRefreshing) {
+                        refreshAllLastSeen();
+                    }
+                }, 5000);
+
+                // Start 1-second auto-refresh for peer connection data
+                if (peerRefreshInterval) {
+                    clearInterval(peerRefreshInterval);
+                }
+               //console.log(`[DEBUG] Starting 1-second peer refresh interval...`);
+                peerRefreshInterval = setInterval(() => {
+                    refreshPeersData();
+                }, 5000);
+            }).catch(() => {
+                // If initial load fails, still try to start the intervals
+                console.warn('Initial connection status load failed, but starting auto-refresh intervals anyway');
+                
+                // Start the peer refresh interval even if initial load failed
+                if (peerRefreshInterval) {
+                    clearInterval(peerRefreshInterval);
+                }
+                // console.log(`[DEBUG] Starting 1-second peer refresh interval (fallback)...`);
+                peerRefreshInterval = setInterval(() => {
+                    refreshPeersData();
+                }, 1000);
+            });
+        }, 500); // 500ms delay to allow connection monitor to initialize
 
         // Remove the periodic refresh - no more polling
         // const statusInterval = setInterval(loadConnectionStatus, 30000);
 
-        // Cleanup function (no interval to clear)
+        // Cleanup function
         return () => {
+            console.log(`[DEBUG] Cleaning up seller connection status intervals...`);
             refreshBtn.removeEventListener('click', refreshConnections);
+            if (lastSeenInterval) {
+                clearInterval(lastSeenInterval);
+                lastSeenInterval = null;
+            }
+            if (peerRefreshInterval) {
+                clearInterval(peerRefreshInterval);
+                peerRefreshInterval = null;
+                console.log(`[DEBUG] Stopped 1-second peer refresh interval`);
+            }
         };
+    }
+
+    // Helper to normalize Hedera topic format to 0.0.xxxxxxx
+    function normalizeTopicFormat(topic) {
+        if (typeof topic !== 'string') return topic;
+        if (/^0\.0\.\d+$/.test(topic)) return topic;
+        if (/^0\.0\d+$/.test(topic)) return topic.replace(/^0\.0(\d+)$/, '0.0.$1');
+        if (/^\d+$/.test(topic)) return `0.0.${topic}`;
+        return topic;
+    }
+
+    async function fetchLastSeen(peer, lastSeenCell, smartContract) {
+        try {
+            lastSeenCell.innerHTML = '<i class="fa fa-spinner fa-spin"></i>';
+
+            if (!peer.publicKey) {
+                lastSeenCell.textContent = 'No public key';
+                return;
+            }
+
+            // Step 1: Convert publicKey to EVM address
+            const evmResponse = await fetch(`/seller/publickey-to-evm/${peer.publicKey}`);
+            const evmData = await evmResponse.json();
+
+            if (!evmData.success) {
+                lastSeenCell.textContent = 'Key conversion failed';
+                return;
+            }
+
+            // Step 2: Get device info by EVM address
+            const deviceResponse = await fetch(`/seller/device-info-by-evm/${evmData.evmAddress}?smartContract=${smartContract}`);
+            const deviceData = await deviceResponse.json();
+
+            if (!deviceData.success || !deviceData.stdOutTopic) {
+                lastSeenCell.textContent = 'No topic found';
+                return;
+            }
+
+            // Step 3: Get last seen from stdOutTopic
+            const normalizedTopic = normalizeTopicFormat(deviceData.stdOutTopic);
+            const lastSeenResponse = await fetch(`/seller/last-seen/${normalizedTopic}`);
+            const lastSeenData = await lastSeenResponse.json();
+
+            if (lastSeenData.success && lastSeenData.lastSeen) {
+                const secondsAgo = lastSeenData.secondsAgo;
+                let displayText = '';
+                let color = '';
+
+                if (secondsAgo < 60) {
+                    displayText = `${secondsAgo}s ago`;
+                    color = '#28a745'; // green
+                } else if (secondsAgo < 3600) {
+                    displayText = `${Math.floor(secondsAgo / 60)}m ago`;
+                    color = '#ffc107'; // yellow
+                } else if (secondsAgo < 86400) {
+                    displayText = `${Math.floor(secondsAgo / 3600)}h ago`;
+                    color = '#fd7e14'; // orange
+                } else {
+                    displayText = `${Math.floor(secondsAgo / 86400)}d ago`;
+                    color = '#dc3545'; // red
+                }
+
+                lastSeenCell.innerHTML = `<span style="color: ${color};">${displayText}</span>`;
+            } else {
+                lastSeenCell.textContent = 'Never';
+            }
+
+        } catch (error) {
+            console.error('Error fetching last seen for peer:', peer.publicKey, error);
+            lastSeenCell.textContent = 'Error';
+        }
     }
 </script>
 
 <style>
-.buyer-table tr.selected {
-    background-color: #DDD;
-    color: black;
+.neuron-seller-config .connection-status-connected {
+    background-color: #4CAF50 !important;
 }
-.buyer-table tr:hover {
-    outline: 2px solid #4d90fe;
+
+.neuron-seller-config .connection-status-disconnected {
+    background-color: #f44336 !important;
 }
-.connection-status-connected { background-color: #4CAF50 !important; }
-.connection-status-disconnected { background-color: #f44336 !important; }
-.connection-status-connecting { background-color: #ff9800 !important; }
-.connection-status-unknown { background-color: #9e9e9e !important; }
-.peer-status-connected { color: #4CAF50; font-weight: bold; }
-.peer-status-disconnected { color: #f44336; font-weight: bold; }
-.peer-status-unknown { color: #9e9e9e; font-weight: bold; }
-.peers-table-row { border-bottom: 1px solid #eee; color: black; }
-.peers-table-row:hover { background-color: #f5f5f5; }
-.peers-table-cell { padding: 8px 5px; vertical-align: middle; color: black; }
-.peer-public-key { font-family: monospace; font-size: 11px; word-break: break-all; max-width: 200px; color: black; }
-.refresh-button-loading { opacity: 0.6; pointer-events: none; }
-.refresh-button-loading i { animation: spin 1s linear infinite; }
+
+.neuron-seller-config .connection-status-connecting {
+    background-color: #ff9800 !important;
+}
+
+.neuron-seller-config .connection-status-unknown {
+    background-color: #9e9e9e !important;
+}
+
+.neuron-seller-config .peer-status-connected {
+    color: #4CAF50;
+    font-weight: bold;
+}
+
+.neuron-seller-config .peer-status-disconnected {
+    color: #f44336;
+    font-weight: bold;
+}
+
+.neuron-seller-config .peer-status-unknown {
+    color: #9e9e9e;
+    font-weight: bold;
+}
+
+.neuron-seller-config .peers-table-row {
+    border-bottom: 1px solid #eee;
+    color: white;
+}
+
+.neuron-seller-config .peers-table-row:hover {
+    background-color: inherit !important;
+    outline: none !important;
+    border: none !important;
+}
+
+.neuron-seller-config #peers-table tr:hover {
+    background-color: inherit !important;
+    outline: none !important;
+    border: none !important;
+}
+
+.neuron-seller-config #peers-table tbody tr:hover {
+    background-color: inherit !important;
+    outline: none !important;
+    border: none !important;
+}
+
+.neuron-seller-config .peers-table-cell {
+    padding: 8px 5px;
+    vertical-align: middle;
+    color: white;
+}
+
+.neuron-seller-config .peer-evm-address {
+    font-family: monospace;
+    font-size: 11px;
+    word-break: break-all;
+    max-width: 200px;
+    color: white;
+}
+
+.neuron-seller-config .refresh-button-loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.neuron-seller-config .refresh-button-loading i {
+    animation: spin 1s linear infinite;
+}
 
 /* Spinner animation for seller */
 .fa-spin {
@@ -847,18 +1338,97 @@
 }
 
 @-webkit-keyframes fa-spin {
-    0% { -webkit-transform: rotate(0deg); transform: rotate(0deg); }
-    100% { -webkit-transform: rotate(360deg); transform: rotate(360deg); }
+    0% {
+        -webkit-transform: rotate(0deg);
+        transform: rotate(0deg);
+    }
+
+    100% {
+        -webkit-transform: rotate(360deg);
+        transform: rotate(360deg);
+    }
 }
 
 @keyframes fa-spin {
-    0% { -webkit-transform: rotate(0deg); transform: rotate(0deg); }
-    100% { -webkit-transform: rotate(360deg); transform: rotate(360deg); }
+    0% {
+        -webkit-transform: rotate(0deg);
+        transform: rotate(0deg);
+    }
+
+    100% {
+        -webkit-transform: rotate(360deg);
+        transform: rotate(360deg);
+    }
 }
 
-@keyframes spin { 
-    0% { transform: rotate(0deg); } 
-    100% { transform: rotate(360deg); } 
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.neuron-seller-config .form-row input:not([readonly]),
+.neuron-seller-config .form-row select {
+    font-family: inherit;
+    font-size: 13px;
+}
+
+/* Monospace for technical fields (addresses, keys, topics) */
+.neuron-seller-config #node-input-publicKey,
+.neuron-seller-config #node-input-stdInTopic,
+.neuron-seller-config #node-input-stdOutTopic,
+.neuron-seller-config #node-input-stdErrTopic,
+.neuron-seller-config #node-input-evmAddress,
+.neuron-seller-config #node-input-balance,
+.neuron-seller-config .peer-evm-address,
+.neuron-seller-config #buyer-table td {
+    font-family: monospace;
+    font-size: 12px;
+}
+
+/* Readonly fields styling */
+.neuron-seller-config input[readonly] {
+    color: #555;
+}
+
+/* Table consistency */
+.neuron-seller-config #peers-table {
+    font-size: 12px;
+}
+
+.neuron-seller-config #peers-table th {
+    font-family: inherit;
+    font-weight: bold;
+}
+
+/* Buyer modal table */
+.neuron-seller-config #buyer-table {
+    font-size: 12px;
+}
+
+.neuron-seller-config #buyer-table th {
+    font-family: inherit;
+    font-weight: bold;
+}
+    
+/* No device message styling */
+.neuron-seller-config #no-device-message {
+    background-color: #f8f9fa !important;
+    border: 1px solid #dee2e6 !important;
+    color: #6c757d !important;
+}
+    
+/* Dark theme compatibility for no device message */
+@media (prefers-color-scheme: dark) {
+    .neuron-seller-config #no-device-message {
+        background-color: #2d2d2d !important;
+        border-color: #555 !important;
+        color: #adb5bd !important;
+    }
 }
 </style>
 
@@ -958,4 +1528,4 @@
         <li>Sellers define which buyers can access their services</li>
         <li>Buyers select which sellers they want to interact with</li>
     </ul>
-</script> 
+</script>

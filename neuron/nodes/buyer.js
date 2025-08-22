@@ -14,7 +14,9 @@ const {
     getGlobalPeerCount,
     getGlobalAllDevices,
     isContractLoading,
-    isMonitoringActive
+    isMonitoringActive,
+    searchDeviceInCache,
+    triggerCacheUpdate
 } = require('./global-contract-monitor.js');
 const { getConnectionMonitor, removeConnectionMonitor } = require('./connection-monitor.js');
 
@@ -328,7 +330,7 @@ module.exports = function (RED) {
 
             if (!node.deviceInfo) {
                 try {
-                    node.status({ fill: "blue", shape: "dot", text: "Creating new device..." });
+                    node.status({ fill: "blue", shape: "dot", text: "Creating new device. Please wait..." });
 
                     const requiredFields = {
                         smartContract: config.smartContract,
@@ -354,16 +356,25 @@ module.exports = function (RED) {
                         return;
                     }
 
-                    // Specific validation for seller addresses
-                    const sellerAddresses = safeParseSellerAddresses(config.sellerEvmAddress);
-                    if (!sellerAddresses || sellerAddresses.length === 0) {
-                        const errorMsg = `Buyer node requires at least one seller to be selected. Please configure seller EVM addresses.`;
+                    // Specific validation for seller addresses/devices
+                    let sellerDevices = [];
+                    if (config.sellerDevices && Array.isArray(config.sellerDevices)) {
+                        // New format - device objects
+                        sellerDevices = config.sellerDevices;
+                    } else {
+                        // Fallback to address list
+                        const sellerAddresses = safeParseSellerAddresses(config.sellerEvmAddress);
+                        sellerDevices = sellerAddresses.map(addr => ({ evmAddress: addr }));
+                    }
+
+                    if (!sellerDevices || sellerDevices.length === 0) {
+                        const errorMsg = `Buyer node requires at least one seller device to be configured. Please add seller devices.`;
                         node.error(errorMsg);
-                        node.status({ fill: "red", shape: "ring", text: "No sellers selected" });
+                        node.status({ fill: "red", shape: "ring", text: "No sellers configured" });
                         return;
                     }
 
-                    console.log(`Node ${node.id}: Validated ${sellerAddresses.length} seller address(es)`);
+                    console.log(`Node ${node.id}: Validated ${sellerDevices.length} seller device(s)`);
 
                     const contracts = {
                         "jetvision": process.env.JETVISION_CONTRACT_EVM,
@@ -946,66 +957,64 @@ module.exports = function (RED) {
 
     RED.httpAdmin.get('/buyer/device-info/:nodeId', async function (req, res) {
         const nodeId = req.params.nodeId;
-        console.log(`[DEBUG] Device info requested for node ID: ${nodeId}`);
+       // console.log(`[DEBUG] Device info requested for node ID: ${nodeId}`);
 
         try {
             let buyerNode = RED.nodes.getNode(nodeId);
             let actualNodeId = nodeId;
             
-            // Template mapping logic (existing code)
+            // Template mapping logic
             if (!buyerNode) {
                 const instanceId = templateToInstanceMap.get(nodeId);
                 if (instanceId) {
-                    console.log(`[DEBUG] Template ID ${nodeId} maps to instance ID ${instanceId}`);
+                //    console.log(`[DEBUG] Template ID ${nodeId} maps to instance ID ${instanceId}`);
                     buyerNode = RED.nodes.getNode(instanceId);
                     actualNodeId = instanceId;
                 }
             }
             
             if (!buyerNode || buyerNode.type !== 'buyer config') {
-                return res.status(404).json({ 
-                    error: 'Buyer node not found',
-                    debug: {
-                        requestedId: nodeId,
-                        actualNodeId: actualNodeId,
-                        foundNode: buyerNode ? buyerNode.type : 'none',
-                        hasMapping: templateToInstanceMap.has(nodeId)
-                    }
-                });
+                return res.status(404).json({ error: 'Buyer node not found' });
             }
 
             if (!buyerNode.deviceInfo) {
-                return res.status(400).json({ 
-                    error: 'Node not initialized - no device info available'
-                });
+                return res.status(400).json({ error: 'Node not initialized' });
             }
 
-            // Get publicKey from adminAddress or extract from EVM
+            // Get publicKey (existing code)
             let publicKey = '';
             if (buyerNode.deviceInfo.adminAddress) {
-                // Option 1: Use existing adminAddress
                 publicKey = buyerNode.deviceInfo.adminAddress;
-            } else if (buyerNode.deviceInfo.evmAddress && hederaService) {
-                // Option 2: Extract from EVM address
-                try {
-                    const selfAdminKeyDer = await hederaService.getAdminKeyFromEvmAddress(buyerNode.deviceInfo.evmAddress);
-                    const selfPublicKeyBytes = extractPublicKeyBytes(selfAdminKeyDer);
-                    publicKey = selfPublicKeyBytes || '';
-                } catch (error) {
-                    console.warn(`Failed to extract public key for buyer ${actualNodeId}:`, error.message);
-                    publicKey = 'Error extracting key';
-                }
             }
 
+            
+            let stdInTopic = '';
+            let stdOutTopic = '';
+            let stdErrTopic = '';
+            
+            if (buyerNode.deviceInfo) {
+                stdInTopic = buyerNode.deviceInfo.topics[0] || '';
+                stdOutTopic = buyerNode.deviceInfo.topics[1] || '';
+                stdErrTopic = buyerNode.deviceInfo.topics[2] || '';
+            }
+            
+
             const response = {
-                evmAddress: buyerNode.deviceInfo.evmAddress || '',
+               // evmAddress: buyerNode.deviceInfo.evmAddress || '',
+                evmAddress: (() => {
+                    const address = buyerNode.deviceInfo.evmAddress || '';
+                    return address && !address.startsWith('0x') ? `0x${address}` : address;
+                })(),
                 wsPort: buyerNode.deviceInfo.wsPort || null,
                 publicKey: publicKey,
+                 stdInTopic: stdInTopic,
+                 stdOutTopic: stdOutTopic,
+                stdErrTopic: stdErrTopic,
                 initialized: !!buyerNode.deviceInfo.evmAddress,
-                nodeId: actualNodeId
+                nodeId: actualNodeId,
+                privateKey: buyerNode.deviceInfo.privateKey || ''
             };
 
-            console.log(`[DEBUG] Returning device info for ${nodeId}:`, response);
             res.json(response);
         } catch (error) {
             console.error(`Error getting device info for buyer node ${nodeId}:`, error);
@@ -1080,6 +1089,288 @@ module.exports = function (RED) {
         } catch (error) {
             console.error(`Error getting device balance for buyer node ${nodeId}:`, error);
             res.status(500).json({ error: 'Failed to get device balance: ' + error.message });
+        }
+    });
+
+    // Add this new endpoint for fetching devices by EVM address
+    RED.httpAdmin.get('/buyer/fetch-device-by-evm/:evmAddress', async function (req, res) {
+        const evmAddress = req.params.evmAddress;
+        try {
+            const smartContract = req.query.smartContract || 'jetvision';
+            if (!smartContract) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'Smart contract not configured for buyer node'
+                });
+            }
+            // Import global contract monitor functions
+            const {
+                searchDeviceInCache,
+                triggerCacheUpdate
+            } = require('./global-contract-monitor.js');
+            // Search cache first
+            let device = searchDeviceInCache(smartContract, evmAddress);
+            if (!device) {
+                console.log(`[DEBUG] Device not found in cache, triggering update for ${smartContract}`);
+                // Trigger cache update and retry
+                const updateResult = await triggerCacheUpdate(smartContract);
+                if (updateResult.success) {
+                    device = searchDeviceInCache(smartContract, evmAddress);
+                }
+            }
+            if (device) {
+                console.log(`[DEBUG] Device found:`, device);
+                return res.json({
+                    success: true,
+                    device: {
+                        evmAddress: device.contract,
+                        deviceName: device.deviceName || 'Unknown Device',
+                        deviceType: device.deviceType || 'Unknown Type',
+                        stdInTopic: device.stdInTopic,
+                        stdOutTopic: device.stdOutTopic,
+                        stdErrTopic: device.stdErrTopic
+                    }
+                });
+            }
+            // If not found, try direct contract fetch with retry logic
+            const { HederaContractService } = require('neuron-js-registration-sdk');
+            const contractEVM = process.env[`${smartContract.toUpperCase()}_CONTRACT_EVM`];
+            if (!contractEVM) {
+                return res.json({
+                    success: false,
+                    error: 'Contract ID not configured for smart contract'
+                });
+            }
+            const contractService = new HederaContractService({
+                network: process.env.HEDERA_NETWORK || 'testnet',
+                operatorId: process.env.HEDERA_OPERATOR_ID,
+                operatorKey: process.env.HEDERA_OPERATOR_KEY,
+                contractEVM
+            });
+            let foundDevice = null;
+            let lastError = null;
+            for (let attempt = 1; attempt <= 3; attempt++) {
+                try {
+                    console.log(`[DEBUG] Direct contract fetch attempt ${attempt} for EVM: ${evmAddress}`);
+                    const devices = await contractService.getDevicesByOwner(contractEVM,evmAddress);
+                    if (devices && devices.length > 0) {
+                        foundDevice = devices[0];
+                        foundDevice.contract = evmAddress;
+                       // console.log(`[DEBUG] Device found in contract:`, foundDevice);
+                        break;
+                    }
+                } catch (err) {
+                    lastError = err;
+                 //   console.error(`[DEBUG] Direct contract fetch failed (attempt ${attempt}):`, err);
+                }
+                if (attempt < 3) {
+                    await new Promise(resolve => setTimeout(resolve, 5000));
+                }
+            }
+            if (foundDevice) {
+                // Update cache for future use
+                try {
+                    const { globalAllDevices, globalPeerCounts, saveContractDataToCache, searchDeviceInCache } = require('./global-contract-monitor.js');
+                    if (!globalAllDevices[smartContract]) globalAllDevices[smartContract] = [];
+                 //   console.log(`[DEBUG] Attempting to update cache for smartContract: ${smartContract}`);
+                  //  console.log(`[DEBUG] foundDevice:`, JSON.stringify(foundDevice, (key, value) => typeof value === 'bigint' ? value.toString() : value));
+                    // Use the evmAddress used in getDevicesByOwner for duplicate check
+                    const exists = globalAllDevices[smartContract].some(d => {
+                        const dAddress = d.contract || d.evmAddress || d.address;
+                        return dAddress && evmAddress && dAddress.toLowerCase() === evmAddress.toLowerCase();
+                    });
+                    if (!exists) {
+                      //  console.log(`[DEBUG] Device not found in cache, adding to globalAllDevices[${smartContract}]`);
+                        globalAllDevices[smartContract].push(foundDevice);
+                        globalPeerCounts[smartContract] = globalAllDevices[smartContract].length;
+                        saveContractDataToCache(smartContract);
+                        // Confirm device is now in cache
+                        const check = searchDeviceInCache(smartContract, evmAddress);
+                       // console.log(`[DEBUG] After save, device in cache:`, check ? 'YES' : 'NO', check ? JSON.stringify(check, (key, value) => typeof value === 'bigint' ? value.toString() : value) : '');
+                        // Log the cache file path
+                        const { cacheFiles } = require('./global-contract-monitor.js');
+                        //console.log(`[DEBUG] Cache file path:`, cacheFiles[smartContract]);
+                        //console.log(`[DEBUG] Updated cache for ${smartContract} with new device`);
+                    } else {
+                        console.log(`[DEBUG] Device already exists in cache for ${smartContract}`);
+                    }
+                } catch (cacheErr) {
+                    console.error(`[DEBUG] Failed to update cache after direct contract fetch:`, cacheErr);
+                }
+                return res.json({
+                    success: true,
+                    device: {
+                        evmAddress: foundDevice.contract || foundDevice.evmAddress || foundDevice.address,
+                        deviceName: foundDevice.deviceName || 'Unknown Device',
+                        deviceType: foundDevice.deviceType || 'Unknown Type',
+                        stdInTopic: foundDevice.stdInTopic,
+                        stdOutTopic: foundDevice.stdOutTopic,
+                        stdErrTopic: foundDevice.stdErrTopic
+                    }
+                });
+            }
+            return res.json({
+                success: false,
+                error: 'Device not found in smart contract'
+            });
+        } catch (error) {
+            console.error(`[DEBUG] Error fetching device:`, error);
+            res.status(500).json({
+                success: false,
+                error: 'Internal server error: ' + error.message
+            });
+        }
+    });
+
+    // Simplified endpoint with correct timestamp field
+    RED.httpAdmin.get('/buyer/last-seen/:topicId', async function (req, res) {
+        const topicId = req.params.topicId;
+        
+        console.log(`[DEBUG] Last seen requested for topic: ${topicId}`);
+        
+        try {
+            if (!hederaService) {
+                return res.status(500).json({ 
+                    success: false, 
+                    error: 'Hedera service not initialized' 
+                });
+            }
+            
+            // Fetch the last topic message
+            const messages = await hederaService.getTopicMessages(topicId, 1, 1, "desc");
+            
+            if (messages && messages.length > 0) {
+                const lastMessage = messages[0];
+                
+                // Handle timestamp format: '1753899626.468846000'
+                // This is Unix timestamp in seconds with nanosecond precision
+                const timestampString = lastMessage.timestamp;
+                console.log(`[DEBUG] Raw timestamp: ${timestampString}`);
+                
+                // Parse the timestamp string as a float (seconds.nanoseconds)
+                const timestampSeconds = parseFloat(timestampString);
+                
+                // Convert to milliseconds for JavaScript Date comparison
+                const lastSeenTime = timestampSeconds * 1000;
+                
+                // Get current time in milliseconds
+                const now = Date.now();
+                
+                // Calculate seconds ago
+                const millisecondsAgo = now - lastSeenTime;
+                const secondsAgo = Math.floor(millisecondsAgo / 1000);
+                
+                console.log(`[DEBUG] Timestamp: ${timestampString}, LastSeenTime: ${lastSeenTime}ms, Now: ${now}ms, SecondsAgo: ${secondsAgo}`);
+                
+                res.json({
+                    success: true,
+                    lastSeen: secondsAgo,
+                    lastSeenFormatted: formatLastSeen(secondsAgo),
+                    timestamp: timestampString
+                });
+            } else {
+                res.json({
+                    success: true,
+                    lastSeen: null,
+                    lastSeenFormatted: 'Never',
+                    timestamp: null
+                });
+            }
+            
+        } catch (error) {
+            console.error(`Error getting last seen for topic ${topicId}:`, error);
+            res.status(500).json({ 
+                success: false, 
+                error: 'Failed to get last seen: ' + error.message 
+            });
+        }
+    });
+
+    // Helper function to format last seen time
+    function formatLastSeen(seconds) {
+        if (seconds === null || seconds === undefined) return 'Never';
+        
+        // Handle negative values (future timestamps - shouldn't happen but just in case)
+        if (seconds < 0) return 'Just now';
+        
+        if (seconds < 60) {
+            return `${seconds}s ago`;
+        } else if (seconds < 3600) {
+            const minutes = Math.floor(seconds / 60);
+            return `${minutes}m ago`;
+        } else if (seconds < 86400) {
+            const hours = Math.floor(seconds / 3600);
+            return `${hours}h ago`;
+        } else {
+            const days = Math.floor(seconds / 86400);
+            return `${days}d ago`;
+        }
+    }
+
+    // Add endpoint to convert EVM address to public key
+    RED.httpAdmin.get('/buyer/evm-to-publickey/:evmAddress', async function (req, res) {
+        const evmAddress = req.params.evmAddress;
+        
+       // console.log(`[DEBUG] EVM to public key conversion requested for: ${evmAddress}`);
+        
+        try {
+            if (!hederaService) {
+                return res.status(500).json({ 
+                    success: false, 
+                    error: 'Hedera service not initialized' 
+                });
+            }
+            
+            // Get admin key from EVM address and extract public key
+            const adminKeyDer = await hederaService.getAdminKeyFromEvmAddress(evmAddress);
+            const publicKeyBytes = extractPublicKeyBytes(adminKeyDer);
+            
+            if (publicKeyBytes) {
+                console.log(`[DEBUG] Successfully converted ${evmAddress} to public key: ${publicKeyBytes}`);
+                res.json({
+                    success: true,
+                    evmAddress: evmAddress,
+                    publicKey: publicKeyBytes
+                });
+            } else {
+                console.log(`[DEBUG] Failed to extract public key from ${evmAddress}`);
+                res.json({
+                    success: false,
+                    error: 'Could not extract public key from EVM address'
+                });
+            }
+            
+        } catch (error) {
+            console.error(`[DEBUG] Error converting EVM to public key for ${evmAddress}:`, error);
+            res.status(500).json({ 
+                success: false, 
+                error: 'Failed to convert EVM to public key: ' + error.message 
+            });
+        }
+    });
+    
+    // Check Device File Exists endpoint - Check if device file exists for the given node
+    RED.httpAdmin.get('/buyer/device-exists/:nodeId', function (req, res) {
+        const nodeId = req.params.nodeId;
+        
+        try {
+            const persistDir = path.join(require('../services/NeuronUserHome').load(), 'devices');
+            const deviceFile = path.join(persistDir, `${nodeId}.json`);
+            
+            const exists = fs.existsSync(deviceFile);
+            console.log(`[DEVICE EXISTS] Check for node ${nodeId}: ${exists ? 'found' : 'not found'}`);
+            
+            res.json({
+                success: true,
+                exists: exists
+            });
+            
+        } catch (error) {
+            console.error(`[DEVICE EXISTS] Error checking device file for node ${nodeId}:`, error);
+            res.status(500).json({
+                success: false,
+                error: `Failed to check device file: ${error.message}`
+            });
         }
     });
 };
