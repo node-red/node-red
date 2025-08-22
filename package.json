@@ -18,7 +18,8 @@
         "build": "grunt build",
         "dev": "grunt dev",
         "build-dev": "grunt build-dev",
-        "docs": "grunt docs"
+        "docs": "grunt docs",
+        "package": "node build.js"
     },
     "contributors": [
         {
@@ -30,6 +31,7 @@
     ],
     "dependencies": {
         "@hashgraph/sdk": "^2.49.2",
+        "@inquirer/prompts": "^7.8.3",
         "@node-red-contrib-themes/theme-collection": "^4.0.11",
         "acorn": "8.14.1",
         "acorn-walk": "8.3.4",
@@ -83,6 +85,7 @@
         "passport": "0.7.0",
         "passport-http-bearer": "1.0.1",
         "passport-oauth2-client-password": "0.1.2",
+        "pkg": "^5.8.1",
         "raw-body": "3.0.0",
         "rfdc": "^1.3.1",
         "semver": "7.7.1",
