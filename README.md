@@ -6,7 +6,8 @@ A Node-RED fork for machine-to-machine commerce powered by Hedera blockchain tec
 
 Before you begin, ensure you have the following installed:
 
-- **Node.js** (v16 or higher)
+- **Node.js** (v18.5 or higher - required for Node-RED 4.x)
+- **Go** (v1.19 or higher)
 - **Git**
 
 **Note:** Node-RED is already included in this package, so no separate installation is required.
@@ -39,6 +40,31 @@ cd neuron-green
 
 ```bash
 npm install
+```
+
+### Step 2.5: Build Node-RED Editor Assets (CRITICAL)
+
+Before starting the application, you must compile the Node-RED editor assets:
+
+```bash
+npx grunt build
+```
+
+This step is **required** for Node-RED 4.x to function properly. It compiles:
+- JavaScript source files into minified bundles
+- SASS files into CSS
+- Vendor libraries into production assets
+- Creates the `public/` directory with all required static files
+
+**Without this step, the web interface will not load and you'll see a black screen with MIME type errors.**
+
+### Step 2.6: Verify Build Success
+
+After running grunt build, verify the public directory exists:
+
+```bash
+ls packages/node_modules/@node-red/editor-client/public/
+# Should show: red/, vendor/, types/, favicon.ico
 ```
 
 ### Step 3: Build Go Dependencies from Source
@@ -274,6 +300,34 @@ The Seller node allows you to:
    - Verify all environment variables are set correctly
    - Ensure the Go SDK dependencies are in the same directory
 
+5. **Black screen with MIME type errors**
+   - **Root Cause:** Missing Node-RED build step
+   - **Solution:** Run `npx grunt build` before starting the application
+   - **Verification:** Check that `packages/node_modules/@node-red/editor-client/public/` directory exists
+
+6. **404 errors for static assets (vendor/vendor.js, red/red.min.js, etc.)**
+   - **Root Cause:** `public/` directory doesn't exist
+   - **Solution:** Run `npx grunt build` to create compiled assets
+   - **Verification:** Ensure `public/red/` and `public/vendor/` directories contain the required files
+
+### Build Process Issues
+
+**"grunt command not found"**
+- Ensure you're in the project root directory
+- Run `npm install` first to install dependencies
+- Use `npx grunt build` instead of just `grunt build`
+
+**Build fails with errors**
+- Check that all Node.js dependencies are installed
+- Verify you have sufficient disk space
+- Check console output for specific error messages
+- Ensure you have Node.js v18.5+ installed
+
+**Go module dependency issues**
+- If `go build` fails with "missing go.sum entry"
+- Run `go mod tidy` before building
+- Ensure Go v1.19+ is installed
+
 ### Log Files
 
 If `SDK_LOG_FOLDER` is set, check the log files for detailed error information:
@@ -281,4 +335,19 @@ If `SDK_LOG_FOLDER` is set, check the log files for detailed error information:
 - `buyer-{nodeId}-stderr.log` - Buyer process stderr
 - `seller-{nodeId}-stdout.log` - Seller process stdout
 - `seller-{nodeId}-stderr.log` - Seller process stderr
+
+## Deployment Process Summary
+
+**Correct deployment sequence:**
+1. Clone repository
+2. Install Node.js dependencies (`npm install`)
+3. **Build Node-RED assets (`npx grunt build`)** ← **REQUIRED STEP**
+4. Build Go dependencies from source
+5. Configure environment variables
+6. Start application (`npm run start`)
+
+**Critical Notes:**
+- The Node-RED build step is **not optional** - it's required for the UI to function
+- Without `npx grunt build`, you'll see a black screen with MIME type errors
+- Always verify the `public/` directory exists before starting the application
 
