@@ -43,14 +43,25 @@ async function build() {
         } catch (error) {
             console.error(chalk.red('Error fetching latest tag:'), error.message);
 
-            process.exit(0);
+            process.exit(1);
         }
     }
 
-    const tag = await input({
-        message: 'Provide neuron-wrapper dependency version/tag',
-        default: await getLatestTag(),
-    });
+    // Check for no-prompt mode (CI environment or explicit flag)
+    const isNoPromptMode = process.env.CI === 'true' || process.argv.includes('--no-prompt');
+    
+    let tag;
+    if (isNoPromptMode) {
+        // In CI or no-prompt mode, automatically use the latest tag
+        tag = await getLatestTag();
+        console.log(chalk.blue(`CI/No-prompt mode: Using latest tag: ${tag}`));
+    } else {
+        // Interactive mode - prompt user for tag
+        tag = await input({
+            message: 'Provide neuron-wrapper dependency version/tag',
+            default: await getLatestTag(),
+        });
+    }
 
     console.log(chalk.blue(`Building using neuron-wrapper tag: ${tag}`));
 
@@ -74,7 +85,7 @@ async function build() {
         } catch (error) {
             console.error(chalk.red('Error fetching assets:'), error.message);
 
-            process.exit(0);
+            process.exit(1);
         }
     }
 
@@ -117,7 +128,7 @@ async function build() {
         } catch (error) {
             console.error(chalk.red('Error downloading asset:'), error.message);
 
-            process.exit(0);
+            process.exit(1);
         }
     }
 
@@ -136,7 +147,7 @@ async function build() {
             if (!fs.existsSync(binPath)) {
                 console.error(chalk.red(`Binary ${bin} not found`));
 
-                process.exit(0);
+                process.exit(1);
             }
 
             const outputPath = path.join(directories[0], output);
@@ -174,7 +185,7 @@ async function build() {
         } catch (error) {
             console.error(chalk.red('Error building executable:'), error.message);
 
-            process.exit(0);
+            process.exit(1);
         }
     }
 

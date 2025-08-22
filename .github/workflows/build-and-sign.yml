@@ -37,7 +37,14 @@ jobs:
       - name: Build executables
         run: npm run package
         env:
-          GH_BUILD_TOKEN: ${{ secrets.GH_BUILD_TOKEN }}
+          CI: true
+
+      - name: Debug - List build directory contents
+        run: |
+          echo "Contents of build directory:"
+          ls -la build/ || echo "build directory not found"
+          echo "Contents of build/releases directory:"
+          ls -la build/releases/ || echo "build/releases directory not found"
 
       - name: Upload macOS executable for signing
         uses: actions/upload-artifact@v4
@@ -45,6 +52,23 @@ jobs:
           name: macos-executable
           path: build/releases/latest-macos-x64
           retention-days: 1
+          if-no-files-found: error
+
+      - name: Upload Windows executable
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-executable
+          path: build/releases/latest-win-x64.exe
+          retention-days: 1
+          if-no-files-found: error
+
+      - name: Upload Linux executable
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-executable
+          path: build/releases/latest-linux-x64
+          retention-days: 1
+          if-no-files-found: error
 
   sign-macos:
     name: Sign macOS Executable
@@ -57,6 +81,13 @@ jobs:
         with:
           name: macos-executable
           path: ./
+
+      - name: Debug - List downloaded files
+        run: |
+          echo "Contents of current directory:"
+          ls -la
+          echo "Contents of downloaded artifact:"
+          ls -la latest-macos-x64 || echo "latest-macos-x64 not found"
 
       - name: Sign macOS executable
         uses: indygreg/apple-code-sign-action@v1
@@ -98,13 +129,18 @@ jobs:
         with:
           path: ./artifacts
 
+      - name: Debug - List downloaded artifacts
+        run: |
+          echo "Contents of artifacts directory:"
+          find ./artifacts -type f -name "*" | head -20
+
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
           files: |
             artifacts/macos-executable-signed/latest-macos-x64-signed
-            build/releases/latest-win-x64.exe
-            build/releases/latest-linux-x64
+            artifacts/windows-executable/latest-win-x64.exe
+            artifacts/linux-executable/latest-linux-x64
           tag_name: ${{ github.ref_name }}
           name: Release ${{ github.ref_name }}
           body: |
