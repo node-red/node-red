@@ -1,0 +1,119 @@
+name: Build and Code Sign
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to build (e.g., 1.0.0)'
+        required: true
+        default: '1.0.0'
+
+env:
+  ACTIONS_ALLOW_UNSECURE_COMMANDS: true
+
+jobs:
+  build-and-sign:
+    name: Build and Code Sign
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build executables
+        run: npm run package
+        env:
+          GH_BUILD_TOKEN: ${{ secrets.GH_BUILD_TOKEN }}
+
+      - name: Upload macOS executable for signing
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-executable
+          path: build/releases/latest-macos-x64
+          retention-days: 1
+
+  sign-macos:
+    name: Sign macOS Executable
+    needs: build-and-sign
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Download macOS executable
+        uses: actions/download-artifact@v4
+        with:
+          name: macos-executable
+          path: ./
+
+      - name: Sign macOS executable
+        uses: indygreg/apple-code-sign-action@v1
+        with:
+          input_path: latest-macos-x64
+          output_path: latest-macos-x64-signed
+          # For ad-hoc signing (no certificate required)
+          # Leave p12_file and p12_password empty for ad-hoc signing
+          
+          # For code signing with certificate (uncomment and configure):
+          # p12_file: ${{ secrets.MACOS_CERTIFICATE_P12 }}
+          # p12_password: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
+          
+          # For notarization (uncomment and configure):
+          # notarize: true
+          # staple: true
+          # app_store_connect_api_issuer: ${{ secrets.APP_STORE_CONNECT_ISSUER }}
+          # app_store_connect_api_key: ${{ secrets.APP_STORE_CONNECT_KEY }}
+
+      - name: Upload signed macOS executable
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-executable-signed
+          path: latest-macos-x64-signed
+          retention-days: 30
+
+  create-release:
+    name: Create Release
+    needs: [build-and-sign, sign-macos]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ./artifacts
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            artifacts/macos-executable-signed/latest-macos-x64-signed
+            build/releases/latest-win-x64.exe
+            build/releases/latest-linux-x64
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
+          body: |
+            ## Neuron Node Builder ${{ github.ref_name }}
+            
+            ### Downloads
+            - **macOS**: `latest-macos-x64-signed` (code signed)
+            - **Windows**: `latest-win-x64.exe`
+            - **Linux**: `latest-linux-x64`
+            
+            ### Changes
+            See the [changelog](CHANGELOG.md) for details.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

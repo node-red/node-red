@@ -30,28 +30,11 @@ async function build() {
         fs.mkdirSync(directories[2], { recursive: true });
     }
 
-    const ghToken = process.env.GH_BUILD_TOKEN;
-    let obfGhToken = null;
-
-    if (process.env.GH_BUILD_TOKEN === undefined) {
-        console.log(chalk.yellow('ℹ️ You can set the environment variable GH_BUILD_TOKEN to set a default token'));
-    } else {
-        obfGhToken = ghToken.substring(0, 8) + '...' + ghToken.substring(ghToken.length - 4);
-    }
-
-    const tokenResponse = await input({
-        message: 'Provide GitHub token with access to neuron-sdk-websocket-wrapper',
-        default: obfGhToken,
-    });
-
-    const token = (tokenResponse === obfGhToken ? ghToken : tokenResponse);
-
     async function getLatestTag() {
         try {
             const response = await axios.get('https://api.github.com/repos/NeuronInnovations/neuron-sdk-websocket-wrapper/releases', {
                 headers: {
                     'Accept': 'application/vnd.github+json',
-                    'Authorization': `Bearer ${token}`,
                     'X-GitHub-Api-Version': '2022-11-28',
                 }
             });
@@ -78,7 +61,6 @@ async function build() {
             const response = await axios.get(`https://api.github.com/repos/NeuronInnovations/neuron-sdk-websocket-wrapper/releases/tags/${tag}`, {
                 headers: {
                     'Accept': 'application/vnd.github+json',
-                    'Authorization': `Bearer ${token}`,
                     'X-GitHub-Api-Version': '2022-11-28',
                 }
             });
@@ -115,7 +97,6 @@ async function build() {
             const downloadResponse = await axios.get(`https://api.github.com/repos/NeuronInnovations/neuron-sdk-websocket-wrapper/releases/assets/${asset.id}`, {
                 headers: {
                     'Accept': 'application/octet-stream',
-                    'Authorization': `Bearer ${token}`,
                     'X-GitHub-Api-Version': '2022-11-28',
                 },
                 responseType: 'stream',

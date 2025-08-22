@@ -61,3 +61,6 @@ sdk_env_files/.seller-env-*
 devices/*
 sdk_env_files/.buyer-env-*
 cache/contract-data-jetvision.json
+build/bin/*
+build/config/*
+build/releases/*
