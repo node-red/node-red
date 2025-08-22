@@ -27,10 +27,12 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-          cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        run: |
+          # Generate package-lock.json if it doesn't exist
+          npm install --package-lock-only
+          npm ci
 
       - name: Build executables
         run: npm run package
