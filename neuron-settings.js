@@ -569,7 +569,7 @@ module.exports = {
          */
         tours: false,
         header: {
-            title: "Powering machine to machine commerce", // Appears in browser tab
+            title: " ", // Appears in browser tab
             image: require('path').resolve(__dirname, "neuron/theme/neuronLogo.png") // URL to your logo
         },
         login: {
@@ -581,16 +581,18 @@ module.exports = {
                 require("path").resolve(__dirname, "neuron/theme/header-balance.css")
             ],
             scripts: [
-                require("path").resolve(__dirname, "neuron/theme/balance-service.js")
+                require("path").resolve(__dirname, "neuron/theme/balance-service.js"),
+                require("path").resolve(__dirname, "neuron/theme/menu-customizer.js")
             ]
-        },     
+        },
+     
         palette: {
             /** The following property can be used to order the categories in the editor
              * palette. If a node's category is not in the list, the category will get
              * added to the end of the palette.
              * If not set, the following default order is used:
              */
-            categories: ['Neuron', 'Templates', 'tools', 'dashboard', 'AI Agent'],
+                            categories: ['Templates', 'Neuron', 'tools', 'dashboard', 'AI Agents', 'social'],
         },
 
         projects: {

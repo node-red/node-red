@@ -132,6 +132,39 @@
         startBalanceUpdates();
     }
 
+    // Function to modify palette category names
+    function modifyPaletteCategories() {
+        console.log('🎨 Modifying palette category names...');
+        
+        // Wait for palette to be fully loaded
+        setTimeout(() => {
+            // Find all palette headers
+            const paletteHeaders = document.querySelectorAll('.red-ui-palette-header');
+            
+            paletteHeaders.forEach(header => {
+                const span = header.querySelector('span');
+                if (span) {
+                    const text = span.textContent.trim();
+                    
+                    if (text === 'tools') {
+                        span.textContent = 'Tools';
+                        console.log('✅ Changed "tools" to "Tools"');
+                    } else if (text === 'dashboard') {
+                        span.textContent = 'UI';
+                        console.log('✅ Changed "dashboard" to "UI"');
+                    }
+                }
+            });
+        }, 2000); // Wait 2 seconds for palette to load
+    }
+
+    // Run palette modification when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', modifyPaletteCategories);
+    } else {
+        modifyPaletteCategories();
+    }
+
     // Stop updates when page unloads
     window.addEventListener('beforeunload', stopBalanceUpdates);
 

@@ -3,6 +3,92 @@
     --balance-text: "Balance: Loading...";
 }
 
+/* Force override any potential CSS variables or themes */
+:root {
+    --red-ui-header-background: #1D1D1D;
+    --red-ui-header-color: #1D1D1D;
+}
+
+/* Target any potential theme-specific classes */
+.theme-dracula .red-ui-header,
+.theme-dark .red-ui-header,
+[data-theme="dracula"] .red-ui-header,
+[data-theme="dark"] .red-ui-header {
+    background-color: #1D1D1D !important;
+    background: #1D1D1D !important;
+}
+
+/* Override the header bottom border (red line) */
+.red-ui-header {
+    border-bottom-color: #343434 !important;
+    border-bottom-width: 0px !important;
+}
+
+/* More aggressive targeting for the header border */
+html body .red-ui-header,
+body .red-ui-header,
+.red-ui-header,
+#red-ui-header {
+    border-bottom-color: #343434 !important;
+    border-bottom-width: 0px !important;
+    border-bottom: 0px solid #343434 !important;
+}
+
+/* REMOVED: CSS variable overrides - not needed when no borders are rendered */
+
+/* REMOVED: Conflicting border rules that were adding borders back */
+
+/* REMOVED: All border-related CSS - returning to original clean state */
+
+/* Clean hover states for all menu items - no border properties */
+#red-ui-header ul.red-ui-menu-dropdown > li > a:hover {
+    background-color: #2a2a2a !important;
+    color: #ffffff !important;
+    transition: background-color 0.15s ease !important;
+}
+
+/* Override palette category names */
+/* Method 1: Target by category container IDs */
+#red-ui-palette-container-tools .red-ui-palette-header span,
+#red-ui-palette-container-dashboard .red-ui-palette-header span {
+    font-size: 0 !important;
+    position: relative !important;
+}
+
+/* Restore normal height and use line-height for centering */
+#red-ui-palette-container-tools .red-ui-palette-header span,
+#red-ui-palette-container-dashboard .red-ui-palette-header span {
+    display: block !important;
+    height: auto !important;
+    line-height: 1.5 !important; /* Fine-tuned value for perfect height and centering */
+}
+
+/* Hide the original text completely */
+#red-ui-palette-container-tools .red-ui-palette-header span:first-child,
+#red-ui-palette-container-dashboard .red-ui-palette-header span:first-child {
+    font-size: 0 !important;
+    visibility: hidden !important;
+}
+
+/* Add the new text using ::after with line-height centering */
+#red-ui-palette-container-tools .red-ui-palette-header span::after {
+    content: "Tools" !important;
+    font-size: 14px !important;
+    visibility: visible !important;
+    color: inherit !important;
+    white-space: nowrap !important;
+}
+
+#red-ui-palette-container-dashboard .red-ui-palette-header span::after {
+    content: "User Interfaces" !important;
+    font-size: 14px !important;
+    visibility: visible !important;
+    color: inherit !important;
+    white-space: nowrap !important;
+}
+
+/* Clean up - remove all conflicting methods and keep only the working one */
+
 .red-ui-header-toolbar::before {
     content: var(--balance-text);
     display: inline-flex !important;
@@ -21,4 +107,312 @@
 body .red-ui-header-toolbar::before {
     visibility: visible !important;
     opacity: 1 !important;
-} 
+}
+
+/* GLOBAL SOLUTION: Override Node-RED's hover variables to disable/modify hover effects */
+:root {
+    /* Option 1: Disable hover effects entirely (set to transparent) */
+    --red-ui-header-menu-item-hover: transparent !important;
+    
+    /* Option 2: Make hover effect very subtle (uncomment one of these) */
+    /* --red-ui-header-menu-item-hover: rgba(255, 255, 255, 0.05) !important; */
+    /* --red-ui-header-menu-item-hover: #1a1a1a !important; */
+    
+    /* Also override the dropdown menu hover variable */
+    --red-ui-menuHoverBackground: transparent !important;
+}
+
+/* Force disable all hover effects with maximum specificity */
+#red-ui-header ul.red-ui-menu-dropdown > li > a:hover,
+#red-ui-header ul.red-ui-menu-dropdown > li.open > a,
+#red-ui-header ul.red-ui-menu-dropdown > li > a:focus,
+#red-ui-header ul.red-ui-menu-dropdown > li:hover > a,
+#red-ui-header ul.red-ui-menu-dropdown > li:focus > a {
+    background: transparent !important;
+    background-color: transparent !important;
+}
+
+/* Also disable dropdown menu hover effects */
+.red-ui-menu-dropdown > li > a:hover,
+.red-ui-menu-dropdown > li.open > a,
+.red-ui-menu-dropdown > li > a:focus,
+.red-ui-menu-dropdown-submenu:hover > a,
+.red-ui-menu-dropdown-submenu:focus > a {
+    background-color: transparent !important;
+}
+
+/* INDIVIDUAL HOVER EFFECTS: Add custom hover for each menu item */
+/* Using maximum specificity to override Node-RED's CSS */
+#red-ui-header ul.red-ui-menu-dropdown > li#menu-item-neuron-docs > a:hover {
+    background-color: #2a2a2a !important;
+    color: #ffffff !important;
+    transition: background-color 0.15s ease !important;
+}
+
+#red-ui-header ul.red-ui-menu-dropdown > li#menu-item-keyboard-shortcuts > a:hover {
+    background-color: #2a2a2a !important;
+    color: #ffffff !important;
+    transition: background-color 0.15s ease !important;
+}
+
+#red-ui-header ul.red-ui-menu-dropdown > li#menu-item-node-red-website > a:hover {
+    background-color: #2a2a2a !important;
+    color: #ffffff !important;
+    transition: background-color 0.15s ease !important;
+}
+
+#red-ui-header ul.red-ui-menu-dropdown > li#menu-item-node-red-version > a:hover {
+    background-color: #1a1a1a !important;
+    color: #ccc !important;
+    transition: background-color 0.15s ease !important;
+}
+
+/* Generic rule for any other menu items */
+#red-ui-header ul.red-ui-menu-dropdown > li > a:hover {
+    background-color: #2a2a2a !important;
+    color: #ffffff !important;
+    transition: background-color 0.15s ease !important;
+}
+
+/* Ensure all menu items have smooth transitions by default */
+#red-ui-header ul.red-ui-menu-dropdown > li > a {
+    transition: background-color 0.15s ease, color 0.15s ease !important;
+}
+
+/* REMOVED: Generic hover rule that was causing interference */
+
+/* Special case for version number - completely isolated */
+#red-ui-header ul.red-ui-menu-dropdown > li#menu-item-node-red-version:hover > a {
+    background-color: #1a1a1a !important;
+    color: #ccc !important;
+}
+
+/* Force version number to never change when other items are hovered */
+#red-ui-header ul.red-ui-menu-dropdown > li#menu-item-node-red-version > a {
+    background-color: transparent !important;
+    color: #999 !important;
+}
+
+/* Nuclear protection for version number - override ANY possible hover state */
+#red-ui-header ul.red-ui-menu-dropdown > li#menu-item-node-red-version > a:hover,
+#red-ui-header ul.red-ui-menu-dropdown > li#menu-item-node-red-version > a:focus,
+#red-ui-header ul.red-ui-menu-dropdown > li#menu-item-node-red-version > a:active,
+#red-ui-header ul.red-ui-menu-dropdown > li#menu-item-node-red-version:hover > a,
+#red-ui-header ul.red-ui-menu-dropdown > li#menu-item-node-red-version:focus > a,
+#red-ui-header ul.red-ui-menu-dropdown > li#menu-item-node-red-version:active > a {
+    background-color: #1a1a1a !important;
+    color: #ccc !important;
+}
+
+/* Prevent any other hover rules from affecting the version number */
+#red-ui-header ul.red-ui-menu-dropdown > li:hover > a[href*="version"],
+#red-ui-header ul.red-ui-menu-dropdown > li:hover > a[href*="v4"] {
+    background-color: #1a1a1a !important;
+    color: #ccc !important;
+}
+
+/* Special styling for the version number to make it distinct */
+#red-ui-header ul.red-ui-menu-dropdown > li#menu-item-node-red-version > a {
+    color: #999 !important;
+    transition: background-color 0.15s ease, color 0.15s ease !important;
+}
+
+/* REMOVED: These rules were adding borders back, conflicting with our border removal approach */
+
+/* REMOVED: This rule was also adding a border back */
+
+/* REMOVED: All conflicting border rules that were adding borders back */
+
+/* REMOVED: Redundant Neuron-specific border removal (covered by global rules above) */
+
+/* Custom menu item styling to match Node-RED exactly */
+#menu-item-neuron-docs {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Override Node-RED's hover behavior for our custom item with maximum specificity */
+.red-ui-header ul.red-ui-menu-dropdown > li#menu-item-neuron-docs > a {
+    background-color: transparent !important;
+    transition: background-color 0.15s ease !important;
+}
+
+.red-ui-header ul.red-ui-menu-dropdown > li#menu-item-neuron-docs > a:hover {
+    background-color: #2a2a2a !important;
+    color: #ffffff !important;
+}
+
+/* Override Node-RED's problematic li:hover > a selector for our item */
+.red-ui-header ul.red-ui-menu-dropdown > li#menu-item-neuron-docs:hover > a {
+    background-color: #2a2a2a !important;
+    color: #ffffff !important;
+}
+
+/* Force version number to never change with maximum specificity */
+.red-ui-header ul.red-ui-menu-dropdown > li#menu-item-node-red-version > a,
+.red-ui-header ul.red-ui-menu-dropdown > li#menu-item-node-red-version > a:hover,
+.red-ui-header ul.red-ui-menu-dropdown > li#menu-item-node-red-version > a:focus,
+.red-ui-header ul.red-ui-menu-dropdown > li#menu-item-node-red-version:hover > a {
+    background-color: transparent !important;
+    color: inherit !important;
+}
+
+/* Additional protection using data attribute */
+.red-ui-header ul.red-ui-menu-dropdown > li[data-never-hover="true"] > a,
+.red-ui-header ul.red-ui-menu-dropdown > li[data-never-hover="true"] > a:hover,
+.red-ui-header ul.red-ui-menu-dropdown > li[data-never-hover="true"] > a:focus,
+.red-ui-header ul.red-ui-menu-dropdown > li[data-never-hover="true"]:hover > a {
+    background-color: transparent !important;
+    color: inherit !important;
+}
+
+/* Nuclear option: Override any possible hover state for version number */
+.red-ui-header ul.red-ui-menu-dropdown > li#menu-item-node-red-version,
+.red-ui-header ul.red-ui-menu-dropdown > li#menu-item-node-red-version * {
+    background-color: transparent !important;
+    background: transparent !important;
+}
+
+/* NUCLEAR OPTION: Completely disable ALL highlighting for v4.0.9 */
+.red-ui-header ul.red-ui-menu-dropdown > li#menu-item-node-red-version,
+.red-ui-header ul.red-ui-menu-dropdown > li#menu-item-node-red-version *,
+.red-ui-header ul.red-ui-menu-dropdown > li#menu-item-node-red-version > a,
+.red-ui-header ul.red-ui-menu-dropdown > li#menu-item-node-red-version > a:hover,
+.red-ui-header ul.red-ui-menu-dropdown > li#menu-item-node-red-version > a:focus,
+.red-ui-header ul.red-ui-menu-dropdown > li#menu-item-node-red-version:hover,
+.red-ui-header ul.red-ui-menu-dropdown > li#menu-item-node-red-version:hover > a,
+.red-ui-header ul.red-ui-menu-dropdown > li#menu-item-node-red-version:hover > a:hover,
+.red-ui-header ul.red-ui-menu-dropdown > li#menu-item-node-red-version:focus,
+.red-ui-header ul.red-ui-menu-dropdown > li#menu-item-node-red-version:focus > a,
+.red-ui-header ul.red-ui-menu-dropdown > li#menu-item-node-red-version:active,
+.red-ui-header ul.red-ui-menu-dropdown > li#menu-item-node-red-version:active > a {
+    background-color: transparent !important;
+    background: transparent !important;
+    color: #999 !important;
+    transition: none !important;
+    outline: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+}
+
+/* Override ANY possible Node-RED hover behavior with maximum aggression */
+.red-ui-header ul.red-ui-menu-dropdown > li#menu-item-node-red-version:hover > a,
+.red-ui-header ul.red-ui-menu-dropdown > li#menu-item-node-red-version:hover > a:hover,
+.red-ui-header ul.red-ui-menu-dropdown > li#menu-item-node-red-version:hover > a:focus,
+.red-ui-header ul.red-ui-menu-dropdown > li#menu-item-node-red-version:hover > a:active {
+    background-color: transparent !important;
+    background: transparent !important;
+    color: #999 !important;
+}
+
+/* Target the specific problematic Node-RED selectors */
+.red-ui-header ul.red-ui-menu-dropdown > li:hover > a[href*="version"],
+.red-ui-header ul.red-ui-menu-dropdown > li:hover > a[href*="v4"],
+.red-ui-header ul.red-ui-menu-dropdown > li:hover > a:contains("v4.0.9"),
+.red-ui-header ul.red-ui-menu-dropdown > li:hover > a:contains("4.0.9") {
+    background-color: transparent !important;
+    background: transparent !important;
+    color: #999 !important;
+}
+
+/* NUCLEAR OVERRIDE: Target the exact problematic Node-RED selector */
+.red-ui-header ul.red-ui-menu-dropdown > li:hover > a {
+    background-color: transparent !important;
+    background: transparent !important;
+}
+
+/* But then allow our custom item to work */
+.red-ui-header ul.red-ui-menu-dropdown > li#menu-item-neuron-docs:hover > a {
+    background-color: #2a2a2a !important;
+    color: #ffffff !important;
+}
+
+/* Force v4.0.9 to NEVER change, even with the broad selector */
+.red-ui-header ul.red-ui-menu-dropdown > li#menu-item-node-red-version:hover > a,
+.red-ui-header ul.red-ui-menu-dropdown > li#menu-item-node-red-version:hover > a:hover,
+.red-ui-header ul.red-ui-menu-dropdown > li#menu-item-node-red-version:hover > a:focus,
+.red-ui-header ul.red-ui-menu-dropdown > li#menu-item-node-red-version:hover > a:active,
+.red-ui-header ul.red-ui-menu-dropdown > li#menu-item-node-red-version:hover > a:visited {
+    background-color: transparent !important;
+    background: transparent !important;
+    color: #999 !important;
+}
+
+#menu-item-neuron-docs a {
+    display: block !important;
+    padding: 4px 12px 4px 32px !important;
+    clear: both !important;
+    font-weight: normal !important;
+    line-height: 20px !important;
+    color: var(--red-ui-menuColor) !important;
+    white-space: normal !important;
+    outline: none !important;
+    text-decoration: none !important;
+    transition: background-color 0.1s ease !important;
+}
+
+#menu-item-neuron-docs a:hover {
+    background-color: #2a2a2a !important;
+    color: #ffffff !important;
+}
+
+#menu-item-neuron-docs i {
+    margin-right: 8px !important;
+    width: 16px !important;
+    text-align: center !important;
+    display: inline-block !important;
+}
+
+#menu-item-neuron-docs .red-ui-menu-label {
+    display: inline-block !important;
+    vertical-align: baseline !important;
+}
+
+/* Add transition for smooth hover effect */
+#menu-item-neuron-docs a {
+    transition: all 0.15s ease !important;
+}
+
+/* Isolated hover effect - only affects our custom item */
+#menu-item-neuron-docs a:hover {
+    background-color: #2a2a2a !important;
+    color: #ffffff !important;
+}
+
+/* REMOVED: Debug border rules that were causing the red border */
+
+/* Match Node-RED's exact header menu styling with bottom padding for vertical centering */
+#menu-item-neuron-docs a {
+    display: block !important;
+    padding: 3px 10px 13px 30px !important; /* Node-RED header menu padding + 10px bottom padding */
+    clear: both !important;
+    font-weight: normal !important;
+    line-height: 20px !important; /* Node-RED's exact line-height */
+    color: var(--red-ui-header-menu-color) !important;
+    white-space: normal !important;
+    text-decoration: none !important;
+    background: transparent !important;
+    transition: background-color 0.15s ease !important;
+}
+
+/* Style the icon to match Node-RED's menu icons */
+#menu-item-neuron-docs a i {
+    margin-right: 8px !important;
+    width: 16px !important;
+    text-align: center !important;
+    display: inline-block !important;
+}
+
+/* Hover state - highlight only the content area, not the extra bottom padding */
+#menu-item-neuron-docs a:hover {
+    padding: 3px 10px 13px 30px !important; /* Keep same padding */
+    color: #ffffff !important;
+    background: linear-gradient(to bottom, #2a2a2a 0%, #2a2a2a calc(100% - 10px), transparent calc(100% - 10px), transparent 100%) !important;
+}
+
+/* Ensure the menu label matches Node-RED's styling */
+#menu-item-neuron-docs .red-ui-menu-label {
+    font-size: 14px !important;
+    text-indent: 0px !important;
+}

@@ -341,7 +341,7 @@ If `SDK_LOG_FOLDER` is set, check the log files for detailed error information:
 **Correct deployment sequence:**
 1. Clone repository
 2. Install Node.js dependencies (`npm install`)
-3. **Build Node-RED assets (`npx grunt build`)** ← **REQUIRED STEP**
+3. Build Node-RED assets (`npx grunt build`)
 4. Build Go dependencies from source
 5. Configure environment variables
 6. Start application (`npm run start`)
