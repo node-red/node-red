@@ -1,0 +1,19 @@
+{
+  "TCP": {
+    "443": {
+      "HTTPS": true
+    }
+  },
+  "Web": {
+    "dashboard.${TAILNET:-your-tailnet}.ts.net:443": {
+      "Handlers": {
+        "/": {
+          "Proxy": "http://dashboard:80"
+        }
+      }
+    }
+  },
+  "AllowFunnel": {
+    "dashboard.${TAILNET:-your-tailnet}.ts.net:443": false
+  }
+}

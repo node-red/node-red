@@ -33,5 +33,6 @@ device.yml
 .claude/
 docker-compose.yml
 docker-compose-*.yml
+!docker-compose-dashboard.yml
 cd.sh
 .playwright-mcp/

@@ -1,0 +1,37 @@
+services:
+  dashboard:
+    image: nginx:alpine
+    container_name: dashboard
+    volumes:
+      - ./dashboard.html:/usr/share/nginx/html/index.html:ro
+      - ./containers.json:/usr/share/nginx/html/containers.json:ro
+    restart: unless-stopped
+    networks:
+      - dashboard-net
+
+  dashboard-tailscale:
+    image: tailscale/tailscale:latest
+    container_name: dashboard-tailscale
+    environment:
+      - TS_AUTHKEY=${TS_AUTHKEY}
+      - TS_STATE_DIR=/var/lib/tailscale
+      - TS_USERSPACE=false
+      - TS_HOSTNAME=dashboard
+      - TS_SERVE_CONFIG=/config/tailscale-serve-dashboard.json
+    volumes:
+      - dashboard_tailscale:/var/lib/tailscale
+      - /dev/net/tun:/dev/net/tun
+      - .:/config
+    cap_add:
+      - NET_ADMIN
+    restart: unless-stopped
+    networks:
+      - dashboard-net
+
+networks:
+  dashboard-net:
+    driver: bridge
+
+volumes:
+  dashboard_tailscale:
+    external: false

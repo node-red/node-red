@@ -5,6 +5,7 @@ services:
     environment:
       - NODE_PATH=/usr/src/node-red/node_modules
       - FLOWS=flows.json
+      - BRANCH_NAME=BRANCH_PLACEHOLDER
     deploy:
       resources:
         limits:
@@ -14,6 +15,8 @@ services:
           memory: 128M
           cpus: '0.25'
     restart: unless-stopped
+    labels:
+      - "nr-experiment=true"
     networks:
       - nr-BRANCH_PLACEHOLDER-net
 

@@ -455,7 +455,7 @@ module.exports = {
     editorTheme: {
         /** Sandbox mode - full UI experience */
         header: {
-            title: "Node-RED Sandbox - Try it out! (Changes are temporary)",
+            title: `Node-RED Experiment (Sandboxed mode) - ${process.env.BRANCH_NAME || require('child_process').execSync('git branch --show-current', {encoding: 'utf8'}).trim().toUpperCase()}`,
             image: null // You can add a custom logo here if needed
         },
         /** The following property can be used to set a custom theme for the editor.
