@@ -34,3 +34,4 @@ device.yml
 docker-compose.yml
 docker-compose-*.yml
 cd.sh
+.playwright-mcp/
