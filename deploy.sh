@@ -7,6 +7,11 @@ if [ -f ~/.localtailscalerc ]; then
     source ~/.localtailscalerc
 fi
 
+# Source Hetzner configuration if it exists
+if [ -f ~/.localhetznerrc ]; then
+    source ~/.localhetznerrc
+fi
+
 # Get current git branch and sanitize it for Docker/Tailscale naming
 BRANCH_NAME=$(git branch --show-current | sed 's/[^a-zA-Z0-9]/-/g' | tr '[:upper:]' '[:lower:]')
 
@@ -44,6 +49,8 @@ DEPLOY_MODE="${DEPLOY_MODE:-local}"
 GCP_VM_NAME="${GCP_VM_NAME:-nr-vps}"
 GCP_ZONE="${GCP_ZONE:-europe-west1-b}"
 GCP_PROJECT="${GCP_PROJECT:-nr-experiments}"
+HETZNER_HOST="${HETZNER_HOST:-your-server-ip}"
+HETZNER_USER="${HETZNER_USER:-root}"
 
 # Check if TS_AUTHKEY is set
 if [ -z "$TS_AUTHKEY" ]; then
@@ -53,7 +60,7 @@ if [ -z "$TS_AUTHKEY" ]; then
 fi
 
 
-if [ "$DEPLOY_MODE" = "gcp" ]; then
+if [ "$DEPLOY_MODE" = "gcp" ] || [ "$DEPLOY_MODE" = "hetzner" ]; then
     # Ensure we have clean working tree before deploying
     if [ -n "$(git status --porcelain)" ]; then
         echo "📝 Uncommitted changes detected. Committing..."
@@ -67,12 +74,12 @@ if [ "$DEPLOY_MODE" = "gcp" ]; then
     
     # Create branch-specific docker-compose file
     COMPOSE_FILE="docker-compose-$BRANCH_NAME.yml"
-    echo "Creating $COMPOSE_FILE for GCP deployment"
+    echo "Creating $COMPOSE_FILE for remote deployment ($DEPLOY_MODE)"
     sed -e "s/BRANCH_PLACEHOLDER/$BRANCH_NAME/g" \
         docker-compose.template.yml > "$COMPOSE_FILE"
     
-    # Use cd.sh for GCP deployment
-    ./cd.sh "$BRANCH_NAME" "$COMPOSE_FILE" "$@"
+    # Use cd.sh for remote deployment (GCP or Hetzner)
+    DEPLOY_MODE="$DEPLOY_MODE" ./cd.sh "$BRANCH_NAME" "$COMPOSE_FILE" "$@"
     
 else
     # Local deployment (original behavior)
