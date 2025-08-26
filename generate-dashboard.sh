@@ -799,7 +799,7 @@ cat > "$HTML_FILE" << 'EOF'
                         </div>
                         ${versionInfo ? `
                         <div class="info-row">
-                            <span class="info-label">Version Info:</span>
+                            <span class="info-label">Branch/Commit:</span>
                             <span class="info-value">${versionInfo}</span>
                         </div>
                         ` : ''}
