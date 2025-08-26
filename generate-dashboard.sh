@@ -131,11 +131,8 @@ get_container_info() {
     
     echo "{
         \"name\": \"$experiment_name\",
-        \"hostname\": \"$hostname\",
         \"image\": \"$image\",
-        \"status\": \"$status\",
         \"created\": \"$created\",
-        \"ports\": \"$ports\",
         \"url\": \"$url\",
         \"issue_url\": \"$issue_url\",
         \"issue_title\": \"$issue_title\",
@@ -773,7 +770,6 @@ cat > "$HTML_FILE" << 'EOF'
         }
 
         function createContainerCard(container) {
-            const dockerStatus = container.status;
             const urlStatus = container.urlStatus || 'unknown';
             const statusClass = urlStatus === 'online' ? 'online' : urlStatus === 'checking' ? 'checking' : urlStatus;
             
