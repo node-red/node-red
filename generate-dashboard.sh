@@ -64,7 +64,8 @@ fetch_issue_title() {
     
     # Try to fetch issue title from GitHub API
     local api_url="https://api.github.com/repos/$GITHUB_ISSUES_REPO/issues/$issue_id"
-    local title=$(curl -s -f "$api_url" 2>/dev/null | grep '"title":' | sed 's/.*"title":"\([^"]*\)".*/\1/' | sed 's/\[NR Modernization Experiment\]\s*//')
+    local response=$(curl -s -f "$api_url" 2>/dev/null)
+    local title=$(echo "$response" | grep '"title":' | head -1 | sed 's/.*"title": *"\([^"]*\)".*/\1/' | sed 's/\[NR Modernization Experiment\] *//')
     
     if [ ! -z "$title" ] && [ "$title" != "$api_url" ]; then
         echo "$title"
