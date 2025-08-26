@@ -80,7 +80,7 @@ get_container_info() {
     local name=$(docker inspect --format='{{.Name}}' "$container_id" | sed 's/^\///')
     local image=$(docker inspect --format='{{.Config.Image}}' "$container_id")
     local status=$(docker inspect --format='{{.State.Status}}' "$container_id")
-    local created=$(docker inspect --format='{{.Created}}' "$container_id")
+    local created=$(docker inspect --format='{{.State.StartedAt}}' "$container_id")
     
     # Get exposed ports
     local ports=$(docker inspect --format='{{range $p, $conf := .NetworkSettings.Ports}}{{if $conf}}{{$p}} {{end}}{{end}}' "$container_id" | tr -d '/tcp' | tr -d '/udp')
@@ -793,7 +793,10 @@ cat > "$HTML_FILE" << 'EOF'
             const urlStatus = container.urlStatus || 'unknown';
             const statusClass = urlStatus === 'online' ? 'online' : urlStatus === 'checking' ? 'checking' : urlStatus;
             
-            const deployed = new Date(container.created).toLocaleString();
+            const dashboardGenerated = new Date(containersData.generated).toLocaleString();
+            const deployedDate = new Date(container.created);
+            const deployedTime = deployedDate.toLocaleString();
+            const deployedRelative = getRelativeTime(deployedDate);
             const imageName = container.image;
             
             // Build version info line
@@ -811,7 +814,7 @@ cat > "$HTML_FILE" << 'EOF'
                     <div class="instance-info">
                         <div class="info-row">
                             <span class="info-label">Deployed:</span>
-                            <span class="info-value">${deployed}</span>
+                            <span class="info-value" title="${deployedTime}">${deployedRelative}</span>
                         </div>
                         ${versionInfo ? `
                         <div class="info-row">
