@@ -54,6 +54,25 @@ if [ "$skip_docker_scan" = false ]; then
     fi
 fi
 
+# Function to fetch GitHub issue title
+fetch_issue_title() {
+    local issue_id=$1
+    if [ -z "$issue_id" ]; then
+        echo ""
+        return
+    fi
+    
+    # Try to fetch issue title from GitHub API
+    local api_url="https://api.github.com/repos/$GITHUB_ISSUES_REPO/issues/$issue_id"
+    local title=$(curl -s -f "$api_url" 2>/dev/null | grep '"title":' | sed 's/.*"title":"\([^"]*\)".*/\1/' | sed 's/\[NR Modernization Experiment\]\s*//')
+    
+    if [ ! -z "$title" ] && [ "$title" != "$api_url" ]; then
+        echo "$title"
+    else
+        echo ""
+    fi
+}
+
 # Function to get container info
 get_container_info() {
     local container_id=$1
@@ -69,10 +88,11 @@ get_container_info() {
     # Get labels for service info
     local service_name=$(docker inspect --format='{{index .Config.Labels "com.docker.compose.service"}}' "$container_id" 2>/dev/null || echo "$name")
     
-    # Extract issue ID from container/service name (expecting format like "node-red-issue-123" or "issue-123")
-    local issue_id=$(echo "$service_name" | sed -n 's/.*issue-\([0-9]\+\).*/\1/p')
+    # Extract issue ID from container name (expecting format like "nr-issue-123")
+    local issue_id=$(echo "$name" | sed -n 's/.*issue-\([0-9]\+\).*/\1/p')
     local experiment_name=""
     local issue_url=""
+    local issue_title=""
     
     # Get current git branch and commit hash
     local branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")
@@ -87,11 +107,17 @@ get_container_info() {
     fi
     
     if [ ! -z "$issue_id" ]; then
-        experiment_name="#$issue_id"
         issue_url="https://github.com/$GITHUB_ISSUES_REPO/issues/$issue_id"
+        issue_title=$(fetch_issue_title "$issue_id")
+        
+        if [ ! -z "$issue_title" ]; then
+            experiment_name="$issue_title"
+        else
+            experiment_name="#$issue_id"
+        fi
     else
-        # Fallback to service name if no issue ID found
-        experiment_name="$service_name"
+        # Fallback to branch name if no issue ID found
+        experiment_name="$branch"
         issue_url=""
     fi
     
@@ -112,6 +138,7 @@ get_container_info() {
         \"ports\": \"$ports\",
         \"url\": \"$url\",
         \"issue_url\": \"$issue_url\",
+        \"issue_title\": \"$issue_title\",
         \"branch\": \"$branch\",
         \"commit\": \"$commit_short\",
         \"commit_url\": \"$commit_url\",
@@ -734,7 +761,7 @@ cat > "$HTML_FILE" << 'EOF'
             const statusClass = urlStatus === 'online' ? 'online' : urlStatus === 'checking' ? 'checking' : urlStatus;
             
             const deployed = new Date(container.created).toLocaleString();
-            const imageShort = container.image.split('/').pop().split(':')[0];
+            const imageName = container.image;
             
             // Build version info line
             let versionInfo = '';
@@ -761,7 +788,7 @@ cat > "$HTML_FILE" << 'EOF'
                         ` : ''}
                         <div class="info-row">
                             <span class="info-label">Image:</span>
-                            <span class="info-value">${imageShort}</span>
+                            <span class="info-value">${imageName}</span>
                         </div>
                         <div class="info-row">
                             <span class="info-label">Issue URL:</span>
