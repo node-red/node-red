@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Configuration - Update these values
-CONTAINER_TAG="your-tag"  # Replace with your container tag/label
-TAILNET_DOMAIN="your-tailnet.ts.net"  # Replace with your tailnet domain
+CONTAINER_TAG="nr-experiment"  # Replace with your container tag/label
+TAILNET_DOMAIN="${TAILNET}.ts.net"  # Replace with your tailnet domain
 GITHUB_REPO="dimitrieh/node-red"  # Your fork repository for branch/commit URLs
 GITHUB_ISSUES_REPO="node-red/node-red"  # Upstream repository for issue URLs
 OUTPUT_DIR="."
@@ -125,7 +125,7 @@ if [ "$skip_docker_scan" = false ]; then
 
     # Find containers with the specified tag/label
     # This checks both labels and image tags
-    containers=$(docker ps -q --filter "label=$CONTAINER_TAG" 2>/dev/null)
+    containers=$(docker ps -q --filter "label=nr-experiment=true" 2>/dev/null)
 
     if [ -z "$containers" ]; then
         echo -e "${YELLOW}⚠️  No containers found with label '$CONTAINER_TAG', trying image tag...${NC}"
