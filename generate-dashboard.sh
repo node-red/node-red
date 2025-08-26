@@ -673,6 +673,21 @@ cat > "$HTML_FILE" << 'EOF'
         let containersData = null;
         let currentFilter = 'all';
 
+        // Function to get relative time string
+        function getRelativeTime(date) {
+            const now = new Date();
+            const diffMs = now - date;
+            const diffSecs = Math.floor(diffMs / 1000);
+            const diffMins = Math.floor(diffSecs / 60);
+            const diffHours = Math.floor(diffMins / 60);
+            const diffDays = Math.floor(diffHours / 24);
+            
+            if (diffSecs < 60) return `${diffSecs} seconds ago`;
+            if (diffMins < 60) return `${diffMins} minutes ago`;
+            if (diffHours < 24) return `${diffHours} hours ago`;
+            return `${diffDays} days ago`;
+        }
+
         // Load containers data
         async function loadContainersData() {
             try {
@@ -681,8 +696,10 @@ cat > "$HTML_FILE" << 'EOF'
                 
                 // Update meta info
                 const metaInfo = document.getElementById('meta-info');
-                const generated = new Date(containersData.generated).toLocaleString();
-                metaInfo.innerHTML = `Generated: ${generated}`;
+                const generatedDate = new Date(containersData.generated);
+                const generated = generatedDate.toLocaleString();
+                const relativeTime = getRelativeTime(generatedDate);
+                metaInfo.innerHTML = `Generated: <code>${relativeTime}</code> (${generated})`;
                 
                 // Initialize status checking
                 containersData.containers.forEach(container => {
