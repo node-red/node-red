@@ -8,6 +8,37 @@ Low-code programming for event-driven applications.
 
 ![Node-RED: Low-code programming for event-driven applications](https://nodered.org/images/node-red-screenshot.png)
 
+## Demo Mode & Deployment
+
+This fork includes sandbox mode for safe public demo access and branch-specific Docker deployments.
+
+### Docker Deployment
+
+Use the `deploy.sh` script for branch-specific deployments with Tailscale networking:
+
+```bash
+# Deploy current branch
+./deploy.sh up -d
+
+# Stop deployment
+./deploy.sh down
+
+# View logs
+./deploy.sh logs
+```
+
+The script automatically:
+- Creates branch-specific containers (e.g., `nr-debug-panel-bottom`)
+- Generates docker-compose.yml from template
+- Sets up Tailscale networking with HTTPS
+- Configures isolated Docker networks and volumes
+
+**Requirements:**
+- Set `TS_AUTHKEY` environment variable for Tailscale
+- Each branch gets its own isolated deployment
+
+**Access:** `https://nr-{branch-name}.[your-tailnet].ts.net`
+
 ## Quick Start
 
 Check out https://nodered.org/docs/getting-started/ for full instructions on getting

@@ -1,0 +1,45 @@
+services:
+  node-red:
+    image: nr-demo:BRANCH_PLACEHOLDER
+    container_name: nr-BRANCH_PLACEHOLDER
+    environment:
+      - NODE_PATH=/usr/src/node-red/node_modules
+      - FLOWS=flows.json
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 128M
+          cpus: '0.25'
+    restart: unless-stopped
+    networks:
+      - nr-BRANCH_PLACEHOLDER-net
+
+  tailscale:
+    image: tailscale/tailscale:latest
+    container_name: nr-BRANCH_PLACEHOLDER-tailscale
+    environment:
+      - TS_AUTHKEY=${TS_AUTHKEY}
+      - TS_STATE_DIR=/var/lib/tailscale
+      - TS_USERSPACE=false
+      - TS_HOSTNAME=nr-BRANCH_PLACEHOLDER
+      - TS_SERVE_CONFIG=/config/tailscale-serve.json
+    volumes:
+      - nr_BRANCH_PLACEHOLDER_tailscale:/var/lib/tailscale
+      - /dev/net/tun:/dev/net/tun
+      - .:/config
+    cap_add:
+      - NET_ADMIN
+    restart: unless-stopped
+    networks:
+      - nr-BRANCH_PLACEHOLDER-net
+
+networks:
+  nr-BRANCH_PLACEHOLDER-net:
+    driver: bridge
+
+volumes:
+  nr_BRANCH_PLACEHOLDER_tailscale:
+    external: false
