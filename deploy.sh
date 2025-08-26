@@ -70,7 +70,7 @@ if [ "$DEPLOY_MODE" = "gcp" ] || [ "$DEPLOY_MODE" = "hetzner" ]; then
     
     # Push current branch to origin
     echo "📤 Pushing to origin..."
-    git push origin "$BRANCH_NAME" || echo "⚠️  Push failed or up to date"
+    git push --force-with-lease origin "$BRANCH_NAME" || echo "⚠️  Push failed"
     
     # Create branch-specific docker-compose file
     COMPOSE_FILE="docker-compose-$BRANCH_NAME.yml"
