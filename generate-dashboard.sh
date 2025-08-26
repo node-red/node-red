@@ -207,6 +207,25 @@ cat > "$HTML_FILE" << 'EOF'
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Container Dashboard</title>
+    
+    <!-- Tally popup widget -->
+    <script async src="https://tally.so/widgets/embed.js"></script>
+    <script>
+    window.TallyConfig = {
+      "formId": "31L4dW",
+      "popup": {
+        "emoji": {
+          "text": "👋",
+          "animation": "wave"
+        },
+        "hideTitle": true,
+        "open": {
+          "trigger": "time",
+          "ms": 30000
+        }
+      }
+    };
+    </script>
     <style>
         * {
             margin: 0;
