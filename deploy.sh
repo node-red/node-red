@@ -633,6 +633,34 @@ deploy_remote() {
         sleep 5
     }
     
+    # Function to ensure tailscale-serve-dashboard.json exists
+    ensure_dashboard_tailscale_config() {
+        if [ ! -f "tailscale-serve-dashboard.json" ]; then
+            log "Generating missing tailscale-serve-dashboard.json..."
+            cat > tailscale-serve-dashboard.json << DASHBOARD_CONFIG
+{
+  "TCP": {
+    "443": {
+      "HTTPS": true
+    }
+  },
+  "Web": {
+    "dashboard.${TAILNET}.ts.net:443": {
+      "Handlers": {
+        "/": {
+          "Proxy": "http://dashboard:80"
+        }
+      }
+    }
+  },
+  "AllowFunnel": {
+    "dashboard.${TAILNET}.ts.net:443": false
+  }
+}
+DASHBOARD_CONFIG
+        fi
+    }
+    
     log "${BLUE}=== Remote Script Started ===${NC}"
     log "📋 Received variables:"
     log "   Branch: $BRANCH_NAME"
@@ -1496,6 +1524,7 @@ DASHBOARD_HTML
                 
                 # Copy fresh dashboard files to the new volumes
                 log "Copying fresh dashboard files to new volumes..."
+                ensure_dashboard_tailscale_config
                 docker run --rm -v global-dashboard_dashboard_config:/config -v "$(pwd):/source" alpine:latest sh -c "cp /source/tailscale-serve-dashboard.json /config/"
                 docker run --rm -v global-dashboard_dashboard_content:/content -v "$(pwd):/source" alpine:latest sh -c "
                     cp /source/dashboard.html /content/index.html &&
@@ -1723,6 +1752,7 @@ CONTAINER_EOF
                     env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose-dashboard.yml up -d dashboard
                     
                     # Copy updated files to fresh volumes
+                    ensure_dashboard_tailscale_config
                     docker run --rm -v global-dashboard_dashboard_config:/config -v "$(pwd):/source" alpine:latest sh -c "cp /source/tailscale-serve-dashboard.json /config/"
                     docker run --rm -v global-dashboard_dashboard_content:/content -v "$(pwd):/source" alpine:latest sh -c "
                         cp /source/dashboard.html /content/index.html &&
@@ -1752,6 +1782,7 @@ CONTAINER_EOF
                     env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose-dashboard.yml up -d dashboard
                     
                     # Copy dashboard files to fresh volumes
+                    ensure_dashboard_tailscale_config
                     docker run --rm -v global-dashboard_dashboard_config:/config -v "$(pwd):/source" alpine:latest sh -c "cp /source/tailscale-serve-dashboard.json /config/"
                     docker run --rm -v global-dashboard_dashboard_content:/content -v "$(pwd):/source" alpine:latest sh -c "
                         cp /source/dashboard.html /content/index.html &&
