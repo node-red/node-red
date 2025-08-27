@@ -32,7 +32,7 @@ services:
     volumes:
       - nr_BRANCH_PLACEHOLDER_tailscale:/var/lib/tailscale
       - /dev/net/tun:/dev/net/tun
-      - .:/config
+      - ./tailscale-serve.json:/config/tailscale-serve.json:ro
     cap_add:
       - NET_ADMIN
     restart: unless-stopped

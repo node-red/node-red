@@ -21,7 +21,7 @@ services:
     volumes:
       - dashboard_tailscale:/var/lib/tailscale
       - /dev/net/tun:/dev/net/tun
-      - .:/config
+      - ./tailscale-serve-dashboard.json:/config/tailscale-serve-dashboard.json:ro
     cap_add:
       - NET_ADMIN
     restart: unless-stopped
