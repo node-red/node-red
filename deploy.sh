@@ -868,12 +868,15 @@ DASHBOARD_CONFIG
                     commit_url=""
                     branch_url=""
                     
-                    # Only try to get git info if we have the deployment directory and we're on the right branch
-                    if [ -d "$REPO_DIR" ] && [ "$(cd "$REPO_DIR" && git branch --show-current 2>/dev/null)" = "$branch" ]; then
-                        commit_short=$(cd "$REPO_DIR" && git rev-parse --short=8 HEAD 2>/dev/null || echo "unknown")
-                        commit_hash=$(cd "$REPO_DIR" && git rev-parse HEAD 2>/dev/null || echo "unknown")
+                    # Try to get git info from the branch-specific deployment directory
+                    branch_repo_dir=~/node-red-deployments-$branch
+                    if [ -d "$branch_repo_dir" ]; then
+                        commit_short=$(cd "$branch_repo_dir" && git rev-parse --short=8 HEAD 2>/dev/null || echo "unknown")
+                        commit_hash=$(cd "$branch_repo_dir" && git rev-parse HEAD 2>/dev/null || echo "unknown")
                         if [ "$commit_hash" != "unknown" ]; then
                             commit_url="https://github.com/$GITHUB_REPO/commit/$commit_hash"
+                            branch_url="https://github.com/$GITHUB_REPO/tree/$branch"
+                        else
                             branch_url="https://github.com/$GITHUB_REPO/tree/$branch"
                         fi
                     else
@@ -1663,14 +1666,19 @@ DASHBOARD_HTML
                         commit_url=""
                         branch_url=""
                         
-                        # Only try to get git info if we still have the deployment directory
-                        if [ -d "$REPO_DIR" ]; then
-                            commit_short=$(cd "$REPO_DIR" && git rev-parse --short=8 HEAD 2>/dev/null || echo "unknown")
-                            commit_hash=$(cd "$REPO_DIR" && git rev-parse HEAD 2>/dev/null || echo "unknown")
+                        # Try to get git info from the branch-specific deployment directory
+                        branch_repo_dir=~/node-red-deployments-$branch_name
+                        if [ -d "$branch_repo_dir" ]; then
+                            commit_short=$(cd "$branch_repo_dir" && git rev-parse --short=8 HEAD 2>/dev/null || echo "unknown")
+                            commit_hash=$(cd "$branch_repo_dir" && git rev-parse HEAD 2>/dev/null || echo "unknown")
                             if [ "$commit_hash" != "unknown" ]; then
                                 commit_url="https://github.com/$GITHUB_REPO/commit/$commit_hash"
                                 branch_url="https://github.com/$GITHUB_REPO/tree/$branch_name"
+                            else
+                                branch_url="https://github.com/$GITHUB_REPO/tree/$branch_name"
                             fi
+                        else
+                            branch_url="https://github.com/$GITHUB_REPO/tree/$branch_name"
                         fi
                         
                         # Generate container entry
