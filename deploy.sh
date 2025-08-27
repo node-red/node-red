@@ -167,6 +167,9 @@ deploy_remote() {
     echo "  - Branch: $BRANCH_NAME"
     echo
     
+    # Check branch sync for remote deployment
+    check_branch_sync
+    
     # Check if required environment variables are set
     if [ -z "$HETZNER_HOST" ] || [ "$HETZNER_HOST" = "your-server-ip" ]; then
         log "${RED}❌ HETZNER_HOST not set!${NC}"
@@ -1116,7 +1119,6 @@ REMOTE_SCRIPT
 # Main script execution
 # Run safety checks first
 check_uncommitted_changes
-check_branch_sync
 
 show_deployment_info
 
