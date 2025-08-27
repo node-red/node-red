@@ -145,6 +145,7 @@ show_deployment_info() {
     echo "  - Tag: nr-experiment"
     echo "  - Serves HTTPS on port 443"
     echo "  - Proxies all requests (/) to internal Node-RED on port 1880"
+    echo "  - Includes Tailscale state validation and automatic stale state cleanup"
     echo
 }
 
@@ -157,6 +158,89 @@ check_ts_authkey() {
         return 1
     fi
     return 0
+}
+
+# Function to validate Tailscale connection for local deployment
+# This function addresses the issue where Tailscale containers fail to connect
+# when they have stale state from previous deployments. It:
+# 1. Waits for the container to initialize
+# 2. Checks logs for connection errors (404 node not found, authentication failures)
+# 3. If stale state is detected, clears the volume and restarts the container
+# 4. Retries up to 3 times before giving up
+validate_and_retry_tailscale_local() {
+    local branch_name="$1"
+    local compose_file="$2"
+    local container_name="nr-$branch_name-tailscale"
+    local max_attempts=3
+    local attempt=1
+    
+    log "${BLUE}🔍 Validating Tailscale connection for $container_name...${NC}"
+    log "Container logs available for troubleshooting with: docker logs $container_name"
+    
+    while [ $attempt -le $max_attempts ]; do
+        log "Attempt $attempt/$max_attempts: Checking Tailscale status..."
+        
+        # Wait for container to initialize
+        sleep 10
+        
+        # Check if container is running
+        if ! docker ps --format "table {{.Names}}" | grep -q "^$container_name$"; then
+            log "${RED}❌ Tailscale container $container_name is not running${NC}"
+            return 1
+        fi
+        
+        # Check container logs for common error patterns
+        local logs=$(docker logs "$container_name" --tail 50 2>&1)
+        
+        if echo "$logs" | grep -q "node not found\|404.*not found\|failed to authenticate\|LoginInteractive\|registration .*failed\|key rejected"; then
+            log "${YELLOW}⚠️  Detected stale Tailscale state in $container_name${NC}"
+            log "Error details from logs:"
+            echo "$logs" | grep -E "(node not found|404.*not found|failed to authenticate|LoginInteractive|registration .*failed|key rejected)" | sed 's/^/   /'
+            
+            if [ $attempt -lt $max_attempts ]; then
+                log "${BLUE}🔄 Clearing stale Tailscale state and retrying...${NC}"
+                clear_tailscale_state_local "$branch_name" "$compose_file"
+                attempt=$((attempt + 1))
+            else
+                log "${RED}❌ Failed to establish Tailscale connection after $max_attempts attempts${NC}"
+                return 1
+            fi
+        elif echo "$logs" | grep -q "serve config loaded\|serve config applied\|listening\|authenticated\|Listening on\|ready"; then
+            log "${GREEN}✅ Tailscale connection validated for $container_name${NC}"
+            return 0
+        else
+            log "${YELLOW}⚠️  Tailscale container logs unclear, waiting longer...${NC}"
+            sleep 10
+            attempt=$((attempt + 1))
+        fi
+    done
+    
+    log "${RED}❌ Tailscale validation failed after $max_attempts attempts${NC}"
+    return 1
+}
+
+# Function to clear Tailscale state for local deployment
+clear_tailscale_state_local() {
+    local branch_name="$1"
+    local compose_file="$2"
+    local container_name="nr-$branch_name-tailscale"
+    local volume_name="nr_${branch_name}_tailscale"
+    
+    log "Stopping Tailscale container..."
+    docker stop "$container_name" 2>/dev/null || true
+    
+    log "Removing Tailscale container..."
+    docker rm "$container_name" 2>/dev/null || true
+    
+    log "Clearing Tailscale state volume..."
+    # Use a temporary container to clear the volume contents
+    docker run --rm -v "$volume_name:/state" alpine:latest sh -c "rm -rf /state/*" 2>/dev/null || true
+    
+    log "Restarting Tailscale container..."
+    env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f "$compose_file" up -d tailscale
+    
+    # Wait for the container to fully restart
+    sleep 5
 }
 
 # Function for local deployment
@@ -209,6 +293,9 @@ TAILSCALE_CONFIG
     if [ "$1" = "up" ] || [ "$1" = "" ]; then
         log "Running: docker compose -f $COMPOSE_FILE up -d"
         env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f "$COMPOSE_FILE" up -d
+        
+        # Validate Tailscale connection and retry if needed
+        validate_and_retry_tailscale_local "$BRANCH_NAME" "$COMPOSE_FILE"
     else
         log "Running: docker compose -f $COMPOSE_FILE $*"
         env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f "$COMPOSE_FILE" "$@"
@@ -365,6 +452,153 @@ deploy_remote() {
     # Function to log with timestamp
     log() {
         echo -e "[$(date '+%Y-%m-%d %H:%M:%S')] $1"
+    }
+    
+    # Function to validate Tailscale connection for remote deployment
+    validate_and_retry_tailscale_remote() {
+        local branch_name="$1"
+        local container_name="nr-$branch_name-tailscale"
+        local max_attempts=3
+        local attempt=1
+        
+        log "${BLUE}🔍 Validating Tailscale connection for $container_name...${NC}"
+    log "Container logs available for troubleshooting with: docker logs $container_name"
+        
+        while [ $attempt -le $max_attempts ]; do
+            log "Attempt $attempt/$max_attempts: Checking Tailscale status..."
+            
+            # Wait for container to initialize
+            sleep 10
+            
+            # Check if container is running
+            if ! docker ps --format "table {{.Names}}" | grep -q "^$container_name$"; then
+                log "${RED}❌ Tailscale container $container_name is not running${NC}"
+                return 1
+            fi
+            
+            # Check container logs for common error patterns
+            local logs=$(docker logs "$container_name" --tail 50 2>&1)
+            
+            if echo "$logs" | grep -q "node not found\|404.*not found\|failed to authenticate\|LoginInteractive\|registration .*failed\|key rejected"; then
+                log "${YELLOW}⚠️  Detected stale Tailscale state in $container_name${NC}"
+                log "Error details from logs:"
+                echo "$logs" | grep -E "(node not found|404.*not found|failed to authenticate|LoginInteractive|registration .*failed|key rejected)" | sed 's/^/   /'
+                
+                if [ $attempt -lt $max_attempts ]; then
+                    log "${BLUE}🔄 Clearing stale Tailscale state and retrying...${NC}"
+                    clear_tailscale_state_remote "$branch_name"
+                    attempt=$((attempt + 1))
+                else
+                    log "${RED}❌ Failed to establish Tailscale connection after $max_attempts attempts${NC}"
+                    return 1
+                fi
+            elif echo "$logs" | grep -q "serve config loaded\|serve config applied\|listening\|authenticated\|Listening on\|ready"; then
+                log "${GREEN}✅ Tailscale connection validated for $container_name${NC}"
+                return 0
+            else
+                log "${YELLOW}⚠️  Tailscale container logs unclear, waiting longer...${NC}"
+                sleep 10
+                attempt=$((attempt + 1))
+            fi
+        done
+        
+        log "${RED}❌ Tailscale validation failed after $max_attempts attempts${NC}"
+        return 1
+    }
+    
+    # Function to clear Tailscale state for remote deployment
+    clear_tailscale_state_remote() {
+        local branch_name="$1"
+        local container_name="nr-$branch_name-tailscale"
+        local volume_name="nr-${branch_name}_nr_${branch_name}_tailscale"
+        
+        log "Stopping Tailscale container..."
+        docker stop "$container_name" 2>/dev/null || true
+        
+        log "Removing Tailscale container..."
+        docker rm "$container_name" 2>/dev/null || true
+        
+        log "Clearing Tailscale state volume..."
+        # Use a temporary container to clear the volume contents
+        docker run --rm -v "$volume_name:/state" alpine:latest sh -c "rm -rf /state/*" 2>/dev/null || true
+        
+        log "Restarting Tailscale container..."
+        env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose.yml up -d tailscale
+        
+        # Wait for the container to fully restart
+        sleep 5
+    }
+    
+    # Function to validate dashboard Tailscale connection for remote deployment
+    validate_and_retry_dashboard_tailscale_remote() {
+        local container_name="dashboard-tailscale"
+        local max_attempts=3
+        local attempt=1
+        
+        log "${BLUE}🔍 Validating dashboard Tailscale connection for $container_name...${NC}"
+        
+        while [ $attempt -le $max_attempts ]; do
+            log "Attempt $attempt/$max_attempts: Checking dashboard Tailscale status..."
+            
+            # Wait for container to initialize
+            sleep 10
+            
+            # Check if container is running
+            if ! docker ps --format "table {{.Names}}" | grep -q "^$container_name$"; then
+                log "${RED}❌ Dashboard Tailscale container $container_name is not running${NC}"
+                return 1
+            fi
+            
+            # Check container logs for common error patterns
+            local logs=$(docker logs "$container_name" --tail 50 2>&1)
+            
+            if echo "$logs" | grep -q "node not found\|404.*not found\|failed to authenticate\|LoginInteractive\|registration .*failed\|key rejected"; then
+                log "${YELLOW}⚠️  Detected stale Tailscale state in dashboard container${NC}"
+                log "Error details from logs:"
+                echo "$logs" | grep -E "(node not found|404.*not found|failed to authenticate|LoginInteractive|registration .*failed|key rejected)" | sed 's/^/   /'
+                
+                if [ $attempt -lt $max_attempts ]; then
+                    log "${BLUE}🔄 Clearing dashboard Tailscale state and retrying...${NC}"
+                    clear_dashboard_tailscale_state_remote
+                    attempt=$((attempt + 1))
+                else
+                    log "${RED}❌ Failed to establish dashboard Tailscale connection after $max_attempts attempts${NC}"
+                    return 1
+                fi
+            elif echo "$logs" | grep -q "serve config loaded\|serve config applied\|listening\|authenticated\|Listening on\|ready"; then
+                log "${GREEN}✅ Dashboard Tailscale connection validated for $container_name${NC}"
+                return 0
+            else
+                log "${YELLOW}⚠️  Dashboard Tailscale container logs unclear, waiting longer...${NC}"
+                sleep 10
+                attempt=$((attempt + 1))
+            fi
+        done
+        
+        log "${RED}❌ Dashboard Tailscale validation failed after $max_attempts attempts${NC}"
+        return 1
+    }
+    
+    # Function to clear dashboard Tailscale state for remote deployment
+    clear_dashboard_tailscale_state_remote() {
+        local container_name="dashboard-tailscale"
+        local volume_name="global-dashboard_dashboard_tailscale"
+        
+        log "Stopping dashboard Tailscale container..."
+        docker stop "$container_name" 2>/dev/null || true
+        
+        log "Removing dashboard Tailscale container..."
+        docker rm "$container_name" 2>/dev/null || true
+        
+        log "Clearing dashboard Tailscale state volume..."
+        # Use a temporary container to clear the volume contents
+        docker run --rm -v "$volume_name:/state" alpine:latest sh -c "rm -rf /state/*" 2>/dev/null || true
+        
+        log "Restarting dashboard Tailscale container..."
+        env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose-dashboard.yml up -d dashboard-tailscale
+        
+        # Wait for the container to fully restart
+        sleep 5
     }
     
     log "${BLUE}=== Remote Script Started ===${NC}"
@@ -543,6 +777,12 @@ DASHBOARD_CONFIG
         log "Debug: TS_AUTHKEY before docker compose: ${TS_AUTHKEY:+SET (${#TS_AUTHKEY} chars)}"
         if env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose.yml up -d; then
             log "${GREEN}✅ Main deployment successful${NC}"
+            
+            # Validate Tailscale connection and retry if needed
+            if ! validate_and_retry_tailscale_remote "$BRANCH_NAME"; then
+                log "${RED}❌ Tailscale validation failed, deployment aborted${NC}"
+                exit 1
+            fi
         else
             log "${RED}❌ Main deployment failed${NC}"
             exit 1
@@ -1218,11 +1458,21 @@ DASHBOARD_HTML
                 # Check if dashboard is running
                 if docker ps --filter "name=dashboard" --filter "status=running" | grep -q dashboard; then
                     log "${GREEN}✅ Dashboard deployed successfully${NC}"
+                    
+                    # Validate dashboard Tailscale connection
+                    if ! validate_and_retry_dashboard_tailscale_remote; then
+                        log "${YELLOW}⚠️  Dashboard Tailscale validation failed, but continuing...${NC}"
+                    fi
                 else
                     # If dashboard failed, try with TS_AUTHKEY for first-time setup
                     log "${YELLOW}⚠️  Dashboard needs initial setup, trying with TS_AUTHKEY...${NC}"
                     if env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose-dashboard.yml -p global-dashboard up -d --force-recreate; then
                         log "${GREEN}✅ Dashboard deployed successfully with TS_AUTHKEY${NC}"
+                        
+                        # Validate dashboard Tailscale connection
+                        if ! validate_and_retry_dashboard_tailscale_remote; then
+                            log "${YELLOW}⚠️  Dashboard Tailscale validation failed, but continuing...${NC}"
+                        fi
                     else
                         log "${YELLOW}⚠️  Dashboard deployment failed${NC}"
                     fi
