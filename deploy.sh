@@ -661,282 +661,10 @@ DASHBOARD_CONFIG
         fi
     }
     
-    log "${BLUE}=== Remote Script Started ===${NC}"
-    log "📋 Received variables:"
-    log "   Branch: $BRANCH_NAME"
-    log "   Tailnet: $TAILNET"
-    log "   Git Remote: $GIT_REMOTE"
-    log "   Remove Dashboard: $REMOVE_DASHBOARD"
-    log "   Docker Args: $DOCKER_ARGS"
-    log "   TS_AUTHKEY: ${TS_AUTHKEY:+SET (${#TS_AUTHKEY} chars)}"
-    
-    # Validate critical variables were received
-    if [ -z "$TS_AUTHKEY" ]; then
-        log "${RED}❌ TS_AUTHKEY not received by remote script!${NC}"
-        exit 1
-    fi
-    
-    if [ -z "$TAILNET" ]; then
-        log "${RED}❌ TAILNET not received by remote script!${NC}"
-        exit 1
-    fi
-    
-    echo
-    
-    # Set deployment directory
-    REPO_DIR=~/node-red-deployments-$BRANCH_NAME
-    
-    # Phase 1: Start with temporary logging for git operations
-    TEMP_LOG="/tmp/deploy-$BRANCH_NAME-$(date +%s).log"
-    exec 1> >(tee -a "$TEMP_LOG")
-    exec 2>&1
-    
-    log "${BLUE}=== Starting deployment for branch: $BRANCH_NAME ===${NC}"
-    log "Arguments: $DOCKER_ARGS"
-    
-    # Ensure Docker is installed
-    if ! command -v docker &> /dev/null; then
-        log "${YELLOW}🐳 Installing Docker...${NC}"
-        curl -fsSL https://get.docker.com -o get-docker.sh
-        sh get-docker.sh
-        rm get-docker.sh
-        systemctl enable docker
-        systemctl start docker
-    fi
-    
-    # Wait for Docker to be ready
-    while ! docker version &> /dev/null; do
-        log "Waiting for Docker to be ready..."
-        systemctl start docker 2>/dev/null || true
-        sleep 5
-    done
-    log "${GREEN}✅ Docker is ready${NC}"
-    
-    # Ensure git is installed
-    if ! command -v git &> /dev/null; then
-        log "${YELLOW}📦 Installing git...${NC}"
-        if command -v apt-get &> /dev/null; then
-            apt-get update && apt-get install -y git jq curl
-        elif command -v yum &> /dev/null; then
-            yum install -y git jq curl
-        fi
-    fi
-    
-    # Only build and deploy for 'up' commands
-    if [[ "$DOCKER_ARGS" == *"up"* ]]; then
-        log "${BLUE}🔄 Updating code and building...${NC}"
-        
-        # Git-first approach: handle repository operations
-        GIT_SUCCESS=false
-        if [ -d "$REPO_DIR/.git" ]; then
-            log "Repository exists, updating..."
-            cd "$REPO_DIR"
-            if git fetch origin && git checkout "$BRANCH_NAME" && git reset --hard "origin/$BRANCH_NAME"; then
-                GIT_SUCCESS=true
-            else
-                log "${RED}Failed to update existing repository${NC}"
-            fi
-        else
-            log "No valid git repository found"
-            if [ -d "$REPO_DIR" ]; then
-                log "Removing corrupted directory..."
-                rm -rf "$REPO_DIR"
-            fi
-            log "Cloning repository..."
-            if git clone "$GIT_REMOTE" "$REPO_DIR"; then
-                cd "$REPO_DIR"
-                if git checkout "$BRANCH_NAME"; then
-                    GIT_SUCCESS=true
-                else
-                    log "${RED}Failed to checkout branch $BRANCH_NAME${NC}"
-                fi
-            else
-                log "${RED}Failed to clone repository${NC}"
-            fi
-        fi
-        
-        # Phase 2: Switch to persistent logging only on git success
-        if [ "$GIT_SUCCESS" = true ]; then
-            log "Git operations completed successfully, setting up persistent logging..."
-            LOG_FILE="$REPO_DIR/deployment.log"
-            
-            # Move temp log to final location and continue logging there
-            mv "$TEMP_LOG" "$LOG_FILE"
-            exec 1> >(tee -a "$LOG_FILE")
-            exec 2>&1
-            
-            log "${GREEN}✅ Git operations successful, continuing deployment...${NC}"
-        else
-            log "${RED}❌ Git operations failed, cleaning up and exiting${NC}"
-            rm -f "$TEMP_LOG"
-            exit 1
-        fi
-        
-        # Generate docker-compose file from template
-        log "Generating docker-compose.yml from template..."
-        sed -e "s/BRANCH_PLACEHOLDER/$BRANCH_NAME/g" \
-            docker-compose.template.yml > docker-compose.yml
-        
-        # Generate Tailscale serve configuration for Node-RED
-        log "Generating Tailscale serve configuration..."
-        cat > tailscale-serve.json << TAILSCALE_CONFIG
-{
-  "TCP": {
-    "443": {
-      "HTTPS": true
-    }
-  },
-  "Web": {
-    "nr-${BRANCH_NAME}.${TAILNET}.ts.net:443": {
-      "Handlers": {
-        "/": {
-          "Proxy": "http://node-red:1880"
-        }
-      }
-    }
-  },
-  "AllowFunnel": {
-    "nr-${BRANCH_NAME}.${TAILNET}.ts.net:443": false
-  }
-}
-TAILSCALE_CONFIG
-        
-        # Generate Tailscale serve configuration for dashboard
-        log "Generating Tailscale dashboard serve configuration..."
-        cat > tailscale-serve-dashboard.json << DASHBOARD_CONFIG
-{
-  "TCP": {
-    "443": {
-      "HTTPS": true
-    }
-  },
-  "Web": {
-    "dashboard.${TAILNET}.ts.net:443": {
-      "Handlers": {
-        "/": {
-          "Proxy": "http://dashboard:80"
-        }
-      }
-    }
-  },
-  "AllowFunnel": {
-    "dashboard.${TAILNET}.ts.net:443": false
-  }
-}
-DASHBOARD_CONFIG
-        
-        # Build Docker image
-        log "${BLUE}Building Docker image: nr-demo:$BRANCH_NAME${NC}"
-        docker build -f Dockerfile -t "nr-demo:$BRANCH_NAME" .
-        
-        # Clean up dangling images
-        docker system prune -f
-        
-        # Deploy with docker-compose
-        log "${BLUE}Deploying with docker-compose...${NC}"
-        log "Debug: TS_AUTHKEY before docker compose: ${TS_AUTHKEY:+SET (${#TS_AUTHKEY} chars)}"
-        if env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose.yml up -d; then
-            log "${GREEN}✅ Main deployment successful${NC}"
-            
-            # Validate Tailscale connection and retry if needed
-            if ! validate_and_retry_tailscale_remote "$BRANCH_NAME"; then
-                log "${RED}❌ Tailscale validation failed, deployment aborted${NC}"
-                exit 1
-            fi
-        else
-            log "${RED}❌ Main deployment failed${NC}"
-            exit 1
-        fi
-        
-        # Deploy dashboard if dashboard config exists
-        if [ -f "docker-compose-dashboard.yml" ]; then
-            log "${BLUE}Generating and deploying dashboard...${NC}"
-            
-            # Generate dashboard data in current directory (safe from removal)
-            log "Scanning containers for dashboard..."
-            
-            # Find containers with the nr-experiment label
-            containers=$(docker ps -q --filter "label=nr-experiment=true" 2>/dev/null || true)
-            
-            if [ -n "$containers" ]; then
-                # Generate containers.json in current directory
-                echo "{" > containers.json
-                echo "  \"generated\": \"$(date -u +"%Y-%m-%dT%H:%M:%SZ")\"," >> containers.json
-                echo "  \"containers\": [" >> containers.json
-                
-                first=true
-                for container in $containers; do
-                    if [ "$first" = false ]; then
-                        echo "," >> containers.json
-                    fi
-                    first=false
-                    
-                    name=$(docker inspect --format='{{.Name}}' "$container" | sed 's/^\///')
-                    image=$(docker inspect --format='{{.Config.Image}}' "$container")
-                    created=$(docker inspect --format='{{.State.StartedAt}}' "$container")
-                    
-                    # Get branch name from container label
-                    branch=$(docker inspect --format='{{index .Config.Labels "com.docker.compose.project"}}' "$container" | sed 's/^nr-//')
-                    
-                    # Extract issue ID from branch name, not container name
-                    issue_id=$(echo "$branch" | sed -n 's/^issue-\([0-9]\+\)$/\1/p')
-                    issue_url=""
-                    issue_title=""
-                    
-                    if [ -n "$issue_id" ]; then
-                        issue_url="https://github.com/$GITHUB_ISSUES_REPO/issues/$issue_id"
-                        # Try to fetch issue title
-                        api_url="https://api.github.com/repos/$GITHUB_ISSUES_REPO/issues/$issue_id"
-                        response=$(curl -s -f "$api_url" 2>/dev/null || echo "{}")
-                        issue_title=$(echo "$response" | grep '"title":' | head -1 | sed 's/.*"title": *"\([^"]*\)".*/\1/' | sed 's/\[NR Modernization Experiment\] *//')
-                    fi
-                    commit_short="unknown"
-                    commit_hash="unknown"
-                    
-                    commit_url=""
-                    branch_url=""
-                    
-                    # Try to get git info from the branch-specific deployment directory
-                    branch_repo_dir=~/node-red-deployments-$branch
-                    if [ -d "$branch_repo_dir" ]; then
-                        commit_short=$(cd "$branch_repo_dir" && git rev-parse --short=8 HEAD 2>/dev/null || echo "unknown")
-                        commit_hash=$(cd "$branch_repo_dir" && git rev-parse HEAD 2>/dev/null || echo "unknown")
-                        if [ "$commit_hash" != "unknown" ]; then
-                            commit_url="https://github.com/$GITHUB_REPO/commit/$commit_hash"
-                            branch_url="https://github.com/$GITHUB_REPO/tree/$branch"
-                        else
-                            branch_url="https://github.com/$GITHUB_REPO/tree/$branch"
-                        fi
-                    else
-                        branch_url="https://github.com/$GITHUB_REPO/tree/$branch"
-                    fi
-                    
-                    # Generate container entry
-                    cat >> containers.json << CONTAINER_EOF
-    {
-        "name": "${issue_title:-$branch}",
-        "image": "$image",
-        "created": "$created",
-        "url": "https://$name.${TAILNET}.ts.net",
-        "issue_url": "$issue_url",
-        "issue_title": "$issue_title",
-        "branch": "$branch",
-        "commit": "$commit_short",
-        "commit_url": "$commit_url",
-        "branch_url": "$branch_url"
-    }
-CONTAINER_EOF
-                done
-                
-                echo "" >> containers.json
-                echo "  ]" >> containers.json
-                echo "}" >> containers.json
-                
-                log "Generated containers.json with $(echo "$containers" | wc -l) containers"
-                
-                # Generate dashboard HTML in current directory
-                log "Generating dashboard.html..."
-                cat > dashboard.html << 'DASHBOARD_HTML'
+    # Function to ensure dashboard.html exists
+    generate_dashboard_html() {
+        log "Generating dashboard.html..."
+        cat > dashboard.html << 'DASHBOARD_HTML'
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1508,6 +1236,283 @@ CONTAINER_EOF
 </body>
 </html>
 DASHBOARD_HTML
+    }
+    
+    log "${BLUE}=== Remote Script Started ===${NC}"
+    log "📋 Received variables:"
+    log "   Branch: $BRANCH_NAME"
+    log "   Tailnet: $TAILNET"
+    log "   Git Remote: $GIT_REMOTE"
+    log "   Remove Dashboard: $REMOVE_DASHBOARD"
+    log "   Docker Args: $DOCKER_ARGS"
+    log "   TS_AUTHKEY: ${TS_AUTHKEY:+SET (${#TS_AUTHKEY} chars)}"
+    
+    # Validate critical variables were received
+    if [ -z "$TS_AUTHKEY" ]; then
+        log "${RED}❌ TS_AUTHKEY not received by remote script!${NC}"
+        exit 1
+    fi
+    
+    if [ -z "$TAILNET" ]; then
+        log "${RED}❌ TAILNET not received by remote script!${NC}"
+        exit 1
+    fi
+    
+    echo
+    
+    # Set deployment directory
+    REPO_DIR=~/node-red-deployments-$BRANCH_NAME
+    
+    # Phase 1: Start with temporary logging for git operations
+    TEMP_LOG="/tmp/deploy-$BRANCH_NAME-$(date +%s).log"
+    exec 1> >(tee -a "$TEMP_LOG")
+    exec 2>&1
+    
+    log "${BLUE}=== Starting deployment for branch: $BRANCH_NAME ===${NC}"
+    log "Arguments: $DOCKER_ARGS"
+    
+    # Ensure Docker is installed
+    if ! command -v docker &> /dev/null; then
+        log "${YELLOW}🐳 Installing Docker...${NC}"
+        curl -fsSL https://get.docker.com -o get-docker.sh
+        sh get-docker.sh
+        rm get-docker.sh
+        systemctl enable docker
+        systemctl start docker
+    fi
+    
+    # Wait for Docker to be ready
+    while ! docker version &> /dev/null; do
+        log "Waiting for Docker to be ready..."
+        systemctl start docker 2>/dev/null || true
+        sleep 5
+    done
+    log "${GREEN}✅ Docker is ready${NC}"
+    
+    # Ensure git is installed
+    if ! command -v git &> /dev/null; then
+        log "${YELLOW}📦 Installing git...${NC}"
+        if command -v apt-get &> /dev/null; then
+            apt-get update && apt-get install -y git jq curl
+        elif command -v yum &> /dev/null; then
+            yum install -y git jq curl
+        fi
+    fi
+    
+    # Only build and deploy for 'up' commands
+    if [[ "$DOCKER_ARGS" == *"up"* ]]; then
+        log "${BLUE}🔄 Updating code and building...${NC}"
+        
+        # Git-first approach: handle repository operations
+        GIT_SUCCESS=false
+        if [ -d "$REPO_DIR/.git" ]; then
+            log "Repository exists, updating..."
+            cd "$REPO_DIR"
+            if git fetch origin && git checkout "$BRANCH_NAME" && git reset --hard "origin/$BRANCH_NAME"; then
+                GIT_SUCCESS=true
+            else
+                log "${RED}Failed to update existing repository${NC}"
+            fi
+        else
+            log "No valid git repository found"
+            if [ -d "$REPO_DIR" ]; then
+                log "Removing corrupted directory..."
+                rm -rf "$REPO_DIR"
+            fi
+            log "Cloning repository..."
+            if git clone "$GIT_REMOTE" "$REPO_DIR"; then
+                cd "$REPO_DIR"
+                if git checkout "$BRANCH_NAME"; then
+                    GIT_SUCCESS=true
+                else
+                    log "${RED}Failed to checkout branch $BRANCH_NAME${NC}"
+                fi
+            else
+                log "${RED}Failed to clone repository${NC}"
+            fi
+        fi
+        
+        # Phase 2: Switch to persistent logging only on git success
+        if [ "$GIT_SUCCESS" = true ]; then
+            log "Git operations completed successfully, setting up persistent logging..."
+            LOG_FILE="$REPO_DIR/deployment.log"
+            
+            # Move temp log to final location and continue logging there
+            mv "$TEMP_LOG" "$LOG_FILE"
+            exec 1> >(tee -a "$LOG_FILE")
+            exec 2>&1
+            
+            log "${GREEN}✅ Git operations successful, continuing deployment...${NC}"
+        else
+            log "${RED}❌ Git operations failed, cleaning up and exiting${NC}"
+            rm -f "$TEMP_LOG"
+            exit 1
+        fi
+        
+        # Generate docker-compose file from template
+        log "Generating docker-compose.yml from template..."
+        sed -e "s/BRANCH_PLACEHOLDER/$BRANCH_NAME/g" \
+            docker-compose.template.yml > docker-compose.yml
+        
+        # Generate Tailscale serve configuration for Node-RED
+        log "Generating Tailscale serve configuration..."
+        cat > tailscale-serve.json << TAILSCALE_CONFIG
+{
+  "TCP": {
+    "443": {
+      "HTTPS": true
+    }
+  },
+  "Web": {
+    "nr-${BRANCH_NAME}.${TAILNET}.ts.net:443": {
+      "Handlers": {
+        "/": {
+          "Proxy": "http://node-red:1880"
+        }
+      }
+    }
+  },
+  "AllowFunnel": {
+    "nr-${BRANCH_NAME}.${TAILNET}.ts.net:443": false
+  }
+}
+TAILSCALE_CONFIG
+        
+        # Generate Tailscale serve configuration for dashboard
+        log "Generating Tailscale dashboard serve configuration..."
+        cat > tailscale-serve-dashboard.json << DASHBOARD_CONFIG
+{
+  "TCP": {
+    "443": {
+      "HTTPS": true
+    }
+  },
+  "Web": {
+    "dashboard.${TAILNET}.ts.net:443": {
+      "Handlers": {
+        "/": {
+          "Proxy": "http://dashboard:80"
+        }
+      }
+    }
+  },
+  "AllowFunnel": {
+    "dashboard.${TAILNET}.ts.net:443": false
+  }
+}
+DASHBOARD_CONFIG
+        
+        # Build Docker image
+        log "${BLUE}Building Docker image: nr-demo:$BRANCH_NAME${NC}"
+        docker build -f Dockerfile -t "nr-demo:$BRANCH_NAME" .
+        
+        # Clean up dangling images
+        docker system prune -f
+        
+        # Deploy with docker-compose
+        log "${BLUE}Deploying with docker-compose...${NC}"
+        log "Debug: TS_AUTHKEY before docker compose: ${TS_AUTHKEY:+SET (${#TS_AUTHKEY} chars)}"
+        if env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose.yml up -d; then
+            log "${GREEN}✅ Main deployment successful${NC}"
+            
+            # Validate Tailscale connection and retry if needed
+            if ! validate_and_retry_tailscale_remote "$BRANCH_NAME"; then
+                log "${RED}❌ Tailscale validation failed, deployment aborted${NC}"
+                exit 1
+            fi
+        else
+            log "${RED}❌ Main deployment failed${NC}"
+            exit 1
+        fi
+        
+        # Deploy dashboard if dashboard config exists
+        if [ -f "docker-compose-dashboard.yml" ]; then
+            log "${BLUE}Generating and deploying dashboard...${NC}"
+            
+            # Generate dashboard data in current directory (safe from removal)
+            log "Scanning containers for dashboard..."
+            
+            # Find containers with the nr-experiment label
+            containers=$(docker ps -q --filter "label=nr-experiment=true" 2>/dev/null || true)
+            
+            if [ -n "$containers" ]; then
+                # Generate containers.json in current directory
+                echo "{" > containers.json
+                echo "  \"generated\": \"$(date -u +"%Y-%m-%dT%H:%M:%SZ")\"," >> containers.json
+                echo "  \"containers\": [" >> containers.json
+                
+                first=true
+                for container in $containers; do
+                    if [ "$first" = false ]; then
+                        echo "," >> containers.json
+                    fi
+                    first=false
+                    
+                    name=$(docker inspect --format='{{.Name}}' "$container" | sed 's/^\///')
+                    image=$(docker inspect --format='{{.Config.Image}}' "$container")
+                    created=$(docker inspect --format='{{.State.StartedAt}}' "$container")
+                    
+                    # Get branch name from container label
+                    branch=$(docker inspect --format='{{index .Config.Labels "com.docker.compose.project"}}' "$container" | sed 's/^nr-//')
+                    
+                    # Extract issue ID from branch name, not container name
+                    issue_id=$(echo "$branch" | sed -n 's/^issue-\([0-9]\+\)$/\1/p')
+                    issue_url=""
+                    issue_title=""
+                    
+                    if [ -n "$issue_id" ]; then
+                        issue_url="https://github.com/$GITHUB_ISSUES_REPO/issues/$issue_id"
+                        # Try to fetch issue title
+                        api_url="https://api.github.com/repos/$GITHUB_ISSUES_REPO/issues/$issue_id"
+                        response=$(curl -s -f "$api_url" 2>/dev/null || echo "{}")
+                        issue_title=$(echo "$response" | grep '"title":' | head -1 | sed 's/.*"title": *"\([^"]*\)".*/\1/' | sed 's/\[NR Modernization Experiment\] *//')
+                    fi
+                    commit_short="unknown"
+                    commit_hash="unknown"
+                    
+                    commit_url=""
+                    branch_url=""
+                    
+                    # Try to get git info from the branch-specific deployment directory
+                    branch_repo_dir=~/node-red-deployments-$branch
+                    if [ -d "$branch_repo_dir" ]; then
+                        commit_short=$(cd "$branch_repo_dir" && git rev-parse --short=8 HEAD 2>/dev/null || echo "unknown")
+                        commit_hash=$(cd "$branch_repo_dir" && git rev-parse HEAD 2>/dev/null || echo "unknown")
+                        if [ "$commit_hash" != "unknown" ]; then
+                            commit_url="https://github.com/$GITHUB_REPO/commit/$commit_hash"
+                            branch_url="https://github.com/$GITHUB_REPO/tree/$branch"
+                        else
+                            branch_url="https://github.com/$GITHUB_REPO/tree/$branch"
+                        fi
+                    else
+                        branch_url="https://github.com/$GITHUB_REPO/tree/$branch"
+                    fi
+                    
+                    # Generate container entry
+                    cat >> containers.json << CONTAINER_EOF
+    {
+        "name": "${issue_title:-$branch}",
+        "image": "$image",
+        "created": "$created",
+        "url": "https://$name.${TAILNET}.ts.net",
+        "issue_url": "$issue_url",
+        "issue_title": "$issue_title",
+        "branch": "$branch",
+        "commit": "$commit_short",
+        "commit_url": "$commit_url",
+        "branch_url": "$branch_url"
+    }
+CONTAINER_EOF
+                done
+                
+                echo "" >> containers.json
+                echo "  ]" >> containers.json
+                echo "}" >> containers.json
+                
+                log "Generated containers.json with $(echo "$containers" | wc -l) containers"
+                
+                # Generate dashboard HTML in current directory
+                generate_dashboard_html
                 
                 # Always recreate dashboard container with fresh volumes (preserve tailscale sidecar)
                 log "Recreating dashboard container with fresh volumes..."
@@ -1777,6 +1782,11 @@ CONTAINER_EOF
                     
                     # Create empty containers.json for the fresh deployment
                     echo '{"generated":"'$(date -u +"%Y-%m-%dT%H:%M:%SZ")'","containers":[]}' > containers.json
+                    
+                    # Generate dashboard HTML if it doesn't exist (for down operations with empty state)
+                    if [ ! -f "dashboard.html" ]; then
+                        generate_dashboard_html
+                    fi
                     
                     # Deploy fresh dashboard with empty state
                     env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose-dashboard.yml up -d dashboard
