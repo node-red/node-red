@@ -192,10 +192,10 @@ validate_and_retry_tailscale_local() {
         # Check container logs for common error patterns
         local logs=$(docker logs "$container_name" --tail 50 2>&1)
         
-        if echo "$logs" | grep -q "node not found\|404.*not found\|failed to authenticate\|LoginInteractive\|registration .*failed\|key rejected"; then
+        if echo "$logs" | grep -q "node not found\|404.*not found\|registration .*failed\|key rejected"; then
             log "${YELLOW}⚠️  Detected stale Tailscale state in $container_name${NC}"
             log "Error details from logs:"
-            echo "$logs" | grep -E "(node not found|404.*not found|failed to authenticate|LoginInteractive|registration .*failed|key rejected)" | sed 's/^/   /'
+            echo "$logs" | grep -E "(node not found|404.*not found|registration .*failed|key rejected)" | sed 's/^/   /'
             
             if [ $attempt -lt $max_attempts ]; then
                 log "${BLUE}🔄 Clearing stale Tailscale state and retrying...${NC}"
@@ -205,7 +205,7 @@ validate_and_retry_tailscale_local() {
                 log "${RED}❌ Failed to establish Tailscale connection after $max_attempts attempts${NC}"
                 return 1
             fi
-        elif echo "$logs" | grep -q "serve config loaded\|serve config applied\|listening\|authenticated\|Listening on\|ready"; then
+        elif echo "$logs" | grep -q "serve config loaded\|serve config applied\|listening\|authenticated\|Listening on\|ready\|Startup complete\|magicsock.*connected"; then
             log "${GREEN}✅ Tailscale connection validated for $container_name${NC}"
             return 0
         else
@@ -479,10 +479,10 @@ deploy_remote() {
             # Check container logs for common error patterns
             local logs=$(docker logs "$container_name" --tail 50 2>&1)
             
-            if echo "$logs" | grep -q "node not found\|404.*not found\|failed to authenticate\|LoginInteractive\|registration .*failed\|key rejected"; then
+            if echo "$logs" | grep -q "node not found\|404.*not found\|registration .*failed\|key rejected"; then
                 log "${YELLOW}⚠️  Detected stale Tailscale state in $container_name${NC}"
                 log "Error details from logs:"
-                echo "$logs" | grep -E "(node not found|404.*not found|failed to authenticate|LoginInteractive|registration .*failed|key rejected)" | sed 's/^/   /'
+                echo "$logs" | grep -E "(node not found|404.*not found|registration .*failed|key rejected)" | sed 's/^/   /'
                 
                 if [ $attempt -lt $max_attempts ]; then
                     log "${BLUE}🔄 Clearing stale Tailscale state and retrying...${NC}"
@@ -492,7 +492,7 @@ deploy_remote() {
                     log "${RED}❌ Failed to establish Tailscale connection after $max_attempts attempts${NC}"
                     return 1
                 fi
-            elif echo "$logs" | grep -q "serve config loaded\|serve config applied\|listening\|authenticated\|Listening on\|ready"; then
+            elif echo "$logs" | grep -q "serve config loaded\|serve config applied\|listening\|authenticated\|Listening on\|ready\|Startup complete\|magicsock.*connected"; then
                 log "${GREEN}✅ Tailscale connection validated for $container_name${NC}"
                 return 0
             else
@@ -568,10 +568,10 @@ deploy_remote() {
             # Check container logs for common error patterns
             local logs=$(docker logs "$container_name" --tail 50 2>&1)
             
-            if echo "$logs" | grep -q "node not found\|404.*not found\|failed to authenticate\|LoginInteractive\|registration .*failed\|key rejected"; then
+            if echo "$logs" | grep -q "node not found\|404.*not found\|registration .*failed\|key rejected"; then
                 log "${YELLOW}⚠️  Detected stale Tailscale state in dashboard container${NC}"
                 log "Error details from logs:"
-                echo "$logs" | grep -E "(node not found|404.*not found|failed to authenticate|LoginInteractive|registration .*failed|key rejected)" | sed 's/^/   /'
+                echo "$logs" | grep -E "(node not found|404.*not found|registration .*failed|key rejected)" | sed 's/^/   /'
                 
                 if [ $attempt -lt $max_attempts ]; then
                     log "${BLUE}🔄 Clearing dashboard Tailscale state and retrying...${NC}"
@@ -581,7 +581,7 @@ deploy_remote() {
                     log "${RED}❌ Failed to establish dashboard Tailscale connection after $max_attempts attempts${NC}"
                     return 1
                 fi
-            elif echo "$logs" | grep -q "serve config loaded\|serve config applied\|listening\|authenticated\|Listening on\|ready"; then
+            elif echo "$logs" | grep -q "serve config loaded\|serve config applied\|listening\|authenticated\|Listening on\|ready\|Startup complete\|magicsock.*connected"; then
                 log "${GREEN}✅ Dashboard Tailscale connection validated for $container_name${NC}"
                 return 0
             else
