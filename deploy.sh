@@ -510,7 +510,9 @@ deploy_remote() {
     clear_tailscale_state_remote() {
         local branch_name="$1"
         local container_name="nr-$branch_name-tailscale"
-        local volume_name="nr-${branch_name}_nr_${branch_name}_tailscale"
+        
+        # Get the actual volume name from the container before removing it
+        local volume_name=$(docker inspect "$container_name" --format '{{range .Mounts}}{{if eq .Type "volume"}}{{if eq .Destination "/var/lib/tailscale"}}{{.Name}}{{end}}{{end}}{{end}}' 2>/dev/null || echo "")
         
         log "Stopping Tailscale container..."
         docker stop "$container_name" 2>/dev/null || true
@@ -518,9 +520,23 @@ deploy_remote() {
         log "Removing Tailscale container..."
         docker rm "$container_name" 2>/dev/null || true
         
-        log "Clearing Tailscale state volume..."
-        # Use a temporary container to clear the volume contents
-        docker run --rm -v "$volume_name:/state" alpine:latest sh -c "rm -rf /state/*" 2>/dev/null || true
+        if [ -n "$volume_name" ]; then
+            log "Clearing Tailscale state volume: $volume_name"
+            docker run --rm -v "$volume_name:/state" alpine:latest sh -c "rm -rf /state/*" 2>/dev/null || {
+                log "${YELLOW}Warning: Failed to clear volume with alpine, trying busybox...${NC}"
+                docker run --rm -v "$volume_name:/state" busybox sh -c "rm -rf /state/*" 2>/dev/null || true
+            }
+        else
+            log "${YELLOW}Warning: Could not determine volume name dynamically, trying possible names...${NC}"
+            # Try multiple possible volume name formats
+            for possible_volume in "nr-${branch_name}_nr_${branch_name}_tailscale" "nr_${branch_name}_tailscale"; do
+                if docker volume inspect "$possible_volume" &>/dev/null; then
+                    log "Found volume: $possible_volume, clearing..."
+                    docker run --rm -v "$possible_volume:/state" alpine:latest sh -c "rm -rf /state/*" 2>/dev/null || true
+                    break
+                fi
+            done
+        fi
         
         log "Restarting Tailscale container..."
         env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose.yml up -d tailscale
@@ -582,7 +598,9 @@ deploy_remote() {
     # Function to clear dashboard Tailscale state for remote deployment
     clear_dashboard_tailscale_state_remote() {
         local container_name="dashboard-tailscale"
-        local volume_name="global-dashboard_dashboard_tailscale"
+        
+        # Get the actual volume name from the container before removing it
+        local volume_name=$(docker inspect "$container_name" --format '{{range .Mounts}}{{if eq .Type "volume"}}{{if eq .Destination "/var/lib/tailscale"}}{{.Name}}{{end}}{{end}}{{end}}' 2>/dev/null || echo "")
         
         log "Stopping dashboard Tailscale container..."
         docker stop "$container_name" 2>/dev/null || true
@@ -590,9 +608,23 @@ deploy_remote() {
         log "Removing dashboard Tailscale container..."
         docker rm "$container_name" 2>/dev/null || true
         
-        log "Clearing dashboard Tailscale state volume..."
-        # Use a temporary container to clear the volume contents
-        docker run --rm -v "$volume_name:/state" alpine:latest sh -c "rm -rf /state/*" 2>/dev/null || true
+        if [ -n "$volume_name" ]; then
+            log "Clearing dashboard Tailscale state volume: $volume_name"
+            docker run --rm -v "$volume_name:/state" alpine:latest sh -c "rm -rf /state/*" 2>/dev/null || {
+                log "${YELLOW}Warning: Failed to clear volume with alpine, trying busybox...${NC}"
+                docker run --rm -v "$volume_name:/state" busybox sh -c "rm -rf /state/*" 2>/dev/null || true
+            }
+        else
+            log "${YELLOW}Warning: Could not determine volume name dynamically, trying possible names...${NC}"
+            # Try multiple possible volume name formats
+            for possible_volume in "global-dashboard_dashboard_tailscale" "dashboard_tailscale"; do
+                if docker volume inspect "$possible_volume" &>/dev/null; then
+                    log "Found volume: $possible_volume, clearing..."
+                    docker run --rm -v "$possible_volume:/state" alpine:latest sh -c "rm -rf /state/*" 2>/dev/null || true
+                    break
+                fi
+            done
+        fi
         
         log "Restarting dashboard Tailscale container..."
         env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose-dashboard.yml up -d dashboard-tailscale
