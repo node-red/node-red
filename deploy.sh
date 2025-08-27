@@ -1142,8 +1142,23 @@ DASHBOARD_HTML
         cd "$REPO_DIR"
         
         # Run the docker command
-        log "Running: docker compose -p nr-$BRANCH_NAME $DOCKER_ARGS"
-        env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose.yml -p "nr-$BRANCH_NAME" $DOCKER_ARGS
+        if [[ "$DOCKER_ARGS" == *"down"* ]]; then
+            # For down commands, try docker-compose first, but fallback to cleanup by name
+            if [ -f "docker-compose.yml" ]; then
+                log "Running: docker compose -p nr-$BRANCH_NAME $DOCKER_ARGS"
+                env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose.yml -p "nr-$BRANCH_NAME" $DOCKER_ARGS 2>/dev/null || true
+            else
+                log "docker-compose.yml not found, cleaning up by container/project names..."
+                # Stop and remove containers by project name
+                docker stop $(docker ps -q --filter "label=com.docker.compose.project=nr-$BRANCH_NAME") 2>/dev/null || true
+                docker rm $(docker ps -aq --filter "label=com.docker.compose.project=nr-$BRANCH_NAME") 2>/dev/null || true
+                # Remove networks by project name
+                docker network rm "nr-${BRANCH_NAME}_nr-${BRANCH_NAME}-net" 2>/dev/null || true
+            fi
+        else
+            log "Running: docker compose -p nr-$BRANCH_NAME $DOCKER_ARGS"
+            env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose.yml -p "nr-$BRANCH_NAME" $DOCKER_ARGS
+        fi
         
         # If this is a down command, do full cleanup
         if [[ "$DOCKER_ARGS" == *"down"* ]]; then
