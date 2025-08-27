@@ -1494,6 +1494,14 @@ DASHBOARD_HTML
                 log "Deploying fresh dashboard container..."
                 env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose-dashboard.yml up -d dashboard
                 
+                # Copy fresh dashboard files to the new volumes
+                log "Copying fresh dashboard files to new volumes..."
+                docker run --rm -v global-dashboard_dashboard_config:/config -v "$(pwd):/source" alpine:latest sh -c "cp /source/tailscale-serve-dashboard.json /config/"
+                docker run --rm -v global-dashboard_dashboard_content:/content -v "$(pwd):/source" alpine:latest sh -c "
+                    cp /source/dashboard.html /content/index.html &&
+                    cp /source/containers.json /content/containers.json
+                "
+                
                 # Preserve tailscale sidecar (only restart if needed for connection)
                 env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose-dashboard.yml up -d dashboard-tailscale
                 
@@ -1713,6 +1721,14 @@ CONTAINER_EOF
                     
                     # Deploy fresh dashboard with updated data
                     env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose-dashboard.yml up -d dashboard
+                    
+                    # Copy updated files to fresh volumes
+                    docker run --rm -v global-dashboard_dashboard_config:/config -v "$(pwd):/source" alpine:latest sh -c "cp /source/tailscale-serve-dashboard.json /config/"
+                    docker run --rm -v global-dashboard_dashboard_content:/content -v "$(pwd):/source" alpine:latest sh -c "
+                        cp /source/dashboard.html /content/index.html &&
+                        cp /source/containers.json /content/containers.json
+                    "
+                    
                     # Preserve tailscale sidecar (no restart unless connection issues)
                     env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose-dashboard.yml up -d dashboard-tailscale
                     
@@ -1734,6 +1750,14 @@ CONTAINER_EOF
                     
                     # Deploy fresh dashboard with empty state
                     env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose-dashboard.yml up -d dashboard
+                    
+                    # Copy dashboard files to fresh volumes
+                    docker run --rm -v global-dashboard_dashboard_config:/config -v "$(pwd):/source" alpine:latest sh -c "cp /source/tailscale-serve-dashboard.json /config/"
+                    docker run --rm -v global-dashboard_dashboard_content:/content -v "$(pwd):/source" alpine:latest sh -c "
+                        cp /source/dashboard.html /content/index.html &&
+                        cp /source/containers.json /content/containers.json
+                    "
+                    
                     # Preserve tailscale sidecar (no restart unless connection issues)
                     env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose-dashboard.yml up -d dashboard-tailscale
                     
