@@ -173,8 +173,13 @@ deploy_local() {
 TAILSCALE_CONFIG
     
     # Run docker-compose
-    log "Running: docker compose -f $COMPOSE_FILE -p nr-$BRANCH_NAME $*"
-    docker compose -f "$COMPOSE_FILE" -p "nr-$BRANCH_NAME" "$@"
+    if [ "$1" = "up" ] || [ "$1" = "" ]; then
+        log "Running: docker compose -f $COMPOSE_FILE -p nr-$BRANCH_NAME up -d"
+        docker compose -f "$COMPOSE_FILE" -p "nr-$BRANCH_NAME" up -d
+    else
+        log "Running: docker compose -f $COMPOSE_FILE -p nr-$BRANCH_NAME $*"
+        docker compose -f "$COMPOSE_FILE" -p "nr-$BRANCH_NAME" "$@"
+    fi
     
     if [ "$1" = "up" ] || [ "$1" = "" ]; then
         echo
