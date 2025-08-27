@@ -847,8 +847,8 @@ DASHBOARD_CONFIG
                     image=$(docker inspect --format='{{.Config.Image}}' "$container")
                     created=$(docker inspect --format='{{.State.StartedAt}}' "$container")
                     
-                    # Extract issue ID from container name
-                    issue_id=$(echo "$name" | sed -n 's/.*issue-\([0-9]\+\).*/\1/p')
+                    # Extract issue ID from branch name, not container name
+                    issue_id=$(echo "$branch" | sed -n 's/^issue-\([0-9]\+\)$/\1/p')
                     issue_url=""
                     issue_title=""
                     
@@ -860,15 +860,23 @@ DASHBOARD_CONFIG
                         issue_title=$(echo "$response" | grep '"title":' | head -1 | sed 's/.*"title": *"\([^"]*\)".*/\1/' | sed 's/\[NR Modernization Experiment\] *//')
                     fi
                     
-                    # Get git info
-                    branch=$(cd "$REPO_DIR" && git branch --show-current 2>/dev/null || echo "$BRANCH_NAME")
-                    commit_short=$(cd "$REPO_DIR" && git rev-parse --short=8 HEAD 2>/dev/null || echo "unknown")
-                    commit_hash=$(cd "$REPO_DIR" && git rev-parse HEAD 2>/dev/null || echo "unknown")
+                    # Get branch name from container label
+                    branch=$(docker inspect --format='{{index .Config.Labels "com.docker.compose.project"}}' "$container" | sed 's/^nr-//')
+                    commit_short="unknown"
+                    commit_hash="unknown"
                     
                     commit_url=""
                     branch_url=""
-                    if [ "$commit_hash" != "unknown" ]; then
-                        commit_url="https://github.com/$GITHUB_REPO/commit/$commit_hash"
+                    
+                    # Only try to get git info if we have the deployment directory and we're on the right branch
+                    if [ -d "$REPO_DIR" ] && [ "$(cd "$REPO_DIR" && git branch --show-current 2>/dev/null)" = "$branch" ]; then
+                        commit_short=$(cd "$REPO_DIR" && git rev-parse --short=8 HEAD 2>/dev/null || echo "unknown")
+                        commit_hash=$(cd "$REPO_DIR" && git rev-parse HEAD 2>/dev/null || echo "unknown")
+                        if [ "$commit_hash" != "unknown" ]; then
+                            commit_url="https://github.com/$GITHUB_REPO/commit/$commit_hash"
+                            branch_url="https://github.com/$GITHUB_REPO/tree/$branch"
+                        fi
+                    else
                         branch_url="https://github.com/$GITHUB_REPO/tree/$branch"
                     fi
                     
@@ -1634,8 +1642,11 @@ DASHBOARD_HTML
                         image=$(docker inspect --format='{{.Config.Image}}' "$container")
                         created=$(docker inspect --format='{{.State.StartedAt}}' "$container")
                         
-                        # Extract issue ID from container name
-                        issue_id=$(echo "$name" | sed -n 's/.*issue-\([0-9]\+\).*/\1/p')
+                        # Get branch name from container label first
+                        branch_name=$(docker inspect --format='{{index .Config.Labels "com.docker.compose.project"}}' "$container" | sed 's/^nr-//')
+                        
+                        # Extract issue ID from branch name, not container name
+                        issue_id=$(echo "$branch_name" | sed -n 's/^issue-\([0-9]\+\)$/\1/p')
                         issue_url=""
                         issue_title=""
                         
@@ -1647,8 +1658,6 @@ DASHBOARD_HTML
                             issue_title=$(echo "$response" | grep '"title":' | head -1 | sed 's/.*"title": *"\([^"]*\)".*/\1/' | sed 's/\[NR Modernization Experiment\] *//')
                         fi
                         
-                        # Get branch name from container label
-                        branch_name=$(docker inspect --format='{{index .Config.Labels "com.docker.compose.project"}}' "$container" | sed 's/^nr-//')
                         commit_short="unknown"
                         commit_hash="unknown"
                         commit_url=""
