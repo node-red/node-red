@@ -626,8 +626,8 @@ deploy_remote() {
             done
         fi
         
-        log "Restarting dashboard Tailscale container..."
-        env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose-dashboard.yml up -d dashboard-tailscale
+        log "Restarting dashboard containers with fresh identity..."
+        env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose-dashboard.yml up -d --force-recreate dashboard dashboard-tailscale
         
         # Wait for the container to fully restart
         sleep 5
@@ -1484,8 +1484,11 @@ DASHBOARD_HTML
                 "
                 
                 # Deploy dashboard container (with TS_AUTHKEY)
-                log "Deploying dashboard container (volumes persist, force recreate)..."
-                env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose-dashboard.yml up -d --force-recreate
+                log "Deploying dashboard container (selective recreation)..."
+                # Always recreate dashboard content container for branch updates
+                env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose-dashboard.yml up -d --force-recreate dashboard
+                # Preserve tailscale sidecar to allow stale state detection
+                env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose-dashboard.yml up -d dashboard-tailscale
                 
                 # Check if dashboard is running
                 if docker ps --filter "name=dashboard" --filter "status=running" | grep -q dashboard; then
@@ -1498,6 +1501,7 @@ DASHBOARD_HTML
                 else
                     # If dashboard failed, try with TS_AUTHKEY for first-time setup
                     log "${YELLOW}⚠️  Dashboard needs initial setup, trying with TS_AUTHKEY...${NC}"
+                    # Force recreate both containers for fresh setup
                     if env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose-dashboard.yml -p global-dashboard up -d --force-recreate; then
                         log "${GREEN}✅ Dashboard deployed successfully with TS_AUTHKEY${NC}"
                         
@@ -1687,7 +1691,9 @@ CONTAINER_EOF
                     
                     # Force recreate dashboard to reload content (dashboard persists via volumes)
                     log "Refreshing dashboard container..."
-                    env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose-dashboard.yml up -d --force-recreate
+                    # Recreate dashboard content, preserve tailscale identity
+                    env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose-dashboard.yml up -d --force-recreate dashboard
+                    env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose-dashboard.yml up -d dashboard-tailscale
                     
                     # Clean up temporary file
                     rm -f containers.json
@@ -1698,7 +1704,9 @@ CONTAINER_EOF
                     # Create empty containers.json
                     echo '{"generated":"'$(date -u +"%Y-%m-%dT%H:%M:%SZ")'","containers":[]}' > containers.json
                     docker run --rm -v global-dashboard_dashboard_content:/content -v "$(pwd):/source" alpine:latest sh -c "cp /source/containers.json /content/containers.json"
-                    env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose-dashboard.yml up -d --force-recreate
+                    # Recreate dashboard content, preserve tailscale identity
+                    env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose-dashboard.yml up -d --force-recreate dashboard
+                    env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose-dashboard.yml up -d dashboard-tailscale
                     rm -f containers.json
                 fi
             fi
