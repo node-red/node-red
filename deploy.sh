@@ -208,10 +208,10 @@ TAILSCALE_CONFIG
     # Run docker-compose
     if [ "$1" = "up" ] || [ "$1" = "" ]; then
         log "Running: docker compose -f $COMPOSE_FILE up -d"
-        docker compose -f "$COMPOSE_FILE" up -d
+        env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f "$COMPOSE_FILE" up -d
     else
         log "Running: docker compose -f $COMPOSE_FILE $*"
-        docker compose -f "$COMPOSE_FILE" "$@"
+        env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f "$COMPOSE_FILE" "$@"
     fi
     
     if [ "$1" = "up" ] || [ "$1" = "" ]; then
@@ -1211,9 +1211,9 @@ DASHBOARD_HTML
                     cp /source/containers.json /content/containers.json
                 "
                 
-                # Deploy dashboard container (no TS_AUTHKEY needed if volume exists)
+                # Deploy dashboard container (with TS_AUTHKEY)
                 log "Deploying dashboard container (volumes persist, force recreate)..."
-                docker compose -f docker-compose-dashboard.yml up -d --force-recreate
+                env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose-dashboard.yml up -d --force-recreate
                 
                 # Check if dashboard is running
                 if docker ps --filter "name=dashboard" --filter "status=running" | grep -q dashboard; then
@@ -1405,7 +1405,7 @@ CONTAINER_EOF
                     
                     # Force recreate dashboard to reload content (dashboard persists via volumes)
                     log "Refreshing dashboard container..."
-                    docker compose -f docker-compose-dashboard.yml up -d --force-recreate
+                    env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose-dashboard.yml up -d --force-recreate
                     
                     # Clean up temporary file
                     rm -f containers.json
@@ -1416,7 +1416,7 @@ CONTAINER_EOF
                     # Create empty containers.json
                     echo '{"generated":"'$(date -u +"%Y-%m-%dT%H:%M:%SZ")'","containers":[]}' > containers.json
                     docker run --rm -v global-dashboard_dashboard_content:/content -v "$(pwd):/source" alpine:latest sh -c "cp /source/containers.json /content/containers.json"
-                    docker compose -f docker-compose-dashboard.yml up -d --force-recreate
+                    env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose-dashboard.yml up -d --force-recreate
                     rm -f containers.json
                 fi
             fi
