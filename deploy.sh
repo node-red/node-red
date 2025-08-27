@@ -148,6 +148,30 @@ deploy_local() {
     sed -e "s/BRANCH_PLACEHOLDER/$BRANCH_NAME/g" \
         docker-compose.template.yml > "$COMPOSE_FILE"
     
+    # Generate Tailscale serve configuration for Node-RED
+    log "Generating Tailscale serve configuration..."
+    cat > tailscale-serve.json << TAILSCALE_CONFIG
+{
+  "TCP": {
+    "443": {
+      "HTTPS": true
+    }
+  },
+  "Web": {
+    "nr-${BRANCH_NAME}.${TAILNET:-tailbfedba}.ts.net:443": {
+      "Handlers": {
+        "/": {
+          "Proxy": "http://node-red:1880"
+        }
+      }
+    }
+  },
+  "AllowFunnel": {
+    "nr-${BRANCH_NAME}.${TAILNET:-tailbfedba}.ts.net:443": false
+  }
+}
+TAILSCALE_CONFIG
+    
     # Run docker-compose
     log "Running: docker compose -f $COMPOSE_FILE -p nr-$BRANCH_NAME $*"
     docker compose -f "$COMPOSE_FILE" -p "nr-$BRANCH_NAME" "$@"
