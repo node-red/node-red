@@ -3,8 +3,7 @@ services:
     image: nginx:alpine
     container_name: dashboard
     volumes:
-      - ./dashboard.html:/usr/share/nginx/html/index.html:ro
-      - ./containers.json:/usr/share/nginx/html/containers.json:ro
+      - dashboard_content:/usr/share/nginx/html:ro
     restart: unless-stopped
     networks:
       - dashboard-net
@@ -20,8 +19,8 @@ services:
       - TS_SERVE_CONFIG=/config/tailscale-serve-dashboard.json
     volumes:
       - dashboard_tailscale:/var/lib/tailscale
+      - dashboard_config:/config:ro
       - /dev/net/tun:/dev/net/tun
-      - ./tailscale-serve-dashboard.json:/config/tailscale-serve-dashboard.json:ro
     cap_add:
       - NET_ADMIN
     restart: unless-stopped
@@ -34,4 +33,8 @@ networks:
 
 volumes:
   dashboard_tailscale:
+    external: false
+  dashboard_content:
+    external: false
+  dashboard_config:
     external: false

@@ -490,14 +490,14 @@ DASHBOARD_CONFIG
         if [ -f "docker-compose-dashboard.yml" ]; then
             log "${BLUE}Generating and deploying dashboard...${NC}"
             
-            # Generate dashboard data
+            # Generate dashboard data in current directory (safe from removal)
             log "Scanning containers for dashboard..."
             
             # Find containers with the nr-experiment label
             containers=$(docker ps -q --filter "label=nr-experiment=true" 2>/dev/null || true)
             
             if [ -n "$containers" ]; then
-                # Generate containers.json
+                # Generate containers.json in current directory
                 echo "{" > containers.json
                 echo "  \"generated\": \"$(date -u +"%Y-%m-%dT%H:%M:%SZ")\"," >> containers.json
                 echo "  \"containers\": [" >> containers.json
@@ -561,7 +561,7 @@ CONTAINER_EOF
                 
                 log "Generated containers.json with $(echo "$containers" | wc -l) containers"
                 
-                # Generate dashboard HTML
+                # Generate dashboard HTML in current directory
                 log "Generating dashboard.html..."
                 cat > dashboard.html << 'DASHBOARD_HTML'
 <!DOCTYPE html>
@@ -1136,16 +1136,39 @@ CONTAINER_EOF
 </html>
 DASHBOARD_HTML
                 
-                # Deploy dashboard container
-                log "Stopping existing dashboard containers..."
-                docker compose -f docker-compose-dashboard.yml down 2>/dev/null || true
+                # Copy dashboard content to persistent volume using temporary container
+                log "Copying dashboard files to persistent volume..."
                 
-                log "Deploying dashboard container..."
-                if env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose-dashboard.yml up -d; then
+                # First, copy the tailscale configuration to the config volume
+                log "Copying Tailscale configuration to volume..."
+                docker run --rm -v dashboard_config:/config -v "$(pwd):/source" alpine:latest sh -c "cp /source/tailscale-serve-dashboard.json /config/"
+                
+                # Copy dashboard files to the content volume
+                docker run --rm -v dashboard_content:/content -v "$(pwd):/source" alpine:latest sh -c "
+                    cp /source/dashboard.html /content/index.html &&
+                    cp /source/containers.json /content/containers.json
+                "
+                
+                # Deploy dashboard container (no TS_AUTHKEY needed if volume exists)
+                log "Deploying dashboard container (volumes persist, force recreate)..."
+                docker compose -f docker-compose-dashboard.yml up -d --force-recreate
+                
+                # Check if dashboard is running
+                if docker ps --filter "name=dashboard" --filter "status=running" | grep -q dashboard; then
                     log "${GREEN}✅ Dashboard deployed successfully${NC}"
                 else
-                    log "${YELLOW}⚠️  Dashboard deployment failed${NC}"
+                    # If dashboard failed, try with TS_AUTHKEY for first-time setup
+                    log "${YELLOW}⚠️  Dashboard needs initial setup, trying with TS_AUTHKEY...${NC}"
+                    if env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose-dashboard.yml up -d --force-recreate; then
+                        log "${GREEN}✅ Dashboard deployed successfully with TS_AUTHKEY${NC}"
+                    else
+                        log "${YELLOW}⚠️  Dashboard deployment failed${NC}"
+                    fi
                 fi
+                
+                # Clean up generated files from current directory
+                log "Cleaning up temporary dashboard files..."
+                rm -f dashboard.html containers.json
             else
                 log "${YELLOW}⚠️  No containers found for dashboard${NC}"
             fi
@@ -1197,21 +1220,127 @@ DASHBOARD_HTML
             log "Removing image: nr-demo:$BRANCH_NAME"
             docker image rm "nr-demo:$BRANCH_NAME" 2>/dev/null || true
             
-            # Stop and remove dashboard if it exists
-            log "Stopping dashboard containers..."
-            docker compose -f docker-compose-dashboard.yml down 2>/dev/null || true
+            # Update dashboard to exclude removed branch (do this BEFORE removing deployment directory)
+            if [ -f "docker-compose-dashboard.yml" ]; then
+                log "${BLUE}Updating dashboard to exclude removed branch...${NC}"
+                
+                # Copy dashboard compose file to home directory for safe access
+                cp docker-compose-dashboard.yml ~/docker-compose-dashboard.yml
+                
+                # Temporarily move to root to generate dashboard content
+                cd ~
+                
+                # Find remaining containers (excluding ones from this branch)
+                containers=$(docker ps -q --filter "label=nr-experiment=true" --filter "label=com.docker.compose.project!=nr-$BRANCH_NAME" 2>/dev/null || true)
+                
+                if [ -n "$containers" ]; then
+                    log "Regenerating dashboard with remaining containers..."
+                    
+                    # Generate updated containers.json
+                    echo "{" > containers.json
+                    echo "  \"generated\": \"$(date -u +"%Y-%m-%dT%H:%M:%SZ")\"," >> containers.json
+                    echo "  \"containers\": [" >> containers.json
+                    
+                    first=true
+                    for container in $containers; do
+                        if [ "$first" = false ]; then
+                            echo "," >> containers.json
+                        fi
+                        first=false
+                        
+                        name=$(docker inspect --format='{{.Name}}' "$container" | sed 's/^\///')
+                        image=$(docker inspect --format='{{.Config.Image}}' "$container")
+                        created=$(docker inspect --format='{{.State.StartedAt}}' "$container")
+                        
+                        # Extract issue ID from container name
+                        issue_id=$(echo "$name" | sed -n 's/.*issue-\([0-9]\+\).*/\1/p')
+                        issue_url=""
+                        issue_title=""
+                        
+                        if [ -n "$issue_id" ]; then
+                            issue_url="https://github.com/$GITHUB_ISSUES_REPO/issues/$issue_id"
+                            # Try to fetch issue title
+                            api_url="https://api.github.com/repos/$GITHUB_ISSUES_REPO/issues/$issue_id"
+                            response=$(curl -s -f "$api_url" 2>/dev/null || echo "{}")
+                            issue_title=$(echo "$response" | grep '"title":' | head -1 | sed 's/.*"title": *"\([^"]*\)".*/\1/' | sed 's/\[NR Modernization Experiment\] *//')
+                        fi
+                        
+                        # Get branch name from container label
+                        branch_name=$(docker inspect --format='{{index .Config.Labels "com.docker.compose.project"}}' "$container" | sed 's/^nr-//')
+                        commit_short="unknown"
+                        commit_hash="unknown"
+                        commit_url=""
+                        branch_url=""
+                        
+                        # Only try to get git info if we still have the deployment directory
+                        if [ -d "$REPO_DIR" ]; then
+                            commit_short=$(cd "$REPO_DIR" && git rev-parse --short=8 HEAD 2>/dev/null || echo "unknown")
+                            commit_hash=$(cd "$REPO_DIR" && git rev-parse HEAD 2>/dev/null || echo "unknown")
+                            if [ "$commit_hash" != "unknown" ]; then
+                                commit_url="https://github.com/$GITHUB_REPO/commit/$commit_hash"
+                                branch_url="https://github.com/$GITHUB_REPO/tree/$branch_name"
+                            fi
+                        fi
+                        
+                        # Generate container entry
+                        cat >> containers.json << CONTAINER_EOF
+    {
+        "name": "${issue_title:-$branch_name}",
+        "image": "$image",
+        "created": "$created",
+        "url": "https://$name.${TAILNET}.ts.net",
+        "issue_url": "$issue_url",
+        "issue_title": "$issue_title",
+        "branch": "$branch_name",
+        "commit": "$commit_short",
+        "commit_url": "$commit_url",
+        "branch_url": "$branch_url"
+    }
+CONTAINER_EOF
+                    done
+                    
+                    echo "" >> containers.json
+                    echo "  ]" >> containers.json
+                    echo "}" >> containers.json
+                    
+                    # Copy updated containers.json to dashboard volume
+                    log "Updating dashboard volume with remaining containers..."
+                    docker run --rm -v dashboard_content:/content -v "$(pwd):/source" alpine:latest sh -c "cp /source/containers.json /content/containers.json"
+                    
+                    # Force recreate dashboard to reload content (dashboard persists via volumes)
+                    log "Refreshing dashboard container..."
+                    docker compose -f docker-compose-dashboard.yml up -d --force-recreate
+                    
+                    # Clean up temporary file
+                    rm -f containers.json
+                    
+                    log "${GREEN}✅ Dashboard updated successfully${NC}"
+                else
+                    log "${YELLOW}⚠️  No containers remain, dashboard will show empty state${NC}"
+                    # Create empty containers.json
+                    echo '{"generated":"'$(date -u +"%Y-%m-%dT%H:%M:%SZ")'","containers":[]}' > containers.json
+                    docker run --rm -v dashboard_content:/content -v "$(pwd):/source" alpine:latest sh -c "cp /source/containers.json /content/containers.json"
+                    docker compose -f docker-compose-dashboard.yml up -d --force-recreate
+                    rm -f containers.json
+                fi
+            fi
             
-            # Full docker system prune
-            log "Performing full docker system prune..."
-            docker system prune -af --volumes
+            # Selective cleanup (preserve dashboard volumes)
+            log "Performing selective docker cleanup..."
+            docker image prune -af
+            docker container prune -f
+            # Note: Not pruning volumes to preserve dashboard persistent volumes
             
-            # Remove the entire deployment directory
+            # Remove the entire deployment directory (now safe - dashboard uses persistent volumes)
             log "Removing deployment directory: $REPO_DIR"
-            cd ~
             rm -rf "$REPO_DIR"
             
+            # Clean up temporary dashboard compose file
+            rm -f ~/docker-compose-dashboard.yml
+            
             log "${GREEN}✅ Full cleanup complete for branch $BRANCH_NAME${NC}"
-            log "   Removed containers, images, volumes, and deployment directory"
+            log "   Removed containers, images, and deployment directory"
+            log "   Dashboard updated to exclude removed branch"
         fi
     fi
     
