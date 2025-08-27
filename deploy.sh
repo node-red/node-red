@@ -330,13 +330,10 @@ deploy_remote() {
     
     # Set deployment directory
     REPO_DIR=~/node-red-deployments-$BRANCH_NAME
-    LOG_FILE="$REPO_DIR/deployment.log"
     
-    # Create deployment directory if it doesn't exist
-    mkdir -p "$REPO_DIR"
-    
-    # Start logging
-    exec 1> >(tee -a "$LOG_FILE")
+    # Phase 1: Start with temporary logging for git operations
+    TEMP_LOG="/tmp/deploy-$BRANCH_NAME-$(date +%s).log"
+    exec 1> >(tee -a "$TEMP_LOG")
     exec 2>&1
     
     log "${BLUE}=== Starting deployment for branch: $BRANCH_NAME ===${NC}"
@@ -374,18 +371,50 @@ deploy_remote() {
     if [[ "$DOCKER_ARGS" == *"up"* ]]; then
         log "${BLUE}🔄 Updating code and building...${NC}"
         
-        # Clone or update repository
+        # Git-first approach: handle repository operations
+        GIT_SUCCESS=false
         if [ -d "$REPO_DIR/.git" ]; then
             log "Repository exists, updating..."
             cd "$REPO_DIR"
-            git fetch origin
-            git checkout "$BRANCH_NAME"
-            git reset --hard "origin/$BRANCH_NAME"
+            if git fetch origin && git checkout "$BRANCH_NAME" && git reset --hard "origin/$BRANCH_NAME"; then
+                GIT_SUCCESS=true
+            else
+                log "${RED}Failed to update existing repository${NC}"
+            fi
         else
+            log "No valid git repository found"
+            if [ -d "$REPO_DIR" ]; then
+                log "Removing corrupted directory..."
+                rm -rf "$REPO_DIR"
+            fi
             log "Cloning repository..."
-            git clone "$GIT_REMOTE" "$REPO_DIR"
-            cd "$REPO_DIR"
-            git checkout "$BRANCH_NAME"
+            if git clone "$GIT_REMOTE" "$REPO_DIR"; then
+                cd "$REPO_DIR"
+                if git checkout "$BRANCH_NAME"; then
+                    GIT_SUCCESS=true
+                else
+                    log "${RED}Failed to checkout branch $BRANCH_NAME${NC}"
+                fi
+            else
+                log "${RED}Failed to clone repository${NC}"
+            fi
+        fi
+        
+        # Phase 2: Switch to persistent logging only on git success
+        if [ "$GIT_SUCCESS" = true ]; then
+            log "Git operations completed successfully, setting up persistent logging..."
+            LOG_FILE="$REPO_DIR/deployment.log"
+            
+            # Move temp log to final location and continue logging there
+            mv "$TEMP_LOG" "$LOG_FILE"
+            exec 1> >(tee -a "$LOG_FILE")
+            exec 2>&1
+            
+            log "${GREEN}✅ Git operations successful, continuing deployment...${NC}"
+        else
+            log "${RED}❌ Git operations failed, cleaning up and exiting${NC}"
+            rm -f "$TEMP_LOG"
+            exit 1
         fi
         
         # Generate docker-compose file from template
