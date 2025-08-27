@@ -34,5 +34,7 @@ device.yml
 docker-compose.yml
 docker-compose-*.yml
 !docker-compose-dashboard.yml
+tailscale-serve.json
+tailscale-serve-*.json
 cd.sh
 .playwright-mcp/
