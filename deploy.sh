@@ -36,6 +36,17 @@ CONTAINER_TAG="nr-experiment"
 GITHUB_REPO="${GITHUB_REPO:-dimitrieh/node-red}"
 GITHUB_ISSUES_REPO="${GITHUB_ISSUES_REPO:-node-red/node-red}"
 
+# Parse command line flags
+REMOVE_DASHBOARD=false
+for arg in "$@"; do
+    case $arg in
+        --remove-dashboard)
+            REMOVE_DASHBOARD=true
+            shift
+            ;;
+    esac
+done
+
 # Function to log with timestamp
 log() {
     echo -e "[$(date '+%Y-%m-%d %H:%M:%S')] $1"
@@ -273,6 +284,7 @@ deploy_remote() {
     log "   Tailnet: $TAILNET_TO_PASS"
     log "   Git Remote: $GIT_REMOTE"
     log "   GitHub Repo: $GITHUB_REPO"
+    log "   Remove Dashboard: $REMOVE_DASHBOARD"
     echo
     
     # Pass all required variables as arguments to remote script
@@ -283,13 +295,14 @@ deploy_remote() {
         "$GIT_REMOTE" \
         "$GITHUB_REPO" \
         "$GITHUB_ISSUES_REPO" \
+        "$REMOVE_DASHBOARD" \
         "$@" << 'REMOTE_SCRIPT'
     
     set -euo pipefail
     
     # Get arguments passed from local script
-    if [ "$#" -lt 6 ]; then
-        echo "❌ Remote script requires at least 6 arguments: BRANCH_NAME TS_AUTHKEY TAILNET GIT_REMOTE GITHUB_REPO GITHUB_ISSUES_REPO [DOCKER_ARGS...]"
+    if [ "$#" -lt 7 ]; then
+        echo "❌ Remote script requires at least 7 arguments: BRANCH_NAME TS_AUTHKEY TAILNET GIT_REMOTE GITHUB_REPO GITHUB_ISSUES_REPO REMOVE_DASHBOARD [DOCKER_ARGS...]"
         exit 1
     fi
     
@@ -299,7 +312,8 @@ deploy_remote() {
     GIT_REMOTE="$4"
     GITHUB_REPO="$5"
     GITHUB_ISSUES_REPO="$6"
-    shift 6
+    REMOVE_DASHBOARD="$7"
+    shift 7
     DOCKER_ARGS="$@"
     
     # Validate required variables
@@ -325,6 +339,7 @@ deploy_remote() {
     log "   Branch: $BRANCH_NAME"
     log "   Tailnet: $TAILNET"
     log "   Git Remote: $GIT_REMOTE"
+    log "   Remove Dashboard: $REMOVE_DASHBOARD"
     log "   Docker Args: $DOCKER_ARGS"
     echo
     
@@ -1220,8 +1235,38 @@ DASHBOARD_HTML
             log "Removing image: nr-demo:$BRANCH_NAME"
             docker image rm "nr-demo:$BRANCH_NAME" 2>/dev/null || true
             
-            # Update dashboard to exclude removed branch (do this BEFORE removing deployment directory)
-            if [ -f "docker-compose-dashboard.yml" ]; then
+            # Handle dashboard based on REMOVE_DASHBOARD flag
+            if [ "$REMOVE_DASHBOARD" = "true" ]; then
+                log "${BLUE}🗑️  Removing dashboard completely (--remove-dashboard flag detected)...${NC}"
+                
+                # Copy dashboard compose file for safe access if it exists
+                if [ -f "docker-compose-dashboard.yml" ]; then
+                    cp docker-compose-dashboard.yml ~/docker-compose-dashboard.yml
+                fi
+                
+                # Stop and remove dashboard containers (try both locations)
+                log "Stopping dashboard containers..."
+                if [ -f "docker-compose-dashboard.yml" ]; then
+                    docker compose -f docker-compose-dashboard.yml down 2>/dev/null || true
+                elif [ -f ~/docker-compose-dashboard.yml ]; then
+                    docker compose -f ~/docker-compose-dashboard.yml down 2>/dev/null || true
+                fi
+                
+                # Remove dashboard volumes
+                log "Removing dashboard volumes..."
+                docker volume rm dashboard_content dashboard_config dashboard_tailscale 2>/dev/null || true
+                
+                # Remove dashboard network
+                log "Removing dashboard network..."
+                docker network rm dashboard-net 2>/dev/null || true
+                
+                # Clean up dashboard compose file
+                log "Cleaning up dashboard compose file..."
+                rm -f ~/docker-compose-dashboard.yml
+                
+                log "${GREEN}✅ Dashboard completely removed${NC}"
+                
+            elif [ -f "docker-compose-dashboard.yml" ]; then
                 log "${BLUE}Updating dashboard to exclude removed branch...${NC}"
                 
                 # Copy dashboard compose file to home directory for safe access
@@ -1363,6 +1408,11 @@ REMOTE_SCRIPT
             log "${GREEN}✅ Remote cleanup complete!${NC}"
             echo "   Server: $HETZNER_HOST"
             echo "   All traces of branch '$BRANCH_NAME' deployment have been removed"
+            if [ "$REMOVE_DASHBOARD" = "true" ]; then
+                echo "   Dashboard has been completely removed (no trace left)"
+            else
+                echo "   Dashboard remains running with updated content"
+            fi
         fi
     else
         # SSH command failed
