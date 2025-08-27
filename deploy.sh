@@ -1481,24 +1481,20 @@ CONTAINER_EOF
 </html>
 DASHBOARD_HTML
                 
-                # Copy dashboard content to persistent volume using temporary container
-                log "Copying dashboard files to persistent volume..."
+                # Always recreate dashboard container with fresh volumes (preserve tailscale sidecar)
+                log "Recreating dashboard container with fresh volumes..."
                 
-                # First, copy the tailscale configuration to the config volume
-                log "Copying Tailscale configuration to volume..."
-                docker run --rm -v global-dashboard_dashboard_config:/config -v "$(pwd):/source" alpine:latest sh -c "cp /source/tailscale-serve-dashboard.json /config/"
+                # Stop and remove ONLY dashboard container + volumes (preserve tailscale)
+                docker stop dashboard 2>/dev/null || true
+                docker rm dashboard 2>/dev/null || true
+                docker volume rm global-dashboard_dashboard_content 2>/dev/null || true
+                docker volume rm global-dashboard_dashboard_config 2>/dev/null || true
                 
-                # Copy dashboard files to the content volume
-                docker run --rm -v global-dashboard_dashboard_content:/content -v "$(pwd):/source" alpine:latest sh -c "
-                    cp /source/dashboard.html /content/index.html &&
-                    cp /source/containers.json /content/containers.json
-                "
+                # Deploy fresh dashboard container with new volumes
+                log "Deploying fresh dashboard container..."
+                env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose-dashboard.yml up -d dashboard
                 
-                # Deploy dashboard container (with TS_AUTHKEY)
-                log "Deploying dashboard container (selective recreation)..."
-                # Always recreate dashboard content container for branch updates
-                env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose-dashboard.yml up -d --force-recreate dashboard
-                # Preserve tailscale sidecar to allow stale state detection
+                # Preserve tailscale sidecar (only restart if needed for connection)
                 env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose-dashboard.yml up -d dashboard-tailscale
                 
                 # Check if dashboard is running
@@ -1510,11 +1506,15 @@ DASHBOARD_HTML
                         log "${YELLOW}⚠️  Dashboard Tailscale validation failed, but continuing...${NC}"
                     fi
                 else
-                    # If dashboard failed, try with TS_AUTHKEY for first-time setup
-                    log "${YELLOW}⚠️  Dashboard needs initial setup, trying with TS_AUTHKEY...${NC}"
-                    # Force recreate both containers for fresh setup
-                    if env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose-dashboard.yml -p global-dashboard up -d --force-recreate; then
-                        log "${GREEN}✅ Dashboard deployed successfully with TS_AUTHKEY${NC}"
+                    # If dashboard failed, try complete recreation including tailscale for first-time setup
+                    log "${YELLOW}⚠️  Dashboard needs initial setup, trying with fresh tailscale...${NC}"
+                    # For first-time setup, recreate both containers completely
+                    docker stop dashboard dashboard-tailscale 2>/dev/null || true
+                    docker rm dashboard dashboard-tailscale 2>/dev/null || true
+                    docker volume rm global-dashboard_dashboard_content global-dashboard_dashboard_config global-dashboard_dashboard_tailscale 2>/dev/null || true
+                    
+                    if env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose-dashboard.yml -p global-dashboard up -d; then
+                        log "${GREEN}✅ Dashboard deployed successfully with fresh setup${NC}"
                         
                         # Validate dashboard Tailscale connection
                         if ! validate_and_retry_dashboard_tailscale_remote; then
@@ -1702,14 +1702,18 @@ CONTAINER_EOF
                     echo "  ]" >> containers.json
                     echo "}" >> containers.json
                     
-                    # Copy updated containers.json to dashboard volume
-                    log "Updating dashboard volume with remaining containers..."
-                    docker run --rm -v global-dashboard_dashboard_content:/content -v "$(pwd):/source" alpine:latest sh -c "cp /source/containers.json /content/containers.json"
+                    # Recreate dashboard container with updated data (preserve tailscale)
+                    log "Recreating dashboard with updated container list..."
                     
-                    # Force recreate dashboard to reload content (dashboard persists via volumes)
-                    log "Refreshing dashboard container..."
-                    # Recreate dashboard content, preserve tailscale identity
-                    env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose-dashboard.yml up -d --force-recreate dashboard
+                    # Stop and remove dashboard container + volumes (preserve tailscale)
+                    docker stop dashboard 2>/dev/null || true
+                    docker rm dashboard 2>/dev/null || true
+                    docker volume rm global-dashboard_dashboard_content 2>/dev/null || true
+                    docker volume rm global-dashboard_dashboard_config 2>/dev/null || true
+                    
+                    # Deploy fresh dashboard with updated data
+                    env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose-dashboard.yml up -d dashboard
+                    # Preserve tailscale sidecar (no restart unless connection issues)
                     env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose-dashboard.yml up -d dashboard-tailscale
                     
                     # Clean up temporary file
@@ -1718,23 +1722,32 @@ CONTAINER_EOF
                     log "${GREEN}✅ Dashboard updated successfully${NC}"
                 else
                     log "${YELLOW}⚠️  No containers remain, dashboard will show empty state${NC}"
-                    # Create empty containers.json
+                    
+                    # Recreate dashboard with empty state (preserve tailscale)
+                    docker stop dashboard 2>/dev/null || true
+                    docker rm dashboard 2>/dev/null || true
+                    docker volume rm global-dashboard_dashboard_content 2>/dev/null || true
+                    docker volume rm global-dashboard_dashboard_config 2>/dev/null || true
+                    
+                    # Create empty containers.json for the fresh deployment
                     echo '{"generated":"'$(date -u +"%Y-%m-%dT%H:%M:%SZ")'","containers":[]}' > containers.json
-                    docker run --rm -v global-dashboard_dashboard_content:/content -v "$(pwd):/source" alpine:latest sh -c "cp /source/containers.json /content/containers.json"
-                    # Recreate dashboard content, preserve tailscale identity
-                    env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose-dashboard.yml up -d --force-recreate dashboard
+                    
+                    # Deploy fresh dashboard with empty state
+                    env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose-dashboard.yml up -d dashboard
+                    # Preserve tailscale sidecar (no restart unless connection issues)
                     env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose-dashboard.yml up -d dashboard-tailscale
+                    
                     rm -f containers.json
                 fi
             fi
             
-            # Selective cleanup (preserve dashboard volumes)
+            # Selective cleanup (dashboard volumes already handled above)
             log "Performing selective docker cleanup..."
             docker image prune -af
             docker container prune -f
-            # Note: Not pruning volumes to preserve dashboard persistent volumes
+            # Note: Not pruning volumes to avoid removing other project volumes
             
-            # Remove the entire deployment directory (now safe - dashboard uses persistent volumes)
+            # Remove the entire deployment directory (dashboard state handled separately above)
             log "Removing deployment directory: $REPO_DIR"
             rm -rf "$REPO_DIR"
             
