@@ -1,3 +1,5 @@
+name: nr-BRANCH_PLACEHOLDER
+
 services:
   node-red:
     image: nr-demo:BRANCH_PLACEHOLDER

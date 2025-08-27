@@ -1,3 +1,5 @@
+name: global-dashboard
+
 services:
   dashboard:
     image: nginx:alpine

@@ -18,6 +18,28 @@ if [ -f ~/.localhetznerrc ]; then
     source ~/.localhetznerrc
 fi
 
+# Validate required configuration was loaded
+validate_config() {
+    local missing_vars=()
+    
+    if [ -z "$TS_AUTHKEY" ]; then
+        missing_vars+=("TS_AUTHKEY")
+    fi
+    
+    if [ -z "$TAILNET" ]; then
+        missing_vars+=("TAILNET")
+    fi
+    
+    if [ ${#missing_vars[@]} -gt 0 ]; then
+        echo -e "${RED}❌ Missing required configuration variables: ${missing_vars[*]}${NC}"
+        echo "   Check ~/.localtailscalerc file exists and contains:"
+        echo "   - export TS_AUTHKEY=\"your-auth-key\""
+        echo "   - export TAILNET=\"your-tailnet\""
+        return 1
+    fi
+    return 0
+}
+
 # Get current git branch and sanitize it for Docker/Tailscale naming
 BRANCH_NAME=$(git branch --show-current | sed 's/[^a-zA-Z0-9]/-/g' | tr '[:upper:]' '[:lower:]')
 
@@ -185,11 +207,11 @@ TAILSCALE_CONFIG
     
     # Run docker-compose
     if [ "$1" = "up" ] || [ "$1" = "" ]; then
-        log "Running: docker compose -f $COMPOSE_FILE -p nr-$BRANCH_NAME up -d"
-        docker compose -f "$COMPOSE_FILE" -p "nr-$BRANCH_NAME" up -d
+        log "Running: docker compose -f $COMPOSE_FILE up -d"
+        docker compose -f "$COMPOSE_FILE" up -d
     else
-        log "Running: docker compose -f $COMPOSE_FILE -p nr-$BRANCH_NAME $*"
-        docker compose -f "$COMPOSE_FILE" -p "nr-$BRANCH_NAME" "$@"
+        log "Running: docker compose -f $COMPOSE_FILE $*"
+        docker compose -f "$COMPOSE_FILE" "$@"
     fi
     
     if [ "$1" = "up" ] || [ "$1" = "" ]; then
@@ -230,6 +252,11 @@ deploy_remote() {
     echo "  - Branch: $BRANCH_NAME"
     echo
     
+    # Validate configuration before proceeding
+    if ! validate_config; then
+        exit 1
+    fi
+    
     # Check branch sync for remote deployment
     check_branch_sync
     
@@ -242,6 +269,7 @@ deploy_remote() {
     
     if ! check_ts_authkey; then
         log "${RED}❌ TS_AUTHKEY is required for remote deployment!${NC}"
+        log "   Check ~/.localtailscalerc configuration."
         exit 1
     fi
     
@@ -276,8 +304,12 @@ deploy_remote() {
     # Deploy via single SSH session
     log "${BLUE}🔨 Deploying to Hetzner server...${NC}"
     
-    # Ensure TAILNET has a reasonable default
-    TAILNET_TO_PASS="${TAILNET:-your-tailnet}"
+    # Validate TAILNET is set from config
+    if [ -z "$TAILNET" ]; then
+        log "${RED}❌ TAILNET not set! Check ~/.localtailscalerc configuration.${NC}"
+        exit 1
+    fi
+    TAILNET_TO_PASS="$TAILNET"
     
     log "📋 Deployment variables:"
     log "   Branch: $BRANCH_NAME"
@@ -285,6 +317,7 @@ deploy_remote() {
     log "   Git Remote: $GIT_REMOTE"
     log "   GitHub Repo: $GITHUB_REPO"
     log "   Remove Dashboard: $REMOVE_DASHBOARD"
+    log "   TS_AUTHKEY: ${TS_AUTHKEY:+SET (${#TS_AUTHKEY} chars)}"
     echo
     
     # Pass all required variables as arguments to remote script
@@ -341,6 +374,19 @@ deploy_remote() {
     log "   Git Remote: $GIT_REMOTE"
     log "   Remove Dashboard: $REMOVE_DASHBOARD"
     log "   Docker Args: $DOCKER_ARGS"
+    log "   TS_AUTHKEY: ${TS_AUTHKEY:+SET (${#TS_AUTHKEY} chars)}"
+    
+    # Validate critical variables were received
+    if [ -z "$TS_AUTHKEY" ]; then
+        log "${RED}❌ TS_AUTHKEY not received by remote script!${NC}"
+        exit 1
+    fi
+    
+    if [ -z "$TAILNET" ]; then
+        log "${RED}❌ TAILNET not received by remote script!${NC}"
+        exit 1
+    fi
+    
     echo
     
     # Set deployment directory
@@ -494,7 +540,8 @@ DASHBOARD_CONFIG
         
         # Deploy with docker-compose
         log "${BLUE}Deploying with docker-compose...${NC}"
-        if env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose.yml -p "nr-$BRANCH_NAME" up -d; then
+        log "Debug: TS_AUTHKEY before docker compose: ${TS_AUTHKEY:+SET (${#TS_AUTHKEY} chars)}"
+        if env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose.yml up -d; then
             log "${GREEN}✅ Main deployment successful${NC}"
         else
             log "${RED}❌ Main deployment failed${NC}"
@@ -1166,7 +1213,7 @@ DASHBOARD_HTML
                 
                 # Deploy dashboard container (no TS_AUTHKEY needed if volume exists)
                 log "Deploying dashboard container (volumes persist, force recreate)..."
-                docker compose -f docker-compose-dashboard.yml -p global-dashboard up -d --force-recreate
+                docker compose -f docker-compose-dashboard.yml up -d --force-recreate
                 
                 # Check if dashboard is running
                 if docker ps --filter "name=dashboard" --filter "status=running" | grep -q dashboard; then
@@ -1212,8 +1259,8 @@ DASHBOARD_HTML
         if [[ "$DOCKER_ARGS" == *"down"* ]]; then
             # For down commands, try docker-compose first, but fallback to cleanup by name
             if [ -f "docker-compose.yml" ]; then
-                log "Running: docker compose -p nr-$BRANCH_NAME $DOCKER_ARGS"
-                env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose.yml -p "nr-$BRANCH_NAME" $DOCKER_ARGS 2>/dev/null || true
+                log "Running: docker compose $DOCKER_ARGS"
+                env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose.yml $DOCKER_ARGS 2>/dev/null || true
             else
                 log "docker-compose.yml not found, cleaning up by container/project names..."
                 # Stop and remove containers by project name
@@ -1223,8 +1270,8 @@ DASHBOARD_HTML
                 docker network rm "nr-${BRANCH_NAME}_nr-${BRANCH_NAME}-net" 2>/dev/null || true
             fi
         else
-            log "Running: docker compose -p nr-$BRANCH_NAME $DOCKER_ARGS"
-            env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose.yml -p "nr-$BRANCH_NAME" $DOCKER_ARGS
+            log "Running: docker compose $DOCKER_ARGS"
+            env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose.yml $DOCKER_ARGS
         fi
         
         # If this is a down command, do full cleanup
@@ -1247,9 +1294,13 @@ DASHBOARD_HTML
                 # Stop and remove dashboard containers (try both locations)
                 log "Stopping dashboard containers..."
                 if [ -f "docker-compose-dashboard.yml" ]; then
-                    docker compose -f docker-compose-dashboard.yml -p global-dashboard down 2>/dev/null || true
+                    docker compose -f docker-compose-dashboard.yml down 2>/dev/null || true
                 elif [ -f ~/docker-compose-dashboard.yml ]; then
-                    docker compose -f ~/docker-compose-dashboard.yml -p global-dashboard down 2>/dev/null || true
+                    docker compose -f ~/docker-compose-dashboard.yml down 2>/dev/null || true
+                else
+                    # Fallback: use project name directly when compose files are missing
+                    log "No compose file found, using project name fallback..."
+                    docker compose -p global-dashboard down 2>/dev/null || true
                 fi
                 
                 # Remove dashboard volumes
@@ -1354,7 +1405,7 @@ CONTAINER_EOF
                     
                     # Force recreate dashboard to reload content (dashboard persists via volumes)
                     log "Refreshing dashboard container..."
-                    docker compose -f docker-compose-dashboard.yml -p global-dashboard up -d --force-recreate
+                    docker compose -f docker-compose-dashboard.yml up -d --force-recreate
                     
                     # Clean up temporary file
                     rm -f containers.json
@@ -1365,7 +1416,7 @@ CONTAINER_EOF
                     # Create empty containers.json
                     echo '{"generated":"'$(date -u +"%Y-%m-%dT%H:%M:%SZ")'","containers":[]}' > containers.json
                     docker run --rm -v global-dashboard_dashboard_content:/content -v "$(pwd):/source" alpine:latest sh -c "cp /source/containers.json /content/containers.json"
-                    docker compose -f docker-compose-dashboard.yml -p global-dashboard up -d --force-recreate
+                    docker compose -f docker-compose-dashboard.yml up -d --force-recreate
                     rm -f containers.json
                 fi
             fi
