@@ -847,6 +847,9 @@ DASHBOARD_CONFIG
                     image=$(docker inspect --format='{{.Config.Image}}' "$container")
                     created=$(docker inspect --format='{{.State.StartedAt}}' "$container")
                     
+                    # Get branch name from container label
+                    branch=$(docker inspect --format='{{index .Config.Labels "com.docker.compose.project"}}' "$container" | sed 's/^nr-//')
+                    
                     # Extract issue ID from branch name, not container name
                     issue_id=$(echo "$branch" | sed -n 's/^issue-\([0-9]\+\)$/\1/p')
                     issue_url=""
@@ -859,9 +862,6 @@ DASHBOARD_CONFIG
                         response=$(curl -s -f "$api_url" 2>/dev/null || echo "{}")
                         issue_title=$(echo "$response" | grep '"title":' | head -1 | sed 's/.*"title": *"\([^"]*\)".*/\1/' | sed 's/\[NR Modernization Experiment\] *//')
                     fi
-                    
-                    # Get branch name from container label
-                    branch=$(docker inspect --format='{{index .Config.Labels "com.docker.compose.project"}}' "$container" | sed 's/^nr-//')
                     commit_short="unknown"
                     commit_hash="unknown"
                     
