@@ -180,6 +180,29 @@ TAILSCALE_CONFIG
         echo
         log "${GREEN}✅ Local Deployment complete!${NC}"
         echo "   Access Node-RED at: https://nr-$BRANCH_NAME.${TAILNET:-[your-tailnet]}.ts.net"
+    elif [ "$1" = "down" ]; then
+        log "${BLUE}🧹 Cleaning up local resources...${NC}"
+        
+        # Remove volumes
+        log "Removing volumes..."
+        docker volume rm "nr_${BRANCH_NAME}_data" 2>/dev/null || true
+        docker volume rm "nr_${BRANCH_NAME}_tailscale" 2>/dev/null || true
+        
+        # Remove branch-specific image
+        log "Removing image: nr-demo:$BRANCH_NAME"
+        docker image rm "nr-demo:$BRANCH_NAME" 2>/dev/null || true
+        
+        # Prune unused images
+        log "Pruning unused images..."
+        docker image prune -f
+        
+        # Remove generated files
+        log "Removing generated files..."
+        rm -f "$COMPOSE_FILE" tailscale-serve.json
+        
+        echo
+        log "${GREEN}✅ Local cleanup complete!${NC}"
+        echo "   Removed containers, volumes, images, and generated files for branch: $BRANCH_NAME"
     fi
 }
 
@@ -1096,26 +1119,51 @@ DASHBOARD_HTML
             log "${YELLOW}⚠️  docker-compose-dashboard.yml not found, skipping dashboard deployment${NC}"
         fi
         
-        # Clean up old resources
-        log "${BLUE}🧹 Cleaning up old resources...${NC}"
-        cd ~
-        # Keep only last 3 deployment directories
-        ls -dt node-red-deployments-* 2>/dev/null | tail -n +4 | xargs -r rm -rf
-        # Clean up old Tailscale configs in home directory
-        rm -f tailscale-serve-*.json 2>/dev/null || true
-        log "Cleanup completed"
         
     else
-        log "${BLUE}⏭️  Skipping build for '$DOCKER_ARGS' command${NC}"
+        log "${BLUE}⏭️  Handling '$DOCKER_ARGS' command${NC}"
         
-        # Just run the docker command
-        cd "$REPO_DIR" 2>/dev/null || {
+        # Check if deployment directory exists
+        if [ ! -d "$REPO_DIR" ]; then
             log "${YELLOW}⚠️  No deployment directory found for branch $BRANCH_NAME${NC}"
-            exit 1
-        }
+            if [[ "$DOCKER_ARGS" == *"down"* ]]; then
+                log "Nothing to clean up for branch $BRANCH_NAME"
+                exit 0
+            else
+                exit 1
+            fi
+        fi
         
+        cd "$REPO_DIR"
+        
+        # Run the docker command
         log "Running: docker compose -p nr-$BRANCH_NAME $DOCKER_ARGS"
         env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose.yml -p "nr-$BRANCH_NAME" $DOCKER_ARGS
+        
+        # If this is a down command, do full cleanup
+        if [[ "$DOCKER_ARGS" == *"down"* ]]; then
+            log "${BLUE}🧹 Performing full cleanup for branch $BRANCH_NAME...${NC}"
+            
+            # Remove branch-specific image
+            log "Removing image: nr-demo:$BRANCH_NAME"
+            docker image rm "nr-demo:$BRANCH_NAME" 2>/dev/null || true
+            
+            # Stop and remove dashboard if it exists
+            log "Stopping dashboard containers..."
+            docker compose -f docker-compose-dashboard.yml down 2>/dev/null || true
+            
+            # Full docker system prune
+            log "Performing full docker system prune..."
+            docker system prune -af --volumes
+            
+            # Remove the entire deployment directory
+            log "Removing deployment directory: $REPO_DIR"
+            cd ~
+            rm -rf "$REPO_DIR"
+            
+            log "${GREEN}✅ Full cleanup complete for branch $BRANCH_NAME${NC}"
+            log "   Removed containers, images, volumes, and deployment directory"
+        fi
     fi
     
     log "${GREEN}=== Deployment script completed ===${NC}"
@@ -1132,6 +1180,11 @@ REMOTE_SCRIPT
             echo "   Server: $HETZNER_HOST"
             echo "   Node-RED: https://nr-$BRANCH_NAME.${TAILNET:-[your-tailnet]}.ts.net"
             echo "   Dashboard: https://dashboard.${TAILNET:-[your-tailnet]}.ts.net"
+        elif [ "$1" = "down" ]; then
+            echo
+            log "${GREEN}✅ Remote cleanup complete!${NC}"
+            echo "   Server: $HETZNER_HOST"
+            echo "   All traces of branch '$BRANCH_NAME' deployment have been removed"
         fi
     else
         # SSH command failed
