@@ -661,6 +661,98 @@ DASHBOARD_CONFIG
         fi
     }
     
+    # Function to generate dashboard content by scanning all running containers server-wide
+    generate_dashboard_content() {
+        log "Scanning containers for dashboard..."
+        
+        # Find ALL containers with the nr-experiment label (server-wide scan)
+        containers=$(docker ps -q --filter "label=nr-experiment=true" 2>/dev/null || true)
+        
+        if [ -n "$containers" ]; then
+            # Generate containers.json with all running containers
+            echo "{" > containers.json
+            echo "  \"generated\": \"$(date -u +"%Y-%m-%dT%H:%M:%SZ")\"," >> containers.json
+            echo "  \"containers\": [" >> containers.json
+            
+            first=true
+            for container in $containers; do
+                if [ "$first" = false ]; then
+                    echo "," >> containers.json
+                fi
+                first=false
+                
+                name=$(docker inspect --format='{{.Name}}' "$container" | sed 's/^\///')
+                image=$(docker inspect --format='{{.Config.Image}}' "$container")
+                created=$(docker inspect --format='{{.State.StartedAt}}' "$container")
+                
+                # Get branch name from container label
+                branch=$(docker inspect --format='{{index .Config.Labels "com.docker.compose.project"}}' "$container" | sed 's/^nr-//')
+                
+                # Extract issue ID from branch name, not container name
+                issue_id=$(echo "$branch" | sed -n 's/^issue-\([0-9]\+\)$/\1/p')
+                issue_url=""
+                issue_title=""
+                
+                if [ -n "$issue_id" ]; then
+                    issue_url="https://github.com/$GITHUB_ISSUES_REPO/issues/$issue_id"
+                    # Try to fetch issue title
+                    api_url="https://api.github.com/repos/$GITHUB_ISSUES_REPO/issues/$issue_id"
+                    response=$(curl -s -f "$api_url" 2>/dev/null || echo "{}")
+                    issue_title=$(echo "$response" | grep '"title":' | head -1 | sed 's/.*"title": *"\([^"]*\)".*/\1/' | sed 's/\[NR Modernization Experiment\] *//')
+                fi
+                commit_short="unknown"
+                commit_hash="unknown"
+                
+                commit_url=""
+                branch_url=""
+                
+                # Try to get git info from the branch-specific deployment directory
+                branch_repo_dir=~/node-red-deployments-$branch
+                if [ -d "$branch_repo_dir" ]; then
+                    commit_short=$(cd "$branch_repo_dir" && git rev-parse --short=8 HEAD 2>/dev/null || echo "unknown")
+                    commit_hash=$(cd "$branch_repo_dir" && git rev-parse HEAD 2>/dev/null || echo "unknown")
+                    if [ "$commit_hash" != "unknown" ]; then
+                        commit_url="https://github.com/$GITHUB_REPO/commit/$commit_hash"
+                        branch_url="https://github.com/$GITHUB_REPO/tree/$branch"
+                    else
+                        branch_url="https://github.com/$GITHUB_REPO/tree/$branch"
+                    fi
+                else
+                    branch_url="https://github.com/$GITHUB_REPO/tree/$branch"
+                fi
+                
+                # Generate container entry
+                cat >> containers.json << CONTAINER_EOF
+    {
+        "name": "${issue_title:-$branch}",
+        "image": "$image",
+        "created": "$created",
+        "url": "https://$name.${TAILNET}.ts.net",
+        "issue_url": "$issue_url",
+        "issue_title": "$issue_title",
+        "branch": "$branch",
+        "commit": "$commit_short",
+        "commit_url": "$commit_url",
+        "branch_url": "$branch_url"
+    }
+CONTAINER_EOF
+            done
+            
+            echo "" >> containers.json
+            echo "  ]" >> containers.json
+            echo "}" >> containers.json
+            
+            log "Generated containers.json with $(echo "$containers" | wc -l) containers"
+        else
+            # Create empty containers.json when no containers are running
+            log "${YELLOW}⚠️  No containers found, generating empty dashboard${NC}"
+            echo '{"generated":"'$(date -u +"%Y-%m-%dT%H:%M:%SZ")'","containers":[]}' > containers.json
+        fi
+        
+        # Generate dashboard HTML
+        generate_dashboard_html
+    }
+
     # Function to generate nginx configuration with no-cache headers
     generate_nginx_config() {
         cat > nginx-dashboard.conf << 'NGINX_CONFIG'
@@ -1486,144 +1578,59 @@ DASHBOARD_CONFIG
         if [ -f "docker-compose-dashboard.yml" ]; then
             log "${BLUE}Generating and deploying dashboard...${NC}"
             
-            # Generate dashboard data in current directory (safe from removal)
-            log "Scanning containers for dashboard..."
+            # Generate dashboard content using common function
+            generate_dashboard_content
             
-            # Find containers with the nr-experiment label
-            containers=$(docker ps -q --filter "label=nr-experiment=true" 2>/dev/null || true)
+            # Always recreate dashboard container with fresh volumes (preserve tailscale sidecar)
+            log "Recreating dashboard container with fresh volumes..."
             
-            if [ -n "$containers" ]; then
-                # Generate containers.json in current directory
-                echo "{" > containers.json
-                echo "  \"generated\": \"$(date -u +"%Y-%m-%dT%H:%M:%SZ")\"," >> containers.json
-                echo "  \"containers\": [" >> containers.json
+            # Stop and remove ONLY dashboard container + volumes (preserve tailscale)
+            docker stop dashboard 2>/dev/null || true
+            docker rm dashboard 2>/dev/null || true
+            docker volume rm global-dashboard_dashboard_content 2>/dev/null || true
+            docker volume rm global-dashboard_dashboard_config 2>/dev/null || true
+            
+            # Deploy fresh dashboard container with new volumes
+            log "Deploying fresh dashboard container..."
+            env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose-dashboard.yml up -d dashboard
+            
+            # Copy fresh dashboard files to the new volumes
+            prepare_and_copy_dashboard_files
+            
+            # Preserve tailscale sidecar (only restart if needed for connection)
+            env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose-dashboard.yml up -d dashboard-tailscale
+            
+            # Check if dashboard is running
+            if docker ps --filter "name=dashboard" --filter "status=running" | grep -q dashboard; then
+                log "${GREEN}✅ Dashboard deployed successfully${NC}"
                 
-                first=true
-                for container in $containers; do
-                    if [ "$first" = false ]; then
-                        echo "," >> containers.json
-                    fi
-                    first=false
-                    
-                    name=$(docker inspect --format='{{.Name}}' "$container" | sed 's/^\///')
-                    image=$(docker inspect --format='{{.Config.Image}}' "$container")
-                    created=$(docker inspect --format='{{.State.StartedAt}}' "$container")
-                    
-                    # Get branch name from container label
-                    branch=$(docker inspect --format='{{index .Config.Labels "com.docker.compose.project"}}' "$container" | sed 's/^nr-//')
-                    
-                    # Extract issue ID from branch name, not container name
-                    issue_id=$(echo "$branch" | sed -n 's/^issue-\([0-9]\+\)$/\1/p')
-                    issue_url=""
-                    issue_title=""
-                    
-                    if [ -n "$issue_id" ]; then
-                        issue_url="https://github.com/$GITHUB_ISSUES_REPO/issues/$issue_id"
-                        # Try to fetch issue title
-                        api_url="https://api.github.com/repos/$GITHUB_ISSUES_REPO/issues/$issue_id"
-                        response=$(curl -s -f "$api_url" 2>/dev/null || echo "{}")
-                        issue_title=$(echo "$response" | grep '"title":' | head -1 | sed 's/.*"title": *"\([^"]*\)".*/\1/' | sed 's/\[NR Modernization Experiment\] *//')
-                    fi
-                    commit_short="unknown"
-                    commit_hash="unknown"
-                    
-                    commit_url=""
-                    branch_url=""
-                    
-                    # Try to get git info from the branch-specific deployment directory
-                    branch_repo_dir=~/node-red-deployments-$branch
-                    if [ -d "$branch_repo_dir" ]; then
-                        commit_short=$(cd "$branch_repo_dir" && git rev-parse --short=8 HEAD 2>/dev/null || echo "unknown")
-                        commit_hash=$(cd "$branch_repo_dir" && git rev-parse HEAD 2>/dev/null || echo "unknown")
-                        if [ "$commit_hash" != "unknown" ]; then
-                            commit_url="https://github.com/$GITHUB_REPO/commit/$commit_hash"
-                            branch_url="https://github.com/$GITHUB_REPO/tree/$branch"
-                        else
-                            branch_url="https://github.com/$GITHUB_REPO/tree/$branch"
-                        fi
-                    else
-                        branch_url="https://github.com/$GITHUB_REPO/tree/$branch"
-                    fi
-                    
-                    # Generate container entry
-                    cat >> containers.json << CONTAINER_EOF
-    {
-        "name": "${issue_title:-$branch}",
-        "image": "$image",
-        "created": "$created",
-        "url": "https://$name.${TAILNET}.ts.net",
-        "issue_url": "$issue_url",
-        "issue_title": "$issue_title",
-        "branch": "$branch",
-        "commit": "$commit_short",
-        "commit_url": "$commit_url",
-        "branch_url": "$branch_url"
-    }
-CONTAINER_EOF
-                done
+                # Validate dashboard Tailscale connection
+                if ! validate_and_retry_dashboard_tailscale_remote; then
+                    log "${YELLOW}⚠️  Dashboard Tailscale validation failed, but continuing...${NC}"
+                fi
+            else
+                # If dashboard failed, try complete recreation including tailscale for first-time setup
+                log "${YELLOW}⚠️  Dashboard needs initial setup, trying with fresh tailscale...${NC}"
+                # For first-time setup, recreate both containers completely
+                docker stop dashboard dashboard-tailscale 2>/dev/null || true
+                docker rm dashboard dashboard-tailscale 2>/dev/null || true
+                docker volume rm global-dashboard_dashboard_content global-dashboard_dashboard_config global-dashboard_dashboard_tailscale 2>/dev/null || true
                 
-                echo "" >> containers.json
-                echo "  ]" >> containers.json
-                echo "}" >> containers.json
-                
-                log "Generated containers.json with $(echo "$containers" | wc -l) containers"
-                
-                # Generate dashboard HTML in current directory
-                generate_dashboard_html
-                
-                # Always recreate dashboard container with fresh volumes (preserve tailscale sidecar)
-                log "Recreating dashboard container with fresh volumes..."
-                
-                # Stop and remove ONLY dashboard container + volumes (preserve tailscale)
-                docker stop dashboard 2>/dev/null || true
-                docker rm dashboard 2>/dev/null || true
-                docker volume rm global-dashboard_dashboard_content 2>/dev/null || true
-                docker volume rm global-dashboard_dashboard_config 2>/dev/null || true
-                
-                # Deploy fresh dashboard container with new volumes
-                log "Deploying fresh dashboard container..."
-                env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose-dashboard.yml up -d dashboard
-                
-                # Copy fresh dashboard files to the new volumes
-                prepare_and_copy_dashboard_files
-                
-                # Preserve tailscale sidecar (only restart if needed for connection)
-                env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose-dashboard.yml up -d dashboard-tailscale
-                
-                # Check if dashboard is running
-                if docker ps --filter "name=dashboard" --filter "status=running" | grep -q dashboard; then
-                    log "${GREEN}✅ Dashboard deployed successfully${NC}"
+                if env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose-dashboard.yml -p global-dashboard up -d; then
+                    log "${GREEN}✅ Dashboard deployed successfully with fresh setup${NC}"
                     
                     # Validate dashboard Tailscale connection
                     if ! validate_and_retry_dashboard_tailscale_remote; then
                         log "${YELLOW}⚠️  Dashboard Tailscale validation failed, but continuing...${NC}"
                     fi
                 else
-                    # If dashboard failed, try complete recreation including tailscale for first-time setup
-                    log "${YELLOW}⚠️  Dashboard needs initial setup, trying with fresh tailscale...${NC}"
-                    # For first-time setup, recreate both containers completely
-                    docker stop dashboard dashboard-tailscale 2>/dev/null || true
-                    docker rm dashboard dashboard-tailscale 2>/dev/null || true
-                    docker volume rm global-dashboard_dashboard_content global-dashboard_dashboard_config global-dashboard_dashboard_tailscale 2>/dev/null || true
-                    
-                    if env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose-dashboard.yml -p global-dashboard up -d; then
-                        log "${GREEN}✅ Dashboard deployed successfully with fresh setup${NC}"
-                        
-                        # Validate dashboard Tailscale connection
-                        if ! validate_and_retry_dashboard_tailscale_remote; then
-                            log "${YELLOW}⚠️  Dashboard Tailscale validation failed, but continuing...${NC}"
-                        fi
-                    else
-                        log "${YELLOW}⚠️  Dashboard deployment failed${NC}"
-                    fi
+                    log "${YELLOW}⚠️  Dashboard deployment failed${NC}"
                 fi
-                
-                # Clean up generated files from current directory
-                log "Cleaning up temporary dashboard files..."
-                cleanup_dashboard_files
-            else
-                log "${YELLOW}⚠️  No containers found for dashboard${NC}"
             fi
+            
+            # Clean up generated files from current directory
+            log "Cleaning up temporary dashboard files..."
+            cleanup_dashboard_files
         else
             log "${YELLOW}⚠️  docker-compose-dashboard.yml not found, skipping dashboard deployment${NC}"
         fi
@@ -1708,7 +1715,7 @@ CONTAINER_EOF
                 log "${GREEN}✅ Dashboard completely removed${NC}"
                 
             elif [ -f "docker-compose-dashboard.yml" ]; then
-                log "${BLUE}Updating dashboard to exclude removed branch...${NC}"
+                log "${BLUE}Updating dashboard to reflect current server state...${NC}"
                 
                 # Copy dashboard compose file to home directory for safe access
                 cp docker-compose-dashboard.yml ~/docker-compose-dashboard.yml
@@ -1716,135 +1723,31 @@ CONTAINER_EOF
                 # Temporarily move to root to generate dashboard content
                 cd ~
                 
-                # Find remaining containers (excluding ones from this branch)
-                containers=$(docker ps -q --filter "label=nr-experiment=true" --filter "label=com.docker.compose.project!=nr-$BRANCH_NAME" 2>/dev/null || true)
+                # Generate dashboard content using common function (server-wide scan)
+                generate_dashboard_content
                 
-                if [ -n "$containers" ]; then
-                    log "Regenerating dashboard with remaining containers..."
-                    
-                    # Generate updated containers.json
-                    echo "{" > containers.json
-                    echo "  \"generated\": \"$(date -u +"%Y-%m-%dT%H:%M:%SZ")\"," >> containers.json
-                    echo "  \"containers\": [" >> containers.json
-                    
-                    first=true
-                    for container in $containers; do
-                        if [ "$first" = false ]; then
-                            echo "," >> containers.json
-                        fi
-                        first=false
-                        
-                        name=$(docker inspect --format='{{.Name}}' "$container" | sed 's/^\///')
-                        image=$(docker inspect --format='{{.Config.Image}}' "$container")
-                        created=$(docker inspect --format='{{.State.StartedAt}}' "$container")
-                        
-                        # Get branch name from container label first
-                        branch_name=$(docker inspect --format='{{index .Config.Labels "com.docker.compose.project"}}' "$container" | sed 's/^nr-//')
-                        
-                        # Extract issue ID from branch name, not container name
-                        issue_id=$(echo "$branch_name" | sed -n 's/^issue-\([0-9]\+\)$/\1/p')
-                        issue_url=""
-                        issue_title=""
-                        
-                        if [ -n "$issue_id" ]; then
-                            issue_url="https://github.com/$GITHUB_ISSUES_REPO/issues/$issue_id"
-                            # Try to fetch issue title
-                            api_url="https://api.github.com/repos/$GITHUB_ISSUES_REPO/issues/$issue_id"
-                            response=$(curl -s -f "$api_url" 2>/dev/null || echo "{}")
-                            issue_title=$(echo "$response" | grep '"title":' | head -1 | sed 's/.*"title": *"\([^"]*\)".*/\1/' | sed 's/\[NR Modernization Experiment\] *//')
-                        fi
-                        
-                        commit_short="unknown"
-                        commit_hash="unknown"
-                        commit_url=""
-                        branch_url=""
-                        
-                        # Try to get git info from the branch-specific deployment directory
-                        branch_repo_dir=~/node-red-deployments-$branch_name
-                        if [ -d "$branch_repo_dir" ]; then
-                            commit_short=$(cd "$branch_repo_dir" && git rev-parse --short=8 HEAD 2>/dev/null || echo "unknown")
-                            commit_hash=$(cd "$branch_repo_dir" && git rev-parse HEAD 2>/dev/null || echo "unknown")
-                            if [ "$commit_hash" != "unknown" ]; then
-                                commit_url="https://github.com/$GITHUB_REPO/commit/$commit_hash"
-                                branch_url="https://github.com/$GITHUB_REPO/tree/$branch_name"
-                            else
-                                branch_url="https://github.com/$GITHUB_REPO/tree/$branch_name"
-                            fi
-                        else
-                            branch_url="https://github.com/$GITHUB_REPO/tree/$branch_name"
-                        fi
-                        
-                        # Generate container entry
-                        cat >> containers.json << CONTAINER_EOF
-    {
-        "name": "${issue_title:-$branch_name}",
-        "image": "$image",
-        "created": "$created",
-        "url": "https://$name.${TAILNET}.ts.net",
-        "issue_url": "$issue_url",
-        "issue_title": "$issue_title",
-        "branch": "$branch_name",
-        "commit": "$commit_short",
-        "commit_url": "$commit_url",
-        "branch_url": "$branch_url"
-    }
-CONTAINER_EOF
-                    done
-                    
-                    echo "" >> containers.json
-                    echo "  ]" >> containers.json
-                    echo "}" >> containers.json
-                    
-                    # Recreate dashboard container with updated data (preserve tailscale)
-                    log "Recreating dashboard with updated container list..."
-                    
-                    # Stop and remove dashboard container + volumes (preserve tailscale)
-                    docker stop dashboard 2>/dev/null || true
-                    docker rm dashboard 2>/dev/null || true
-                    docker volume rm global-dashboard_dashboard_content 2>/dev/null || true
-                    docker volume rm global-dashboard_dashboard_config 2>/dev/null || true
-                    
-                    # Deploy fresh dashboard with updated data
-                    env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose-dashboard.yml up -d dashboard
-                    
-                    # Copy updated files to fresh volumes
-                    prepare_and_copy_dashboard_files
-                    
-                    # Preserve tailscale sidecar (no restart unless connection issues)
-                    env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose-dashboard.yml up -d dashboard-tailscale
-                    
-                    # Clean up temporary file
-                    cleanup_dashboard_files
-                    
-                    log "${GREEN}✅ Dashboard updated successfully${NC}"
-                else
-                    log "${YELLOW}⚠️  No containers remain, dashboard will show empty state${NC}"
-                    
-                    # Recreate dashboard with empty state (preserve tailscale)
-                    docker stop dashboard 2>/dev/null || true
-                    docker rm dashboard 2>/dev/null || true
-                    docker volume rm global-dashboard_dashboard_content 2>/dev/null || true
-                    docker volume rm global-dashboard_dashboard_config 2>/dev/null || true
-                    
-                    # Create empty containers.json for the fresh deployment
-                    echo '{"generated":"'$(date -u +"%Y-%m-%dT%H:%M:%SZ")'","containers":[]}' > containers.json
-                    
-                    # Generate dashboard HTML if it doesn't exist (for down operations with empty state)
-                    if [ ! -f "dashboard.html" ]; then
-                        generate_dashboard_html
-                    fi
-                    
-                    # Deploy fresh dashboard with empty state
-                    env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose-dashboard.yml up -d dashboard
-                    
-                    # Copy dashboard files to fresh volumes
-                    prepare_and_copy_dashboard_files
-                    
-                    # Preserve tailscale sidecar (no restart unless connection issues)
-                    env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose-dashboard.yml up -d dashboard-tailscale
-                    
-                    cleanup_dashboard_files
-                fi
+                # Recreate dashboard container with updated data (preserve tailscale)
+                log "Recreating dashboard with current server state..."
+                
+                # Stop and remove dashboard container + volumes (preserve tailscale)
+                docker stop dashboard 2>/dev/null || true
+                docker rm dashboard 2>/dev/null || true
+                docker volume rm global-dashboard_dashboard_content 2>/dev/null || true
+                docker volume rm global-dashboard_dashboard_config 2>/dev/null || true
+                
+                # Deploy fresh dashboard with updated data
+                env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose-dashboard.yml up -d dashboard
+                
+                # Copy updated files to fresh volumes
+                prepare_and_copy_dashboard_files
+                
+                # Preserve tailscale sidecar (no restart unless connection issues)
+                env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose-dashboard.yml up -d dashboard-tailscale
+                
+                # Clean up temporary files
+                cleanup_dashboard_files
+                
+                log "${GREEN}✅ Dashboard updated successfully${NC}"
             fi
             
             # Selective cleanup (dashboard volumes already handled above)
