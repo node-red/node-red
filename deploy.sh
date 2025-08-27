@@ -1156,17 +1156,17 @@ DASHBOARD_HTML
                 
                 # First, copy the tailscale configuration to the config volume
                 log "Copying Tailscale configuration to volume..."
-                docker run --rm -v dashboard_config:/config -v "$(pwd):/source" alpine:latest sh -c "cp /source/tailscale-serve-dashboard.json /config/"
+                docker run --rm -v global-dashboard_dashboard_config:/config -v "$(pwd):/source" alpine:latest sh -c "cp /source/tailscale-serve-dashboard.json /config/"
                 
                 # Copy dashboard files to the content volume
-                docker run --rm -v dashboard_content:/content -v "$(pwd):/source" alpine:latest sh -c "
+                docker run --rm -v global-dashboard_dashboard_content:/content -v "$(pwd):/source" alpine:latest sh -c "
                     cp /source/dashboard.html /content/index.html &&
                     cp /source/containers.json /content/containers.json
                 "
                 
                 # Deploy dashboard container (no TS_AUTHKEY needed if volume exists)
                 log "Deploying dashboard container (volumes persist, force recreate)..."
-                docker compose -f docker-compose-dashboard.yml up -d --force-recreate
+                docker compose -f docker-compose-dashboard.yml -p global-dashboard up -d --force-recreate
                 
                 # Check if dashboard is running
                 if docker ps --filter "name=dashboard" --filter "status=running" | grep -q dashboard; then
@@ -1174,7 +1174,7 @@ DASHBOARD_HTML
                 else
                     # If dashboard failed, try with TS_AUTHKEY for first-time setup
                     log "${YELLOW}⚠️  Dashboard needs initial setup, trying with TS_AUTHKEY...${NC}"
-                    if env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose-dashboard.yml up -d --force-recreate; then
+                    if env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose-dashboard.yml -p global-dashboard up -d --force-recreate; then
                         log "${GREEN}✅ Dashboard deployed successfully with TS_AUTHKEY${NC}"
                     else
                         log "${YELLOW}⚠️  Dashboard deployment failed${NC}"
@@ -1247,18 +1247,18 @@ DASHBOARD_HTML
                 # Stop and remove dashboard containers (try both locations)
                 log "Stopping dashboard containers..."
                 if [ -f "docker-compose-dashboard.yml" ]; then
-                    docker compose -f docker-compose-dashboard.yml down 2>/dev/null || true
+                    docker compose -f docker-compose-dashboard.yml -p global-dashboard down 2>/dev/null || true
                 elif [ -f ~/docker-compose-dashboard.yml ]; then
-                    docker compose -f ~/docker-compose-dashboard.yml down 2>/dev/null || true
+                    docker compose -f ~/docker-compose-dashboard.yml -p global-dashboard down 2>/dev/null || true
                 fi
                 
                 # Remove dashboard volumes
                 log "Removing dashboard volumes..."
-                docker volume rm dashboard_content dashboard_config dashboard_tailscale 2>/dev/null || true
+                docker volume rm global-dashboard_dashboard_content global-dashboard_dashboard_config global-dashboard_dashboard_tailscale 2>/dev/null || true
                 
                 # Remove dashboard network
                 log "Removing dashboard network..."
-                docker network rm dashboard-net 2>/dev/null || true
+                docker network rm global-dashboard_dashboard-net 2>/dev/null || true
                 
                 # Clean up dashboard compose file
                 log "Cleaning up dashboard compose file..."
@@ -1350,11 +1350,11 @@ CONTAINER_EOF
                     
                     # Copy updated containers.json to dashboard volume
                     log "Updating dashboard volume with remaining containers..."
-                    docker run --rm -v dashboard_content:/content -v "$(pwd):/source" alpine:latest sh -c "cp /source/containers.json /content/containers.json"
+                    docker run --rm -v global-dashboard_dashboard_content:/content -v "$(pwd):/source" alpine:latest sh -c "cp /source/containers.json /content/containers.json"
                     
                     # Force recreate dashboard to reload content (dashboard persists via volumes)
                     log "Refreshing dashboard container..."
-                    docker compose -f docker-compose-dashboard.yml up -d --force-recreate
+                    docker compose -f docker-compose-dashboard.yml -p global-dashboard up -d --force-recreate
                     
                     # Clean up temporary file
                     rm -f containers.json
@@ -1364,8 +1364,8 @@ CONTAINER_EOF
                     log "${YELLOW}⚠️  No containers remain, dashboard will show empty state${NC}"
                     # Create empty containers.json
                     echo '{"generated":"'$(date -u +"%Y-%m-%dT%H:%M:%SZ")'","containers":[]}' > containers.json
-                    docker run --rm -v dashboard_content:/content -v "$(pwd):/source" alpine:latest sh -c "cp /source/containers.json /content/containers.json"
-                    docker compose -f docker-compose-dashboard.yml up -d --force-recreate
+                    docker run --rm -v global-dashboard_dashboard_content:/content -v "$(pwd):/source" alpine:latest sh -c "cp /source/containers.json /content/containers.json"
+                    docker compose -f docker-compose-dashboard.yml -p global-dashboard up -d --force-recreate
                     rm -f containers.json
                 fi
             fi
