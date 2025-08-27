@@ -38,3 +38,5 @@ tailscale-serve.json
 tailscale-serve-*.json
 cd.sh
 .playwright-mcp/
+containers.html
+containers.json
