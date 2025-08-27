@@ -661,6 +661,63 @@ DASHBOARD_CONFIG
         fi
     }
     
+    # Function to generate nginx configuration with no-cache headers
+    generate_nginx_config() {
+        cat > nginx-dashboard.conf << 'NGINX_CONFIG'
+server {
+    listen       80;
+    listen  [::]:80;
+    server_name  localhost;
+
+    location / {
+        root   /usr/share/nginx/html;
+        index  index.html index.htm;
+        
+        # Disable caching for dashboard to ensure fresh content
+        add_header Cache-Control "no-cache, no-store, must-revalidate" always;
+        add_header Pragma "no-cache" always;
+        add_header Expires "0" always;
+    }
+
+    # Still allow caching for static assets like images
+    location ~* \.(css|js|png|jpg|jpeg|gif|ico|svg)$ {
+        root   /usr/share/nginx/html;
+        expires 1h;
+        add_header Cache-Control "public, immutable";
+    }
+
+    error_page   500 502 503 504  /50x.html;
+    location = /50x.html {
+        root   /usr/share/nginx/html;
+    }
+}
+NGINX_CONFIG
+    }
+
+    # Function to prepare and copy all dashboard files to volumes
+    prepare_and_copy_dashboard_files() {
+        log "Preparing and copying dashboard files to volumes..."
+        ensure_dashboard_tailscale_config
+        generate_nginx_config
+        
+        # Copy config files (tailscale serve config and nginx config)
+        docker run --rm -v global-dashboard_dashboard_config:/config -v "$(pwd):/source" alpine:latest sh -c "
+            cp /source/tailscale-serve-dashboard.json /config/ &&
+            cp /source/nginx-dashboard.conf /config/default.conf
+        "
+        
+        # Copy content files (dashboard HTML and containers data)
+        docker run --rm -v global-dashboard_dashboard_content:/content -v "$(pwd):/source" alpine:latest sh -c "
+            cp /source/dashboard.html /content/index.html &&
+            cp /source/containers.json /content/containers.json
+        "
+    }
+
+    # Function to clean up temporary dashboard files
+    cleanup_dashboard_files() {
+        rm -f dashboard.html containers.json nginx-dashboard.conf tailscale-serve-dashboard.json
+    }
+
     # Function to ensure dashboard.html exists
     generate_dashboard_html() {
         log "Generating dashboard.html..."
@@ -1528,13 +1585,7 @@ CONTAINER_EOF
                 env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose-dashboard.yml up -d dashboard
                 
                 # Copy fresh dashboard files to the new volumes
-                log "Copying fresh dashboard files to new volumes..."
-                ensure_dashboard_tailscale_config
-                docker run --rm -v global-dashboard_dashboard_config:/config -v "$(pwd):/source" alpine:latest sh -c "cp /source/tailscale-serve-dashboard.json /config/"
-                docker run --rm -v global-dashboard_dashboard_content:/content -v "$(pwd):/source" alpine:latest sh -c "
-                    cp /source/dashboard.html /content/index.html &&
-                    cp /source/containers.json /content/containers.json
-                "
+                prepare_and_copy_dashboard_files
                 
                 # Preserve tailscale sidecar (only restart if needed for connection)
                 env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose-dashboard.yml up -d dashboard-tailscale
@@ -1569,7 +1620,7 @@ CONTAINER_EOF
                 
                 # Clean up generated files from current directory
                 log "Cleaning up temporary dashboard files..."
-                rm -f dashboard.html containers.json
+                cleanup_dashboard_files
             else
                 log "${YELLOW}⚠️  No containers found for dashboard${NC}"
             fi
@@ -1757,18 +1808,13 @@ CONTAINER_EOF
                     env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose-dashboard.yml up -d dashboard
                     
                     # Copy updated files to fresh volumes
-                    ensure_dashboard_tailscale_config
-                    docker run --rm -v global-dashboard_dashboard_config:/config -v "$(pwd):/source" alpine:latest sh -c "cp /source/tailscale-serve-dashboard.json /config/"
-                    docker run --rm -v global-dashboard_dashboard_content:/content -v "$(pwd):/source" alpine:latest sh -c "
-                        cp /source/dashboard.html /content/index.html &&
-                        cp /source/containers.json /content/containers.json
-                    "
+                    prepare_and_copy_dashboard_files
                     
                     # Preserve tailscale sidecar (no restart unless connection issues)
                     env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose-dashboard.yml up -d dashboard-tailscale
                     
                     # Clean up temporary file
-                    rm -f containers.json
+                    cleanup_dashboard_files
                     
                     log "${GREEN}✅ Dashboard updated successfully${NC}"
                 else
@@ -1792,17 +1838,12 @@ CONTAINER_EOF
                     env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose-dashboard.yml up -d dashboard
                     
                     # Copy dashboard files to fresh volumes
-                    ensure_dashboard_tailscale_config
-                    docker run --rm -v global-dashboard_dashboard_config:/config -v "$(pwd):/source" alpine:latest sh -c "cp /source/tailscale-serve-dashboard.json /config/"
-                    docker run --rm -v global-dashboard_dashboard_content:/content -v "$(pwd):/source" alpine:latest sh -c "
-                        cp /source/dashboard.html /content/index.html &&
-                        cp /source/containers.json /content/containers.json
-                    "
+                    prepare_and_copy_dashboard_files
                     
                     # Preserve tailscale sidecar (no restart unless connection issues)
                     env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose-dashboard.yml up -d dashboard-tailscale
                     
-                    rm -f containers.json
+                    cleanup_dashboard_files
                 fi
             fi
             
