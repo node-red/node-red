@@ -341,7 +341,7 @@ check_survey_exists() {
     fi
     
     # Parse response to find matching survey name using jq with exact match
-    if echo "$response" | jq -e --arg name "$survey_name" '.[] | select(.name == $name)' > /dev/null 2>&1; then
+    if echo "$response" | jq -e --arg name "$survey_name" '.items[] | select(.name == $name)' > /dev/null 2>&1; then
         local survey_found="FOUND"
     else
         local survey_found="NOT_FOUND"
@@ -353,7 +353,7 @@ check_survey_exists() {
     else
         log "${YELLOW}⚠️  [TALLY] Survey '$survey_name' not found in API response${NC}"
         # Show first few survey names for debugging using jq
-        local available_surveys=$(echo "$response" | jq -r '.[:3] | map(.name) | join(", ")' 2>/dev/null || echo "none")
+        local available_surveys=$(echo "$response" | jq -r '.items[:3] | map(.name) | join(", ")' 2>/dev/null || echo "none")
         log "${BLUE}📋 [TALLY] Available surveys: $available_surveys${NC}"
         return 1
     fi
@@ -388,7 +388,7 @@ get_survey_id() {
     fi
     
     # Extract form ID for matching survey name using jq with exact match
-    local survey_id=$(echo "$response" | jq -r --arg name "$survey_name" '.[] | select(.name == $name) | .id // empty' 2>/dev/null)
+    local survey_id=$(echo "$response" | jq -r --arg name "$survey_name" '.items[] | select(.name == $name) | .id // empty' 2>/dev/null)
     
     if [ -n "$survey_id" ]; then
         log "${GREEN}✅ [TALLY] Found survey ID: '$survey_id' for '$survey_name'${NC}"
@@ -396,7 +396,7 @@ get_survey_id() {
     else
         log "${RED}❌ [TALLY] Could not extract survey ID for '$survey_name'${NC}"
         # Debug: show what surveys were found using jq
-        local found_surveys=$(echo "$response" | jq -r '.[:3] | map("\(.name):\(.id)") | join(" | ")' 2>/dev/null || echo "none")
+        local found_surveys=$(echo "$response" | jq -r '.items[:3] | map("\(.name):\(.id)") | join(" | ")' 2>/dev/null || echo "none")
         log "${RED}📋 [TALLY] Available surveys: $found_surveys${NC}"
     fi
 }
