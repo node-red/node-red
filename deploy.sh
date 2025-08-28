@@ -93,7 +93,7 @@ validate_tailscale_connection() {
                 log "${RED}❌ Failed to establish Tailscale connection after $max_attempts attempts${NC}"
                 return 1
             fi
-        elif echo "$logs" | grep -q "serve config loaded\|serve config applied\|listening\|authenticated\|Listening on\|ready\|Startup complete\|magicsock.*connected"; then
+        elif echo "$logs" | grep -q "serve config loaded\|serve config applied\|listening\|authenticated\|Listening on\|ready\|Startup complete\|magicsock.*connected\|client connected\|tunnel established\|serve.*started\|proxy.*ready\|health check.*ok\|tailscaled.*started\|login.*successful"; then
             log "${GREEN}✅ Tailscale connection validated for $container_name${NC}"
             return 0
         else
@@ -133,13 +133,23 @@ clear_tailscale_state() {
             docker run --rm -v "$volume_name:/state" busybox sh -c "rm -rf /state/*" 2>/dev/null || true
         }
     else
-        # Try multiple possible volume name formats
+        # Try multiple possible volume name formats (based on old script patterns)
         log "${YELLOW}Warning: Could not determine volume name, trying common patterns...${NC}"
-        local possible_volumes=("$container_name" "${container_name//-/_}")
+        local branch_name=$(echo "$container_name" | sed 's/-tailscale$//')
+        local possible_volumes=(
+            "$container_name" 
+            "${container_name//-/_}"
+            "nr_${branch_name}_tailscale"
+            "nr-${branch_name}_nr_${branch_name}_tailscale"
+            "${branch_name}_tailscale"
+        )
         for vol in "${possible_volumes[@]}"; do
             if docker volume inspect "$vol" &>/dev/null; then
                 log "Found volume: $vol, clearing..."
-                docker run --rm -v "$vol:/state" alpine:latest sh -c "rm -rf /state/*" 2>/dev/null || true
+                docker run --rm -v "$vol:/state" alpine:latest sh -c "rm -rf /state/*" 2>/dev/null || {
+                    log "${YELLOW}Warning: Failed to clear volume with alpine, trying busybox...${NC}"
+                    docker run --rm -v "$vol:/state" busybox sh -c "rm -rf /state/*" 2>/dev/null || true
+                }
                 break
             fi
         done
