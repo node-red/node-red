@@ -551,6 +551,10 @@ generate_dashboard_html() {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Container Dashboard</title>
     
+    <!-- Favicon implementation matching node-red-academy.learnworlds.com -->
+    <link rel="icon" type="image/png" href="https://lwfiles.mycourse.app/67605a7461b32c08f9864eb5-public/c41a9ea6f80733c54d30135a2b3d3254.png">
+    <link rel="apple-touch-icon" type="image/png" href="https://lwfiles.mycourse.app/67605a7461b32c08f9864eb5-public/c41a9ea6f80733c54d30135a2b3d3254.png">
+    
     <!-- Tally popup widget -->
     <script async src="https://tally.so/widgets/embed.js"></script>
     <script>
