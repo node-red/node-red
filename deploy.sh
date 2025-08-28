@@ -452,8 +452,18 @@ duplicate_survey() {
     log "${BLUE}🔍 [TALLY] Original template name: '$original_name'${NC}"
     log "${BLUE}🎯 [TALLY] Target survey name: '$new_survey_name'${NC}"
     
-    # Replace the name field in the JSON using jq for reliable JSON manipulation
-    local new_form_data=$(echo "$template_data" | jq --arg name "$new_survey_name" '.name = $name' 2>/dev/null)
+    # Replace the name field and FORM_TITLE blocks in the JSON using jq for reliable JSON manipulation
+    local new_form_data=$(echo "$template_data" | jq --arg name "$new_survey_name" '
+      .name = $name |
+      .blocks |= map(
+        if .type == "FORM_TITLE" then
+          .payload.safeHTMLSchema = [[$name]] |
+          .payload.title = $name
+        else
+          .
+        end
+      )
+    ' 2>/dev/null)
     
     # Verify the name was replaced and JSON is valid
     if ! echo "$new_form_data" | jq . > /dev/null 2>&1; then
