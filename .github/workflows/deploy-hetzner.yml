@@ -141,7 +141,7 @@ jobs:
     needs: validate-branch
     if: needs.validate-branch.outputs.branch_valid == 'true' && github.event.inputs.action == 'deploy'
     runs-on: ubuntu-latest
-    environment: production
+    environment: nr-experiments
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -223,7 +223,7 @@ jobs:
     needs: validate-branch
     if: github.event.inputs.action == 'cleanup'
     runs-on: ubuntu-latest
-    environment: production
+    environment: nr-experiments
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
