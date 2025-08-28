@@ -380,20 +380,28 @@ get_survey_id() {
     fi
 }
 
-# Function to create survey from template
-create_survey_from_template() {
+# Function to generate new UUID (simple version for bash)
+generate_uuid() {
+    # Generate a simple UUID-like string using /dev/urandom
+    cat /proc/sys/kernel/random/uuid 2>/dev/null || \
+    python3 -c "import uuid; print(str(uuid.uuid4()))" 2>/dev/null || \
+    echo "$(date +%s)-$(shuf -i 1000-9999 -n 1)-$(shuf -i 1000-9999 -n 1)-$(shuf -i 1000-9999 -n 1)-$(shuf -i 100000000000-999999999999 -n 1)"
+}
+
+# Function to duplicate survey using proper 2-step process
+duplicate_survey() {
     local new_survey_name="$1"
     local template_name="$2"
     local tally_token="$3"
     
-    log "${BLUE}🔨 [TALLY] Creating survey '$new_survey_name' from template '$template_name'...${NC}"
+    log "${BLUE}🔨 [TALLY] Duplicating survey '$template_name' as '$new_survey_name'...${NC}"
     
     if [ -z "$tally_token" ]; then
-        log "${RED}❌ [TALLY] No token provided to create_survey_from_template${NC}"
+        log "${RED}❌ [TALLY] No token provided to duplicate_survey${NC}"
         return 1
     fi
     
-    log "${BLUE}🔍 [TALLY] First getting template ID for '$template_name'...${NC}"
+    log "${BLUE}🔍 [TALLY] Step 1: Getting template ID for '$template_name'...${NC}"
     # First get template ID
     local template_id=$(get_survey_id "$template_name" "$tally_token")
     
@@ -403,13 +411,96 @@ create_survey_from_template() {
     fi
     
     log "${GREEN}✅ [TALLY] Template ID found: '$template_id'${NC}"
-    log "${BLUE}📡 [TALLY] Making API call to create survey from template...${NC}"
+    log "${BLUE}📡 [TALLY] Step 2: Fetching complete template form data...${NC}"
     
-    # Create new survey from template using Tally API
+    # Get the complete form data (blocks, settings, CSS)
+    local template_data=$(curl -s -H "Authorization: Bearer $tally_token" \
+        "https://api.tally.so/forms/$template_id" 2>/dev/null || echo "{}")
+    
+    log "${BLUE}📄 [TALLY] Template data length: ${#template_data} characters${NC}"
+    if [ ${#template_data} -lt 50 ]; then
+        log "${RED}❌ [TALLY] Failed to fetch template data: '$template_data'${NC}"
+        return 1
+    fi
+    
+    # Check if template data contains blocks
+    if ! echo "$template_data" | grep -q '"blocks"'; then
+        log "${RED}❌ [TALLY] Template data missing blocks field${NC}"
+        return 1
+    fi
+    
+    log "${GREEN}✅ [TALLY] Template data fetched successfully${NC}"
+    log "${BLUE}🔄 [TALLY] Step 3: Generating new UUIDs for blocks...${NC}"
+    
+    # Create a temporary file to process the JSON
+    local temp_file="/tmp/tally_template_$$"
+    echo "$template_data" > "$temp_file"
+    
+    # Extract and modify the form data with new UUIDs
+    local new_form_data=$(python3 -c "
+import json
+import uuid
+import sys
+
+try:
+    with open('$temp_file', 'r') as f:
+        data = json.load(f)
+    
+    # Create new form data
+    new_form = {
+        'name': '$new_survey_name',
+        'status': data.get('status', 'DRAFT'),
+        'blocks': [],
+        'settings': data.get('settings', {}),
+        'customCSS': data.get('customCSS', '')
+    }
+    
+    # Copy blocks with new UUIDs
+    uuid_mapping = {}
+    for block in data.get('blocks', []):
+        old_uuid = block.get('uuid')
+        old_group_uuid = block.get('groupUuid')
+        
+        # Generate new UUIDs
+        new_uuid = str(uuid.uuid4())
+        
+        # Map group UUIDs consistently
+        if old_group_uuid in uuid_mapping:
+            new_group_uuid = uuid_mapping[old_group_uuid]
+        else:
+            new_group_uuid = str(uuid.uuid4())
+            uuid_mapping[old_group_uuid] = new_group_uuid
+        
+        # Create new block with updated UUIDs
+        new_block = block.copy()
+        new_block['uuid'] = new_uuid
+        new_block['groupUuid'] = new_group_uuid
+        
+        new_form['blocks'].append(new_block)
+    
+    print(json.dumps(new_form))
+    
+except Exception as e:
+    print(f'ERROR: {e}', file=sys.stderr)
+    sys.exit(1)
+" 2>/dev/null)
+    
+    # Clean up temp file
+    rm -f "$temp_file"
+    
+    if [ -z "$new_form_data" ] || [[ "$new_form_data" == "ERROR:"* ]]; then
+        log "${RED}❌ [TALLY] Failed to process template data with new UUIDs${NC}"
+        return 1
+    fi
+    
+    log "${GREEN}✅ [TALLY] Generated new UUIDs for $(echo "$new_form_data" | python3 -c "import json,sys; print(len(json.load(sys.stdin)['blocks']))" 2>/dev/null || echo "?") blocks${NC}"
+    log "${BLUE}📡 [TALLY] Step 4: Creating new survey with duplicated data...${NC}"
+    
+    # Create new survey with the processed data
     local create_response=$(curl -s -X POST \
         -H "Authorization: Bearer $tally_token" \
         -H "Content-Type: application/json" \
-        -d "{\"name\":\"$new_survey_name\",\"templateId\":\"$template_id\"}" \
+        -d "$new_form_data" \
         "https://api.tally.so/forms" 2>/dev/null || echo "{}")
     
     log "${BLUE}📄 [TALLY] Create response length: ${#create_response} characters${NC}"
@@ -418,14 +509,20 @@ create_survey_from_template() {
         return 1
     fi
     
+    # Check for errors in response
+    if echo "$create_response" | grep -q '"message":\|"error":\|"Bad Request"'; then
+        log "${RED}❌ [TALLY] API returned error: '$create_response'${NC}"
+        return 1
+    fi
+    
     # Extract new survey ID
-    local new_survey_id=$(echo "$create_response" | grep '"id":' | head -1 | sed 's/.*"id": *"\([^"]*\)".*/\1/')
+    local new_survey_id=$(echo "$create_response" | python3 -c "import json,sys; print(json.load(sys.stdin).get('id', ''))" 2>/dev/null)
     
     if [ -n "$new_survey_id" ]; then
-        log "${GREEN}✅ [TALLY] Successfully created survey with ID: '$new_survey_id'${NC}"
+        log "${GREEN}✅ [TALLY] Successfully duplicated survey with ID: '$new_survey_id'${NC}"
         echo "$new_survey_id"
     else
-        log "${RED}❌ [TALLY] Could not extract new survey ID from create response${NC}"
+        log "${RED}❌ [TALLY] Could not extract new survey ID from response${NC}"
         log "${RED}📄 [TALLY] Create response: '$create_response'${NC}"
     fi
 }
@@ -490,8 +587,8 @@ setup_issue_survey() {
         log "${GREEN}✅ [TALLY] Survey '$survey_name' already exists, getting ID...${NC}"
         local survey_id=$(get_survey_id "$survey_name" "$tally_token")
     else
-        log "${BLUE}🔨 [TALLY] Survey doesn't exist, creating new survey '$survey_name' from template '$template_name'...${NC}"
-        local survey_id=$(create_survey_from_template "$survey_name" "$template_name" "$tally_token")
+        log "${BLUE}🔨 [TALLY] Survey doesn't exist, duplicating template '$template_name' as '$survey_name'...${NC}"
+        local survey_id=$(duplicate_survey "$survey_name" "$template_name" "$tally_token")
     fi
     
     if [ -n "$survey_id" ]; then
