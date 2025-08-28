@@ -22,7 +22,7 @@ COPY package*.json ./
 COPY Gruntfile.js ./
 
 # Install all dependencies (including devDependencies for build)
-RUN npm ci --include=dev
+RUN npm install --include=dev
 
 # Copy entire source code for building
 COPY . .
@@ -70,7 +70,7 @@ COPY --from=builder --chown=node-red:node-red /usr/src/node-red/package-lock.jso
 # COPY --from=builder --chown=node-red:node-red /usr/src/node-red/docs/ ./docs/
 
 # Install only production dependencies for the runtime
-RUN npm ci --omit=dev && npm cache clean --force
+RUN npm install --omit=dev && npm cache clean --force
 
 # No demo-settings.js file created - configuration embedded in CMD for security
 
