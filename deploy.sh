@@ -334,14 +334,21 @@ check_survey_exists() {
         return 1
     fi
     
-    # Parse response to find matching survey name
-    if echo "$response" | grep -q "\"name\":.*\"$survey_name\""; then
+    # Parse response to find matching survey name using jq
+    local survey_found=$(echo "$response" | jq -r --arg name "$survey_name" '
+        if (.items // []) | map(.name) | index($name) then "FOUND" else "NOT_FOUND" end
+    ' 2>/dev/null || echo "PARSE_ERROR")
+
+    if [ "$survey_found" = "FOUND" ]; then
         log "${GREEN}✅ [TALLY] Survey '$survey_name' found in API response${NC}"
         return 0
     else
         log "${YELLOW}⚠️  [TALLY] Survey '$survey_name' not found in API response${NC}"
         # Show first few survey names for debugging
-        log "${BLUE}📋 [TALLY] Available surveys: $(echo "$response" | grep '"name":' | head -3 | sed 's/.*"name": *"\([^"]*\)".*/\1/' | tr '\n' ',' | sed 's/,$//')${NC}"
+        local available_surveys=$(echo "$response" | jq -r '
+            (.items // []) | .[0:3] | map(.name // "unnamed") | join(", ")
+        ' 2>/dev/null || echo "parse-error")
+        log "${BLUE}📋 [TALLY] Available surveys: $available_surveys${NC}"
         return 1
     fi
 }
@@ -368,15 +375,21 @@ get_survey_id() {
         return 1
     fi
     
-    # Extract form ID for matching survey name (simplified parsing)
-    local survey_id=$(echo "$response" | grep -A5 -B5 "\"name\":.*\"$survey_name\"" | \
-        grep "\"id\":" | head -1 | sed 's/.*"id": *"\([^"]*\)".*/\1/')
+    # Extract form ID for matching survey name using jq
+    local survey_id=$(echo "$response" | jq -r --arg name "$survey_name" '
+        (.items // []) | map(select(.name == $name)) | .[0].id // ""
+    ' 2>/dev/null)
     
     if [ -n "$survey_id" ]; then
         log "${GREEN}✅ [TALLY] Found survey ID: '$survey_id' for '$survey_name'${NC}"
         echo "$survey_id"
     else
         log "${RED}❌ [TALLY] Could not extract survey ID for '$survey_name'${NC}"
+        # Debug: show what surveys were found
+        local found_surveys=$(echo "$response" | jq -r '
+            (.items // []) | .[0:3] | map((.name // "unnamed") + ":" + (.id // "no-id")) | join("|")
+        ' 2>/dev/null || echo "parse-error")
+        log "${RED}📋 [TALLY] Available surveys: $found_surveys${NC}"
     fi
 }
 
@@ -384,7 +397,6 @@ get_survey_id() {
 generate_uuid() {
     # Generate a simple UUID-like string using /dev/urandom
     cat /proc/sys/kernel/random/uuid 2>/dev/null || \
-    python3 -c "import uuid; print(str(uuid.uuid4()))" 2>/dev/null || \
     echo "$(date +%s)-$(shuf -i 1000-9999 -n 1)-$(shuf -i 1000-9999 -n 1)-$(shuf -i 1000-9999 -n 1)-$(shuf -i 100000000000-999999999999 -n 1)"
 }
 
@@ -436,54 +448,43 @@ duplicate_survey() {
     local temp_file="/tmp/tally_template_$$"
     echo "$template_data" > "$temp_file"
     
-    # Extract and modify the form data with new UUIDs
-    local new_form_data=$(python3 -c "
-import json
-import uuid
-import sys
-
-try:
-    with open('$temp_file', 'r') as f:
-        data = json.load(f)
-    
-    # Create new form data
-    new_form = {
-        'name': '$new_survey_name',
-        'status': data.get('status', 'DRAFT'),
-        'blocks': [],
-        'settings': data.get('settings', {}),
-        'customCSS': data.get('customCSS', '')
+    # Extract basic form data first
+    local base_form_data=$(jq --arg name "$new_survey_name" '
+    {
+        "name": $name,
+        "status": (.status // "DRAFT"),
+        "settings": (.settings // {}),
+        "customCSS": (.customCSS // ""),
+        "blocks": .blocks
     }
+    ' "$temp_file" 2>/dev/null)
     
-    # Copy blocks with new UUIDs
-    uuid_mapping = {}
-    for block in data.get('blocks', []):
-        old_uuid = block.get('uuid')
-        old_group_uuid = block.get('groupUuid')
-        
-        # Generate new UUIDs
-        new_uuid = str(uuid.uuid4())
-        
-        # Map group UUIDs consistently
-        if old_group_uuid in uuid_mapping:
-            new_group_uuid = uuid_mapping[old_group_uuid]
-        else:
-            new_group_uuid = str(uuid.uuid4())
-            uuid_mapping[old_group_uuid] = new_group_uuid
-        
-        # Create new block with updated UUIDs
-        new_block = block.copy()
-        new_block['uuid'] = new_uuid
-        new_block['groupUuid'] = new_group_uuid
-        
-        new_form['blocks'].append(new_block)
+    # Count blocks for UUID generation
+    local block_count=$(echo "$base_form_data" | jq '.blocks | length' 2>/dev/null || echo 0)
     
-    print(json.dumps(new_form))
+    # Generate UUIDs for all blocks 
+    local uuid_list=""
+    local group_uuid_list=""
+    for i in $(seq 0 $((block_count - 1))); do
+        if [ $i -eq 0 ]; then
+            uuid_list="\"$(generate_uuid)\""
+            group_uuid_list="\"$(generate_uuid)\""
+        else
+            uuid_list="$uuid_list, \"$(generate_uuid)\""
+            group_uuid_list="$group_uuid_list, \"$(generate_uuid)\""
+        fi
+    done
     
-except Exception as e:
-    print(f'ERROR: {e}', file=sys.stderr)
-    sys.exit(1)
-" 2>/dev/null)
+    # Apply UUIDs to blocks
+    local new_form_data=$(echo "$base_form_data" | jq --argjson uuids "[$uuid_list]" --argjson group_uuids "[$group_uuid_list]" '
+    .blocks |= [
+        to_entries[] | 
+        .value + {
+            "uuid": $uuids[.key],
+            "groupUuid": $group_uuids[.key]
+        }
+    ]
+    ' 2>/dev/null)
     
     # Clean up temp file
     rm -f "$temp_file"
@@ -493,7 +494,7 @@ except Exception as e:
         return 1
     fi
     
-    log "${GREEN}✅ [TALLY] Generated new UUIDs for $(echo "$new_form_data" | python3 -c "import json,sys; print(len(json.load(sys.stdin)['blocks']))" 2>/dev/null || echo "?") blocks${NC}"
+    log "${GREEN}✅ [TALLY] Generated new UUIDs for $(echo "$new_form_data" | jq '.blocks | length' 2>/dev/null || echo "?") blocks${NC}"
     log "${BLUE}📡 [TALLY] Step 4: Creating new survey with duplicated data...${NC}"
     
     # Create new survey with the processed data
