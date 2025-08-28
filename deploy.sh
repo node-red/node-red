@@ -316,16 +316,34 @@ check_survey_exists() {
     local survey_name="$1"
     local tally_token="$2"
     
+    log "${BLUE}🔍 [TALLY] Checking if survey '$survey_name' exists...${NC}"
+    
     if [ -z "$tally_token" ]; then
+        log "${RED}❌ [TALLY] No token provided to check_survey_exists${NC}"
         return 1
     fi
     
+    log "${BLUE}📡 [TALLY] Making API call to list forms...${NC}"
     # Use Tally API to list forms and check if survey exists
     local response=$(curl -s -H "Authorization: Bearer $tally_token" \
         "https://api.tally.so/forms" 2>/dev/null || echo "{}")
     
+    log "${BLUE}📄 [TALLY] API response length: ${#response} characters${NC}"
+    if [ ${#response} -lt 10 ]; then
+        log "${RED}❌ [TALLY] API response too short, likely failed: '$response'${NC}"
+        return 1
+    fi
+    
     # Parse response to find matching survey name
-    echo "$response" | grep -q "\"name\":.*\"$survey_name\""
+    if echo "$response" | grep -q "\"name\":.*\"$survey_name\""; then
+        log "${GREEN}✅ [TALLY] Survey '$survey_name' found in API response${NC}"
+        return 0
+    else
+        log "${YELLOW}⚠️  [TALLY] Survey '$survey_name' not found in API response${NC}"
+        # Show first few survey names for debugging
+        log "${BLUE}📋 [TALLY] Available surveys: $(echo "$response" | grep '"name":' | head -3 | sed 's/.*"name": *"\([^"]*\)".*/\1/' | tr '\n' ',' | sed 's/,$//')${NC}"
+        return 1
+    fi
 }
 
 # Function to get survey ID by name
@@ -333,16 +351,33 @@ get_survey_id() {
     local survey_name="$1"
     local tally_token="$2"
     
+    log "${BLUE}🔍 [TALLY] Getting survey ID for '$survey_name'...${NC}"
+    
     if [ -z "$tally_token" ]; then
+        log "${RED}❌ [TALLY] No token provided to get_survey_id${NC}"
         return 1
     fi
     
+    log "${BLUE}📡 [TALLY] Making API call to get survey ID...${NC}"
     local response=$(curl -s -H "Authorization: Bearer $tally_token" \
         "https://api.tally.so/forms" 2>/dev/null || echo "{}")
     
+    log "${BLUE}📄 [TALLY] API response length: ${#response} characters${NC}"
+    if [ ${#response} -lt 10 ]; then
+        log "${RED}❌ [TALLY] API response too short, likely failed: '$response'${NC}"
+        return 1
+    fi
+    
     # Extract form ID for matching survey name (simplified parsing)
-    echo "$response" | grep -A5 -B5 "\"name\":.*\"$survey_name\"" | \
-        grep "\"id\":" | head -1 | sed 's/.*"id": *"\([^"]*\)".*/\1/'
+    local survey_id=$(echo "$response" | grep -A5 -B5 "\"name\":.*\"$survey_name\"" | \
+        grep "\"id\":" | head -1 | sed 's/.*"id": *"\([^"]*\)".*/\1/')
+    
+    if [ -n "$survey_id" ]; then
+        log "${GREEN}✅ [TALLY] Found survey ID: '$survey_id' for '$survey_name'${NC}"
+        echo "$survey_id"
+    else
+        log "${RED}❌ [TALLY] Could not extract survey ID for '$survey_name'${NC}"
+    fi
 }
 
 # Function to create survey from template
@@ -351,19 +386,24 @@ create_survey_from_template() {
     local template_name="$2"
     local tally_token="$3"
     
+    log "${BLUE}🔨 [TALLY] Creating survey '$new_survey_name' from template '$template_name'...${NC}"
+    
     if [ -z "$tally_token" ]; then
+        log "${RED}❌ [TALLY] No token provided to create_survey_from_template${NC}"
         return 1
     fi
     
-    log "Creating survey '$new_survey_name' from template '$template_name'..."
-    
+    log "${BLUE}🔍 [TALLY] First getting template ID for '$template_name'...${NC}"
     # First get template ID
     local template_id=$(get_survey_id "$template_name" "$tally_token")
     
     if [ -z "$template_id" ]; then
-        log "${RED}❌ Template survey '$template_name' not found${NC}"
+        log "${RED}❌ [TALLY] Template survey '$template_name' not found or ID extraction failed${NC}"
         return 1
     fi
+    
+    log "${GREEN}✅ [TALLY] Template ID found: '$template_id'${NC}"
+    log "${BLUE}📡 [TALLY] Making API call to create survey from template...${NC}"
     
     # Create new survey from template using Tally API
     local create_response=$(curl -s -X POST \
@@ -372,34 +412,66 @@ create_survey_from_template() {
         -d "{\"name\":\"$new_survey_name\",\"templateId\":\"$template_id\"}" \
         "https://api.tally.so/forms" 2>/dev/null || echo "{}")
     
+    log "${BLUE}📄 [TALLY] Create response length: ${#create_response} characters${NC}"
+    if [ ${#create_response} -lt 10 ]; then
+        log "${RED}❌ [TALLY] Create response too short, likely failed: '$create_response'${NC}"
+        return 1
+    fi
+    
     # Extract new survey ID
-    echo "$create_response" | grep '"id":' | head -1 | sed 's/.*"id": *"\([^"]*\)".*/\1/'
+    local new_survey_id=$(echo "$create_response" | grep '"id":' | head -1 | sed 's/.*"id": *"\([^"]*\)".*/\1/')
+    
+    if [ -n "$new_survey_id" ]; then
+        log "${GREEN}✅ [TALLY] Successfully created survey with ID: '$new_survey_id'${NC}"
+        echo "$new_survey_id"
+    else
+        log "${RED}❌ [TALLY] Could not extract new survey ID from create response${NC}"
+        log "${RED}📄 [TALLY] Create response: '$create_response'${NC}"
+    fi
 }
 
 # Function to setup survey for issue branches
 setup_issue_survey() {
     local branch="$1"
     
+    log "${BLUE}🚀 [TALLY] Starting survey setup for branch: '$branch'${NC}"
+    
     # Extract issue ID from branch name using existing pattern
     local issue_id=$(echo "$branch" | sed -n 's/^issue-\([0-9]\+\)$/\1/p')
     
     if [ -z "$issue_id" ]; then
-        # Not an issue branch, no survey needed
+        log "${BLUE}ℹ️  [TALLY] Branch '$branch' is not an issue branch (no issue-NNNN pattern), skipping survey setup${NC}"
         export TALLY_SURVEY_ID=""
         return 0
     fi
     
-    log "${BLUE}🗣️  Setting up survey for issue branch: $branch${NC}"
+    log "${GREEN}✅ [TALLY] Detected issue branch with ID: $issue_id${NC}"
+    log "${BLUE}🗣️  [TALLY] Setting up survey for issue branch: $branch${NC}"
     
     # Get Tally token from environment (passed from local machine) or local config
     local tally_token="$TALLY_TOKEN"
-    if [ -z "$tally_token" ] && [ -f ~/.localtallyrc ]; then
-        source ~/.localtallyrc
-        tally_token="$TALLY_TOKEN"
+    log "${BLUE}🔍 [TALLY] Checking for TALLY_TOKEN in environment...${NC}"
+    
+    if [ -z "$tally_token" ]; then
+        log "${YELLOW}⚠️  [TALLY] No TALLY_TOKEN in environment, checking ~/.localtallyrc...${NC}"
+        if [ -f ~/.localtallyrc ]; then
+            log "${BLUE}📁 [TALLY] Found ~/.localtallyrc, sourcing it...${NC}"
+            source ~/.localtallyrc
+            tally_token="$TALLY_TOKEN"
+            if [ -n "$tally_token" ]; then
+                log "${GREEN}✅ [TALLY] Token loaded from ~/.localtallyrc${NC}"
+            else
+                log "${RED}❌ [TALLY] ~/.localtallyrc exists but TALLY_TOKEN is empty${NC}"
+            fi
+        else
+            log "${YELLOW}⚠️  [TALLY] ~/.localtallyrc not found${NC}"
+        fi
+    else
+        log "${GREEN}✅ [TALLY] Token found in environment (length: ${#tally_token} chars)${NC}"
     fi
     
     if [ -z "$tally_token" ]; then
-        log "${YELLOW}⚠️  No Tally token found, skipping survey setup${NC}"
+        log "${YELLOW}⚠️  [TALLY] No Tally token found anywhere, skipping survey setup${NC}"
         export TALLY_SURVEY_ID=""
         return 0
     fi
@@ -408,23 +480,30 @@ setup_issue_survey() {
     local survey_name="$branch"
     local template_name="nr-experiment-template"
     
+    log "${BLUE}📋 [TALLY] Survey configuration:${NC}"
+    log "${BLUE}   - Survey name: '$survey_name'${NC}"
+    log "${BLUE}   - Template name: '$template_name'${NC}"
+    
     # Check if survey already exists
+    log "${BLUE}🔍 [TALLY] Checking if survey already exists...${NC}"
     if check_survey_exists "$survey_name" "$tally_token"; then
-        log "Survey '$survey_name' already exists, getting ID..."
+        log "${GREEN}✅ [TALLY] Survey '$survey_name' already exists, getting ID...${NC}"
         local survey_id=$(get_survey_id "$survey_name" "$tally_token")
     else
-        log "Creating new survey '$survey_name' from template '$template_name'..."
+        log "${BLUE}🔨 [TALLY] Survey doesn't exist, creating new survey '$survey_name' from template '$template_name'...${NC}"
         local survey_id=$(create_survey_from_template "$survey_name" "$template_name" "$tally_token")
     fi
     
     if [ -n "$survey_id" ]; then
         export TALLY_SURVEY_ID="$survey_id"
-        log "${GREEN}✅ Survey ready: $survey_name (ID: $survey_id)${NC}"
+        log "${GREEN}✅ [TALLY] Survey ready: $survey_name (ID: $survey_id)${NC}"
+        log "${GREEN}🎯 [TALLY] TALLY_SURVEY_ID exported: '$TALLY_SURVEY_ID'${NC}"
     else
-        log "${YELLOW}⚠️  Failed to setup survey, continuing without it${NC}"
+        log "${YELLOW}⚠️  [TALLY] Failed to setup survey, continuing without it${NC}"
         export TALLY_SURVEY_ID=""
     fi
     
+    log "${BLUE}🏁 [TALLY] Survey setup completed for branch: '$branch'${NC}"
     return 0
 }
 
