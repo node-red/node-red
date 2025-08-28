@@ -99,7 +99,7 @@ validate_tailscale_connection() {
         if echo "$logs" | grep -q "node not found\|404.*not found\|registration .*failed\|key rejected"; then
             log "${YELLOW}⚠️  Detected stale Tailscale state in $container_name${NC}"
             log "Error details from logs:"
-            echo "$logs" | grep -E "(node not found|404.*not found|registration .*failed|key rejected)" | sed 's/^/   /'
+            echo "$logs" | grep -E "(node not found|404.*not found|registration .*failed|key rejected)" | sed -E 's/(auth[a-zA-Z]*[=:])[a-zA-Z0-9_-]+/\1***REDACTED***/gi; s/(key[=:])[a-zA-Z0-9_-]+/\1***REDACTED***/gi; s/^/   /'
             
             if [ $attempt -lt $max_attempts ]; then
                 log "${BLUE}🔄 Clearing stale Tailscale state and retrying...${NC}"
