@@ -391,9 +391,9 @@ setup_issue_survey() {
     
     log "${BLUE}🗣️  Setting up survey for issue branch: $branch${NC}"
     
-    # Load Tally token (reuse existing pattern from deploy.sh)
-    local tally_token=""
-    if [ -f ~/.localtallyrc ]; then
+    # Get Tally token from environment (passed from local machine) or local config
+    local tally_token="$TALLY_TOKEN"
+    if [ -z "$tally_token" ] && [ -f ~/.localtallyrc ]; then
         source ~/.localtallyrc
         tally_token="$TALLY_TOKEN"
     fi
@@ -1086,6 +1086,7 @@ deploy_remote() {
     log "   GitHub Repo: $GITHUB_REPO"
     log "   Remove Dashboard: $REMOVE_DASHBOARD"
     log "   TS_AUTHKEY: ${TS_AUTHKEY:+SET (${#TS_AUTHKEY} chars)}"
+    log "   TALLY_TOKEN: ${TALLY_TOKEN:+SET (${#TALLY_TOKEN} chars)}"
     echo
     
     # Copy the deploy-dry.sh script to remote and execute it
@@ -1095,6 +1096,7 @@ deploy_remote() {
     ssh -i "$HETZNER_SSH_KEY" "$HETZNER_USER@$HETZNER_HOST" \
         "export BRANCH_NAME='$BRANCH_NAME' && \
          export TS_AUTHKEY='$TS_AUTHKEY' && \
+         export TALLY_TOKEN='$TALLY_TOKEN' && \
          export TAILNET='$TAILNET_TO_PASS' && \
          export GIT_REMOTE='$GIT_REMOTE' && \
          export GITHUB_REPO='$GITHUB_REPO' && \
@@ -1140,6 +1142,7 @@ deploy_remote_execution() {
     log "   Git Remote: $GIT_REMOTE"
     log "   Remove Dashboard: $REMOVE_DASHBOARD"
     log "   TS_AUTHKEY: ${TS_AUTHKEY:+SET (${#TS_AUTHKEY} chars)}"
+    log "   TALLY_TOKEN: ${TALLY_TOKEN:+SET (${#TALLY_TOKEN} chars)}"
     
     # Validate critical variables were received
     if [ -z "$TS_AUTHKEY" ]; then
