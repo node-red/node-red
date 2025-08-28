@@ -334,8 +334,14 @@ check_survey_exists() {
         return 1
     fi
     
-    # Parse response to find matching survey name using bash-native tools with exact match
-    if echo "$response" | grep -q "\"name\":\"$survey_name\""; then
+    # Validate JSON response
+    if ! echo "$response" | jq . > /dev/null 2>&1; then
+        log "${RED}❌ [TALLY] Invalid JSON response from API${NC}"
+        return 1
+    fi
+    
+    # Parse response to find matching survey name using jq with exact match
+    if echo "$response" | jq -e --arg name "$survey_name" '.[] | select(.name == $name)' > /dev/null 2>&1; then
         local survey_found="FOUND"
     else
         local survey_found="NOT_FOUND"
@@ -346,8 +352,8 @@ check_survey_exists() {
         return 0
     else
         log "${YELLOW}⚠️  [TALLY] Survey '$survey_name' not found in API response${NC}"
-        # Show first few survey names for debugging
-        local available_surveys=$(echo "$response" | grep '"name":' | head -3 | sed 's/.*"name": *"\([^"]*\)".*/\1/' | tr '\n' ',' | sed 's/,$//')
+        # Show first few survey names for debugging using jq
+        local available_surveys=$(echo "$response" | jq -r '.[:3] | map(.name) | join(", ")' 2>/dev/null || echo "none")
         log "${BLUE}📋 [TALLY] Available surveys: $available_surveys${NC}"
         return 1
     fi
@@ -375,22 +381,22 @@ get_survey_id() {
         return 1
     fi
     
-    # Extract form ID for matching survey name using bash-native tools with exact match
-    local survey_id=$(echo "$response" | grep -A5 -B5 "\"name\":\"$survey_name\"" | \
-        grep "\"id\":" | head -1 | sed 's/.*"id": *"\([^"]*\)".*/\1/')
+    # Validate JSON response
+    if ! echo "$response" | jq . > /dev/null 2>&1; then
+        log "${RED}❌ [TALLY] Invalid JSON response from API${NC}"
+        return 1
+    fi
+    
+    # Extract form ID for matching survey name using jq with exact match
+    local survey_id=$(echo "$response" | jq -r --arg name "$survey_name" '.[] | select(.name == $name) | .id // empty' 2>/dev/null)
     
     if [ -n "$survey_id" ]; then
         log "${GREEN}✅ [TALLY] Found survey ID: '$survey_id' for '$survey_name'${NC}"
         echo "$survey_id"
     else
         log "${RED}❌ [TALLY] Could not extract survey ID for '$survey_name'${NC}"
-        # Debug: show what surveys were found
-        local found_surveys=$(echo "$response" | grep '"name":' | head -3 | \
-            while read -r line; do
-                name=$(echo "$line" | sed 's/.*"name": *"\([^"]*\)".*/\1/')
-                id=$(echo "$response" | grep -A10 -B10 "$line" | grep '"id":' | head -1 | sed 's/.*"id": *"\([^"]*\)".*/\1/')
-                echo "${name}:${id}"
-            done | tr '\n' '|' | sed 's/|$//')
+        # Debug: show what surveys were found using jq
+        local found_surveys=$(echo "$response" | jq -r '.[:3] | map("\(.name):\(.id)") | join(" | ")' 2>/dev/null || echo "none")
         log "${RED}📋 [TALLY] Available surveys: $found_surveys${NC}"
     fi
 }
@@ -474,22 +480,31 @@ duplicate_survey() {
         return 1
     fi
     
-    # Check for errors in response
-    if echo "$create_response" | grep -q '"message":\|"error":\|"Bad Request"'; then
-        log "${RED}❌ [TALLY] API returned error: '$create_response'${NC}"
+    # Validate JSON response
+    if ! echo "$create_response" | jq . > /dev/null 2>&1; then
+        log "${RED}❌ [TALLY] Invalid JSON response from survey creation API${NC}"
         return 1
     fi
     
-    # Extract new survey ID
-    local new_survey_id=$(echo "$create_response" | python3 -c "import json,sys; print(json.load(sys.stdin).get('id', ''))" 2>/dev/null)
-    
-    if [ -n "$new_survey_id" ]; then
-        log "${GREEN}✅ [TALLY] Successfully duplicated survey with ID: '$new_survey_id'${NC}"
-        echo "$new_survey_id"
-    else
-        log "${RED}❌ [TALLY] Could not extract new survey ID from response${NC}"
-        log "${RED}📄 [TALLY] Create response: '$create_response'${NC}"
+    # Check for errors in response using jq
+    if echo "$create_response" | jq -e '.error // .message' > /dev/null 2>&1; then
+        local error_msg=$(echo "$create_response" | jq -r '.error // .message // "Unknown error"' 2>/dev/null)
+        log "${RED}❌ [TALLY] API returned error: '$error_msg'${NC}"
+        return 1
     fi
+    
+    # Extract new survey ID using jq
+    local new_survey_id=$(echo "$create_response" | jq -r '.id // empty' 2>/dev/null)
+    
+    # Additional validation that we got a valid ID
+    if [ -z "$new_survey_id" ] || [ "$new_survey_id" = "null" ]; then
+        log "${RED}❌ [TALLY] No form ID returned from survey creation${NC}"
+        log "${RED}📄 [TALLY] Create response: '$create_response'${NC}"
+        return 1
+    fi
+    
+    log "${GREEN}✅ [TALLY] Successfully duplicated survey with ID: '$new_survey_id'${NC}"
+    echo "$new_survey_id"
 }
 
 # Function to setup survey for issue branches
