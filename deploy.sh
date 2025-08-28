@@ -549,11 +549,20 @@ generate_dashboard_html() {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Container Dashboard</title>
+    <meta name="description" content="Live status dashboard for Node-RED Modernization Project experiments. Test ongoing UI/UX improvements and provide feedback to shape Node-RED's future.">
+    <meta name="keywords" content="Node-RED, dashboard, experiments, modernization, UI, UX, testing, status">
+    <meta name="author" content="Node-RED Modernization Project">
+    <meta name="robots" content="noindex, nofollow">
+    
+    <title>Node-RED Modernization Project - Experiment Dashboard</title>
     
     <!-- Favicon implementation matching node-red-academy.learnworlds.com -->
     <link rel="icon" type="image/png" href="https://lwfiles.mycourse.app/67605a7461b32c08f9864eb5-public/c41a9ea6f80733c54d30135a2b3d3254.png">
     <link rel="apple-touch-icon" type="image/png" href="https://lwfiles.mycourse.app/67605a7461b32c08f9864eb5-public/c41a9ea6f80733c54d30135a2b3d3254.png">
+    
+    <!-- Preconnect to external domains for performance -->
+    <link rel="preconnect" href="https://tally.so">
+    <link rel="preconnect" href="https://lwfiles.mycourse.app">
     
     <!-- Tally popup widget -->
     <script async src="https://tally.so/widgets/embed.js"></script>
