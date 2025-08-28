@@ -334,10 +334,12 @@ check_survey_exists() {
         return 1
     fi
     
-    # Parse response to find matching survey name using jq
-    local survey_found=$(echo "$response" | jq -r --arg name "$survey_name" '
-        if (.items // []) | map(.name) | index($name) then "FOUND" else "NOT_FOUND" end
-    ' 2>/dev/null || echo "PARSE_ERROR")
+    # Parse response to find matching survey name using bash-native tools
+    if echo "$response" | grep -q "\"name\":.*\"$survey_name\""; then
+        local survey_found="FOUND"
+    else
+        local survey_found="NOT_FOUND"
+    fi
 
     if [ "$survey_found" = "FOUND" ]; then
         log "${GREEN}✅ [TALLY] Survey '$survey_name' found in API response${NC}"
@@ -345,9 +347,7 @@ check_survey_exists() {
     else
         log "${YELLOW}⚠️  [TALLY] Survey '$survey_name' not found in API response${NC}"
         # Show first few survey names for debugging
-        local available_surveys=$(echo "$response" | jq -r '
-            (.items // []) | .[0:3] | map(.name // "unnamed") | join(", ")
-        ' 2>/dev/null || echo "parse-error")
+        local available_surveys=$(echo "$response" | grep '"name":' | head -3 | sed 's/.*"name": *"\([^"]*\)".*/\1/' | tr '\n' ',' | sed 's/,$//')
         log "${BLUE}📋 [TALLY] Available surveys: $available_surveys${NC}"
         return 1
     fi
@@ -375,10 +375,9 @@ get_survey_id() {
         return 1
     fi
     
-    # Extract form ID for matching survey name using jq
-    local survey_id=$(echo "$response" | jq -r --arg name "$survey_name" '
-        (.items // []) | map(select(.name == $name)) | .[0].id // ""
-    ' 2>/dev/null)
+    # Extract form ID for matching survey name using bash-native tools
+    local survey_id=$(echo "$response" | grep -A5 -B5 "\"name\":.*\"$survey_name\"" | \
+        grep "\"id\":" | head -1 | sed 's/.*"id": *"\([^"]*\)".*/\1/')
     
     if [ -n "$survey_id" ]; then
         log "${GREEN}✅ [TALLY] Found survey ID: '$survey_id' for '$survey_name'${NC}"
@@ -386,9 +385,12 @@ get_survey_id() {
     else
         log "${RED}❌ [TALLY] Could not extract survey ID for '$survey_name'${NC}"
         # Debug: show what surveys were found
-        local found_surveys=$(echo "$response" | jq -r '
-            (.items // []) | .[0:3] | map((.name // "unnamed") + ":" + (.id // "no-id")) | join("|")
-        ' 2>/dev/null || echo "parse-error")
+        local found_surveys=$(echo "$response" | grep '"name":' | head -3 | \
+            while read -r line; do
+                name=$(echo "$line" | sed 's/.*"name": *"\([^"]*\)".*/\1/')
+                id=$(echo "$response" | grep -A10 -B10 "$line" | grep '"id":' | head -1 | sed 's/.*"id": *"\([^"]*\)".*/\1/')
+                echo "${name}:${id}"
+            done | tr '\n' '|' | sed 's/|$//')
         log "${RED}📋 [TALLY] Available surveys: $found_surveys${NC}"
     fi
 }
@@ -442,59 +444,26 @@ duplicate_survey() {
     fi
     
     log "${GREEN}✅ [TALLY] Template data fetched successfully${NC}"
-    log "${BLUE}🔄 [TALLY] Step 3: Generating new UUIDs for blocks...${NC}"
+    log "${BLUE}🔄 [TALLY] Step 3: Creating form data with new name...${NC}"
     
-    # Create a temporary file to process the JSON
-    local temp_file="/tmp/tally_template_$$"
-    echo "$template_data" > "$temp_file"
+    # Simple approach: just change the name in the template data
+    # Replace the name field in the JSON using sed
+    local new_form_data=$(echo "$template_data" | sed "s/\"name\":\"[^\"]*\"/\"name\":\"$new_survey_name\"/g")
     
-    # Extract basic form data first
-    local base_form_data=$(jq --arg name "$new_survey_name" '
-    {
-        "name": $name,
-        "status": (.status // "DRAFT"),
-        "settings": (.settings // {}),
-        "customCSS": (.customCSS // ""),
-        "blocks": .blocks
-    }
-    ' "$temp_file" 2>/dev/null)
-    
-    # Count blocks for UUID generation
-    local block_count=$(echo "$base_form_data" | jq '.blocks | length' 2>/dev/null || echo 0)
-    
-    # Generate UUIDs for all blocks 
-    local uuid_list=""
-    local group_uuid_list=""
-    for i in $(seq 0 $((block_count - 1))); do
-        if [ $i -eq 0 ]; then
-            uuid_list="\"$(generate_uuid)\""
-            group_uuid_list="\"$(generate_uuid)\""
-        else
-            uuid_list="$uuid_list, \"$(generate_uuid)\""
-            group_uuid_list="$group_uuid_list, \"$(generate_uuid)\""
-        fi
-    done
-    
-    # Apply UUIDs to blocks
-    local new_form_data=$(echo "$base_form_data" | jq --argjson uuids "[$uuid_list]" --argjson group_uuids "[$group_uuid_list]" '
-    .blocks |= [
-        to_entries[] | 
-        .value + {
-            "uuid": $uuids[.key],
-            "groupUuid": $group_uuids[.key]
-        }
-    ]
-    ' 2>/dev/null)
-    
-    # Clean up temp file
-    rm -f "$temp_file"
-    
-    if [ -z "$new_form_data" ] || [[ "$new_form_data" == "ERROR:"* ]]; then
-        log "${RED}❌ [TALLY] Failed to process template data with new UUIDs${NC}"
+    # Verify the name was replaced
+    if ! echo "$new_form_data" | grep -q "\"name\":\"$new_survey_name\""; then
+        log "${RED}❌ [TALLY] Failed to replace name in template data${NC}"
         return 1
     fi
     
-    log "${GREEN}✅ [TALLY] Generated new UUIDs for $(echo "$new_form_data" | jq '.blocks | length' 2>/dev/null || echo "?") blocks${NC}"
+    if [ -z "$new_form_data" ]; then
+        log "${RED}❌ [TALLY] Failed to process template data${NC}"
+        return 1
+    fi
+    
+    # Count blocks using grep instead of jq
+    local block_count=$(echo "$new_form_data" | grep -c '"uuid":' 2>/dev/null || echo "?")
+    log "${GREEN}✅ [TALLY] Prepared form data with $block_count blocks${NC}"
     log "${BLUE}📡 [TALLY] Step 4: Creating new survey with duplicated data...${NC}"
     
     # Create new survey with the processed data
