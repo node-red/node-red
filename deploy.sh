@@ -18,6 +18,236 @@ if [ -f ~/.localhetznerrc ]; then
     source ~/.localhetznerrc
 fi
 
+# ============================================================================
+# COMMON UTILITY FUNCTIONS (DRY)
+# ============================================================================
+
+# Function to log with timestamp
+log() {
+    echo -e "[$(date '+%Y-%m-%d %H:%M:%S')] $1"
+}
+
+# Generic function to generate Tailscale serve configuration
+generate_tailscale_serve_config() {
+    local hostname="$1"
+    local proxy_target="$2"
+    local output_file="$3"
+    local tailnet="${4:-$TAILNET}"
+    
+    cat > "$output_file" << EOF
+{
+  "TCP": {
+    "443": {
+      "HTTPS": true
+    }
+  },
+  "Web": {
+    "${hostname}.${tailnet}.ts.net:443": {
+      "Handlers": {
+        "/": {
+          "Proxy": "${proxy_target}"
+        }
+      }
+    }
+  },
+  "AllowFunnel": {
+    "${hostname}.${tailnet}.ts.net:443": false
+  }
+}
+EOF
+}
+
+# Generic function to validate Tailscale connection
+validate_tailscale_connection() {
+    local container_name="$1"
+    local max_attempts=3
+    local attempt=1
+    
+    log "${BLUE}🔍 Validating Tailscale connection for $container_name...${NC}"
+    log "Container logs available for troubleshooting with: docker logs $container_name"
+    
+    while [ $attempt -le $max_attempts ]; do
+        log "Attempt $attempt/$max_attempts: Checking Tailscale status..."
+        
+        # Wait for container to initialize
+        sleep 10
+        
+        # Check if container is running
+        if ! docker ps --format "table {{.Names}}" | grep -q "^$container_name$"; then
+            log "${RED}❌ Tailscale container $container_name is not running${NC}"
+            return 1
+        fi
+        
+        # Check container logs for common error patterns
+        local logs=$(docker logs "$container_name" --tail 50 2>&1)
+        
+        if echo "$logs" | grep -q "node not found\|404.*not found\|registration .*failed\|key rejected"; then
+            log "${YELLOW}⚠️  Detected stale Tailscale state in $container_name${NC}"
+            log "Error details from logs:"
+            echo "$logs" | grep -E "(node not found|404.*not found|registration .*failed|key rejected)" | sed 's/^/   /'
+            
+            if [ $attempt -lt $max_attempts ]; then
+                log "${BLUE}🔄 Clearing stale Tailscale state and retrying...${NC}"
+                return 2  # Special code to indicate retry needed
+            else
+                log "${RED}❌ Failed to establish Tailscale connection after $max_attempts attempts${NC}"
+                return 1
+            fi
+        elif echo "$logs" | grep -q "serve config loaded\|serve config applied\|listening\|authenticated\|Listening on\|ready\|Startup complete\|magicsock.*connected"; then
+            log "${GREEN}✅ Tailscale connection validated for $container_name${NC}"
+            return 0
+        else
+            log "${YELLOW}⚠️  Tailscale container logs unclear, waiting longer...${NC}"
+            sleep 10
+            attempt=$((attempt + 1))
+        fi
+    done
+    
+    log "${RED}❌ Tailscale validation failed after $max_attempts attempts${NC}"
+    return 1
+}
+
+# Generic function to clear Tailscale state
+clear_tailscale_state() {
+    local container_name="$1"
+    local volume_name="${2:-}"
+    local compose_file="${3:-}"
+    local service_name="${4:-tailscale}"
+    
+    log "Stopping Tailscale container..."
+    docker stop "$container_name" 2>/dev/null || true
+    
+    log "Removing Tailscale container..."
+    docker rm "$container_name" 2>/dev/null || true
+    
+    # Try to detect volume name from container if not provided
+    if [ -z "$volume_name" ]; then
+        volume_name=$(docker inspect "$container_name" --format '{{range .Mounts}}{{if eq .Type "volume"}}{{if eq .Destination "/var/lib/tailscale"}}{{.Name}}{{end}}{{end}}{{end}}' 2>/dev/null || echo "")
+    fi
+    
+    # Clear volume if found
+    if [ -n "$volume_name" ]; then
+        log "Clearing Tailscale state volume: $volume_name"
+        docker run --rm -v "$volume_name:/state" alpine:latest sh -c "rm -rf /state/*" 2>/dev/null || {
+            log "${YELLOW}Warning: Failed to clear volume with alpine, trying busybox...${NC}"
+            docker run --rm -v "$volume_name:/state" busybox sh -c "rm -rf /state/*" 2>/dev/null || true
+        }
+    else
+        # Try multiple possible volume name formats
+        log "${YELLOW}Warning: Could not determine volume name, trying common patterns...${NC}"
+        local possible_volumes=("$container_name" "${container_name//-/_}")
+        for vol in "${possible_volumes[@]}"; do
+            if docker volume inspect "$vol" &>/dev/null; then
+                log "Found volume: $vol, clearing..."
+                docker run --rm -v "$vol:/state" alpine:latest sh -c "rm -rf /state/*" 2>/dev/null || true
+                break
+            fi
+        done
+    fi
+    
+    # Restart container if compose file provided
+    if [ -n "$compose_file" ]; then
+        log "Restarting Tailscale container..."
+        env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f "$compose_file" up -d "$service_name"
+        sleep 5
+    fi
+}
+
+# Function to validate and retry Tailscale with automatic state clearing
+validate_and_retry_tailscale() {
+    local container_name="$1"
+    local volume_name="${2:-}"
+    local compose_file="${3:-}"
+    local service_name="${4:-tailscale}"
+    
+    local max_retries=3
+    local retry_count=0
+    
+    while [ $retry_count -lt $max_retries ]; do
+        validate_tailscale_connection "$container_name"
+        local result=$?
+        
+        if [ $result -eq 0 ]; then
+            return 0
+        elif [ $result -eq 2 ]; then
+            # Retry needed - clear state
+            clear_tailscale_state "$container_name" "$volume_name" "$compose_file" "$service_name"
+            retry_count=$((retry_count + 1))
+        else
+            return 1
+        fi
+    done
+    
+    return 1
+}
+
+# Function to remove Docker volumes safely
+remove_volumes() {
+    local volumes=("$@")
+    log "Removing volumes..."
+    for volume in "${volumes[@]}"; do
+        docker volume rm "$volume" 2>/dev/null || true
+    done
+}
+
+# Function to get container git info
+get_container_git_info() {
+    local branch="$1"
+    local branch_repo_dir="$2"
+    local github_repo="$3"
+    
+    local commit_short="unknown"
+    local commit_hash="unknown"
+    local commit_url=""
+    local branch_url="https://github.com/$github_repo/tree/$branch"
+    
+    if [ -d "$branch_repo_dir" ]; then
+        commit_short=$(cd "$branch_repo_dir" && git rev-parse --short=8 HEAD 2>/dev/null || echo "unknown")
+        commit_hash=$(cd "$branch_repo_dir" && git rev-parse HEAD 2>/dev/null || echo "unknown")
+        if [ "$commit_hash" != "unknown" ]; then
+            commit_url="https://github.com/$github_repo/commit/$commit_hash"
+        fi
+    fi
+    
+    echo "$commit_short|$commit_hash|$commit_url|$branch_url"
+}
+
+# Function to ensure Docker is installed and ready
+ensure_docker() {
+    if ! command -v docker &> /dev/null; then
+        log "${YELLOW}🐳 Installing Docker...${NC}"
+        curl -fsSL https://get.docker.com -o get-docker.sh
+        sh get-docker.sh
+        rm get-docker.sh
+        systemctl enable docker
+        systemctl start docker
+    fi
+    
+    # Wait for Docker to be ready
+    while ! docker version &> /dev/null; do
+        log "Waiting for Docker to be ready..."
+        systemctl start docker 2>/dev/null || true
+        sleep 5
+    done
+    log "${GREEN}✅ Docker is ready${NC}"
+}
+
+# Function to ensure git is installed
+ensure_git() {
+    if ! command -v git &> /dev/null; then
+        log "${YELLOW}📦 Installing git...${NC}"
+        if command -v apt-get &> /dev/null; then
+            apt-get update && apt-get install -y git jq curl
+        elif command -v yum &> /dev/null; then
+            yum install -y git jq curl
+        fi
+    fi
+}
+
+# ============================================================================
+# CONFIGURATION VALIDATION
+# ============================================================================
+
 # Validate required configuration was loaded
 validate_config() {
     local missing_vars=()
@@ -40,6 +270,21 @@ validate_config() {
     return 0
 }
 
+# Function to check if TS_AUTHKEY is set
+check_ts_authkey() {
+    if [ -z "$TS_AUTHKEY" ]; then
+        echo -e "${YELLOW}⚠️  WARNING: TS_AUTHKEY not set!${NC}"
+        echo "   Set with: export TS_AUTHKEY=your-tailscale-auth-key"
+        echo
+        return 1
+    fi
+    return 0
+}
+
+# ============================================================================
+# GIT OPERATIONS
+# ============================================================================
+
 # Get current git branch and sanitize it for Docker/Tailscale naming
 BRANCH_NAME=$(git branch --show-current | sed 's/[^a-zA-Z0-9]/-/g' | tr '[:upper:]' '[:lower:]')
 
@@ -49,33 +294,13 @@ if [ -z "$BRANCH_NAME" ]; then
     exit 1
 fi
 
-# Configuration
-DEPLOY_MODE="${DEPLOY_MODE:-local}"
-HETZNER_HOST="${HETZNER_HOST:-your-server-ip}"
-HETZNER_USER="${HETZNER_USER:-root}"
-HETZNER_SSH_KEY="${HETZNER_SSH_KEY:-~/.ssh/id_rsa}"
-CONTAINER_TAG="nr-experiment"
-GITHUB_REPO="${GITHUB_REPO:-dimitrieh/node-red}"
-GITHUB_ISSUES_REPO="${GITHUB_ISSUES_REPO:-node-red/node-red}"
-
-# Parse command line flags
-REMOVE_DASHBOARD=false
-for arg in "$@"; do
-    case $arg in
-        --remove-dashboard)
-            REMOVE_DASHBOARD=true
-            shift
-            ;;
-    esac
-done
-
-# Function to log with timestamp
-log() {
-    echo -e "[$(date '+%Y-%m-%d %H:%M:%S')] $1"
-}
-
 # Function to check for uncommitted changes
 check_uncommitted_changes() {
+    # Skip git checks if explicitly disabled (for testing)
+    if [ "${SKIP_GIT_CHECKS:-}" = "true" ]; then
+        return 0
+    fi
+    
     if [ -n "$(git status --porcelain)" ]; then
         echo -e "${RED}❌ Error: Uncommitted changes detected!${NC}"
         echo "Please commit and push your changes before deploying:"
@@ -125,6 +350,403 @@ check_branch_sync() {
     log "${GREEN}✅ Local and remote branches are in sync${NC}"
 }
 
+# ============================================================================
+# DASHBOARD FUNCTIONS
+# ============================================================================
+
+# Function to generate nginx configuration with no-cache headers
+generate_nginx_config() {
+    cat > nginx-dashboard.conf << 'NGINX_CONFIG'
+server {
+    listen       80;
+    listen  [::]:80;
+    server_name  localhost;
+
+    location / {
+        root   /usr/share/nginx/html;
+        index  index.html index.htm;
+        
+        # Disable caching for dashboard to ensure fresh content
+        add_header Cache-Control "no-cache, no-store, must-revalidate" always;
+        add_header Pragma "no-cache" always;
+        add_header Expires "0" always;
+    }
+
+    # Still allow caching for static assets like images
+    location ~* \.(css|js|png|jpg|jpeg|gif|ico|svg)$ {
+        root   /usr/share/nginx/html;
+        expires 1h;
+        add_header Cache-Control "public, immutable";
+    }
+
+    error_page   500 502 503 504  /50x.html;
+    location = /50x.html {
+        root   /usr/share/nginx/html;
+    }
+}
+NGINX_CONFIG
+}
+
+# Function to generate dashboard HTML (extracted to external file for maintainability)
+generate_dashboard_html() {
+    local dashboard_file="${1:-dashboard.html}"
+    log "Generating $dashboard_file..."
+    
+    # This could be moved to a separate template file
+    cat > "$dashboard_file" << 'DASHBOARD_HTML'
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Container Dashboard</title>
+    
+    <!-- Tally popup widget -->
+    <script async src="https://tally.so/widgets/embed.js"></script>
+    <script>
+    window.TallyConfig = {
+      "formId": "31L4dW",
+      "popup": {
+        "emoji": {
+          "text": "👋",
+          "animation": "wave"
+        },
+        "hideTitle": true,
+        "open": {
+          "trigger": "time",
+          "ms": 30000
+        }
+      }
+    };
+    </script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f0f0f0; min-height: 100vh; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 20px; background: #8f0000; color: white; padding: 40px 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .header h1 { font-size: 2.5rem; margin-bottom: 10px; font-weight: 400; letter-spacing: -0.5px; display: inline; line-height: 1.2; }
+        .header h1 .logo { height: 1em; width: auto; vertical-align: middle; margin-right: 0.2em; }
+        .header p { font-size: 1.1rem; opacity: 0.95; margin-bottom: 15px; }
+        .header-links { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; }
+        .header-link { color: white; text-decoration: none; padding: 8px 16px; border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 4px; font-size: 0.9rem; transition: all 0.3s ease; background: rgba(255, 255, 255, 0.1); }
+        .header-link:hover { background: rgba(255, 255, 255, 0.2); border-color: rgba(255, 255, 255, 0.6); transform: translateY(-1px); }
+        .meta-info { color: #666; font-size: 0.9rem; background: white; padding: 10px 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); white-space: nowrap; }
+        .meta-info code { background: #f5f5f5; padding: 2px 6px; border-radius: 3px; color: #8f0000; font-weight: 500; }
+        .controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
+        .refresh-btn { background: white; color: #666; border: 2px solid #ddd; padding: 0 16px; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; font-size: 14px; font-weight: 500; box-shadow: 0 2px 4px rgba(0,0,0,0.05); height: 40px; display: flex; align-items: center; justify-content: center; position: relative; white-space: nowrap; min-width: 120px; }
+        .refresh-btn:hover { background: rgba(143, 0, 0, 0.05); color: #8f0000; border-color: #8f0000; }
+        .control-buttons { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+        .status-filter { display: flex; align-items: center; background: white; border-radius: 8px; border: 2px solid #ddd; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.05); height: 40px; }
+        .filter-btn { background: transparent; color: #666; border: none; padding: 0 15px; cursor: pointer; transition: all 0.3s ease; font-size: 14px; font-weight: 500; line-height: 1; min-width: 70px; border-right: 1px solid #ddd; position: relative; white-space: nowrap; height: 40px; display: flex; align-items: center; justify-content: center; flex: 1; }
+        .filter-btn:last-child { border-right: none; }
+        .filter-btn:hover { background: rgba(143, 0, 0, 0.05); color: #8f0000; }
+        .filter-btn.active { background: #8f0000; color: white; }
+        .instances-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; margin-top: 20px; }
+        .instance-card { background: white; border-radius: 8px; padding: 25px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); transition: all 0.3s ease; cursor: pointer; position: relative; overflow: hidden; border: 1px solid #e0e0e0; }
+        .instance-card:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15); border-color: #8f0000; }
+        .instance-card.online:hover { border-color: #4CAF50; }
+        .instance-card.checking:hover { border-color: #2196F3; }
+        .instance-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: #4CAF50; }
+        .instance-card.checking::before { background: #2196F3; }
+        .instance-card.offline::before { background: #f44336; }
+        .instance-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; }
+        .instance-name { font-size: 1.3rem; font-weight: 600; color: #333; margin: 0; }
+        .status-badge { padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+        .status-online { background: #e8f5e8; color: #4CAF50; }
+        .status-offline { background: #ffebee; color: #f44336; }
+        .status-checking { background: #e3f2fd; color: #2196F3; }
+        .instance-info { margin-bottom: 20px; }
+        .info-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.9rem; }
+        .info-label { color: #666; font-weight: 500; }
+        .info-value { color: #333; font-family: 'SF Mono', Monaco, monospace; font-size: 0.85rem; text-align: right; flex: 1; margin-left: 10px; word-break: break-all; }
+        .info-value a { color: #0066cc; text-decoration: none; transition: color 0.2s ease; }
+        .info-value a:hover { color: #8f0000; text-decoration: underline; }
+        @media (max-width: 900px) {
+            .controls { flex-direction: column; align-items: stretch; }
+            .meta-info { width: 100%; text-align: center; }
+            .control-buttons { justify-content: center; width: 100%; }
+        }
+        @media (max-width: 600px) {
+            .header h1 { font-size: 2rem; }
+            .instances-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><img src="https://us1.discourse-cdn.com/flex026/uploads/nodered/original/1X/778549404735e222c89ce5449482a189ace8cdae.png" alt="Node-RED" class="logo"> Node-RED Modernization Project Experiment Dashboard</h1>
+            <p>Live status of all currently running Node-RED experiments | Feel free to test the other experiments!</p>
+            <div class="header-links">
+                <a href="https://discourse.nodered.org/t/node-red-survey-shaping-the-future-of-node-reds-user-experience/98346" target="_blank" rel="noopener noreferrer" class="header-link">Modernization Project</a>
+                <a href="https://github.com/node-red/node-red/issues" target="_blank" rel="noopener noreferrer" class="header-link">Issue Tracker</a>
+            </div>
+        </div>
+        <div class="controls">
+            <div class="meta-info" id="meta-info">Loading...</div>
+            <div class="control-buttons">
+                <button class="refresh-btn" onclick="checkAllStatus()">Check status</button>
+                <div class="status-filter">
+                    <button class="filter-btn active" data-filter="all" id="all-btn">All (<span id="total-count">0</span>)</button>
+                    <button class="filter-btn" data-filter="online" id="online-btn">Online (<span id="online-count">0</span>)</button>
+                    <button class="filter-btn" data-filter="offline" id="offline-btn">Offline (<span id="offline-count">0</span>)</button>
+                </div>
+            </div>
+        </div>
+        <div id="instances" class="instances-grid"></div>
+    </div>
+    <script>
+        let containersData = null;
+        let currentFilter = 'all';
+        function getRelativeTime(date) {
+            const now = new Date();
+            const diffMs = now - date;
+            const diffSecs = Math.floor(diffMs / 1000);
+            const diffMins = Math.floor(diffSecs / 60);
+            const diffHours = Math.floor(diffMins / 60);
+            const diffDays = Math.floor(diffHours / 24);
+            if (diffSecs < 60) return `${diffSecs} seconds ago`;
+            if (diffMins < 60) return `${diffMins} minutes ago`;
+            if (diffHours < 24) return `${diffHours} hours ago`;
+            return `${diffDays} days ago`;
+        }
+        async function loadContainersData() {
+            try {
+                const response = await fetch('containers.json');
+                containersData = await response.json();
+                const metaInfo = document.getElementById('meta-info');
+                const generatedDate = new Date(containersData.generated);
+                const generated = generatedDate.toLocaleString();
+                const relativeTime = getRelativeTime(generatedDate);
+                metaInfo.innerHTML = `Generated: <code>${relativeTime}</code> (${generated})`;
+                containersData.containers.forEach(container => { container.urlStatus = 'checking'; });
+                displayContainers();
+                updateStats();
+                checkAllStatus();
+            } catch (error) {
+                console.error('Error loading containers data:', error);
+                document.getElementById('instances').innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #666; font-size: 1.2rem; margin: 50px 0;">❌ Failed to load containers data</div>';
+            }
+        }
+        async function checkAllStatus() {
+            if (!containersData) return;
+            const promises = containersData.containers.map(async (container) => {
+                container.urlStatus = 'checking';
+                displayContainers();
+                try {
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 5000);
+                    const response = await fetch(container.url, { method: 'HEAD', signal: controller.signal, mode: 'no-cors' });
+                    clearTimeout(timeoutId);
+                    container.urlStatus = 'online';
+                } catch (error) {
+                    container.urlStatus = 'offline';
+                }
+                return container;
+            });
+            await Promise.all(promises);
+            displayContainers();
+            updateStats();
+        }
+        function displayContainers() {
+            if (!containersData) return;
+            const container = document.getElementById('instances');
+            const filteredContainers = getFilteredContainers();
+            if (filteredContainers.length === 0) {
+                container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #666; font-size: 1.2rem; margin: 50px 0;">No containers match the current filter</div>';
+                return;
+            }
+            container.innerHTML = filteredContainers.map(cont => createContainerCard(cont)).join('');
+            container.querySelectorAll('.instance-card').forEach(card => {
+                card.addEventListener('click', function(event) {
+                    if (event.target.tagName === 'A' || event.target.closest('a')) { return; }
+                    const url = this.getAttribute('data-url');
+                    window.open(url, '_blank');
+                });
+            });
+        }
+        function createContainerCard(container) {
+            const urlStatus = container.urlStatus || 'unknown';
+            const statusClass = urlStatus === 'online' ? 'online' : urlStatus === 'checking' ? 'checking' : urlStatus;
+            const deployedDate = new Date(container.created);
+            const deployedTime = deployedDate.toLocaleString();
+            const deployedRelative = getRelativeTime(deployedDate);
+            let versionInfo = '';
+            if (container.branch && container.commit && container.branch_url && container.commit_url) {
+                versionInfo = `<a href="${container.branch_url}" target="_blank">${container.branch}</a> | <a href="${container.commit_url}" target="_blank">${container.commit}</a>`;
+            }
+            return `
+                <div class="instance-card ${statusClass}" data-url="${container.url}">
+                    <div class="instance-header">
+                        <h3 class="instance-name">${container.issue_title ? container.issue_title.replace(/^\[NR Modernization Experiment\]\s*/, '') : container.name}</h3>
+                        <span class="status-badge status-${urlStatus}">${urlStatus}</span>
+                    </div>
+                    <div class="instance-info">
+                        <div class="info-row">
+                            <span class="info-label">Deployed:</span>
+                            <span class="info-value" title="${deployedTime}">${deployedRelative}</span>
+                        </div>
+                        ${versionInfo ? `
+                        <div class="info-row">
+                            <span class="info-label">Version:</span>
+                            <span class="info-value">${versionInfo}</span>
+                        </div>
+                        ` : ''}
+                        <div class="info-row">
+                            <span class="info-label">Image:</span>
+                            <span class="info-value">${container.image}</span>
+                        </div>
+                        ${container.issue_url ? `
+                        <div class="info-row">
+                            <span class="info-label">Issue:</span>
+                            <span class="info-value"><a href="${container.issue_url}" target="_blank">${container.issue_url}</a></span>
+                        </div>
+                        ` : ''}
+                        <div class="info-row">
+                            <span class="info-label">URL:</span>
+                            <span class="info-value"><a href="${container.url}" target="_blank">${container.url}</a></span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        function getFilteredContainers() {
+            if (!containersData) return [];
+            if (currentFilter === 'all') { return containersData.containers; }
+            return containersData.containers.filter(container => { return container.urlStatus === currentFilter; });
+        }
+        function updateStats() {
+            if (!containersData) return;
+            const stats = { total: containersData.containers.length, online: containersData.containers.filter(c => c.urlStatus === 'online').length, offline: containersData.containers.filter(c => c.urlStatus === 'offline').length };
+            document.getElementById('total-count').textContent = stats.total;
+            document.getElementById('online-count').textContent = stats.online;
+            document.getElementById('offline-count').textContent = stats.offline;
+        }
+        document.addEventListener('DOMContentLoaded', loadContainersData);
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelector('.filter-btn.active').classList.remove('active');
+                this.classList.add('active');
+                currentFilter = this.getAttribute('data-filter');
+                displayContainers();
+            });
+        });
+    </script>
+</body>
+</html>
+DASHBOARD_HTML
+}
+
+# Function to generate dashboard content by scanning all running containers
+generate_dashboard_content() {
+    log "Scanning containers for dashboard..."
+    
+    # Find ALL containers with the nr-experiment label (server-wide scan)
+    containers=$(docker ps -q --filter "label=nr-experiment=true" 2>/dev/null || true)
+    
+    if [ -n "$containers" ]; then
+        # Generate containers.json with all running containers
+        echo "{" > containers.json
+        echo "  \"generated\": \"$(date -u +"%Y-%m-%dT%H:%M:%SZ")\"," >> containers.json
+        echo "  \"containers\": [" >> containers.json
+        
+        first=true
+        for container in $containers; do
+            if [ "$first" = false ]; then
+                echo "," >> containers.json
+            fi
+            first=false
+            
+            name=$(docker inspect --format='{{.Name}}' "$container" | sed 's/^\///')
+            image=$(docker inspect --format='{{.Config.Image}}' "$container")
+            created=$(docker inspect --format='{{.State.StartedAt}}' "$container")
+            
+            # Get branch name from container label
+            branch=$(docker inspect --format='{{index .Config.Labels "com.docker.compose.project"}}' "$container" | sed 's/^nr-//')
+            
+            # Extract issue ID from branch name
+            issue_id=$(echo "$branch" | sed -n 's/^issue-\([0-9]\+\)$/\1/p')
+            issue_url=""
+            issue_title=""
+            
+            if [ -n "$issue_id" ]; then
+                issue_url="https://github.com/$GITHUB_ISSUES_REPO/issues/$issue_id"
+                # Try to fetch issue title
+                api_url="https://api.github.com/repos/$GITHUB_ISSUES_REPO/issues/$issue_id"
+                response=$(curl -s -f "$api_url" 2>/dev/null || echo "{}")
+                issue_title=$(echo "$response" | grep '"title":' | head -1 | sed 's/.*"title": *"\([^"]*\)".*/\1/' | sed 's/\[NR Modernization Experiment\] *//')
+            fi
+            
+            # Get git info using common function
+            branch_repo_dir=~/node-red-deployments-$branch
+            git_info=$(get_container_git_info "$branch" "$branch_repo_dir" "$GITHUB_REPO")
+            IFS='|' read -r commit_short commit_hash commit_url branch_url <<< "$git_info"
+            
+            # Generate container entry
+            cat >> containers.json << CONTAINER_EOF
+    {
+        "name": "${issue_title:-$branch}",
+        "image": "$image",
+        "created": "$created",
+        "url": "https://$name.${TAILNET}.ts.net",
+        "issue_url": "$issue_url",
+        "issue_title": "$issue_title",
+        "branch": "$branch",
+        "commit": "$commit_short",
+        "commit_url": "$commit_url",
+        "branch_url": "$branch_url"
+    }
+CONTAINER_EOF
+        done
+        
+        echo "" >> containers.json
+        echo "  ]" >> containers.json
+        echo "}" >> containers.json
+        
+        log "Generated containers.json with $(echo "$containers" | wc -l) containers"
+    else
+        # Create empty containers.json when no containers are running
+        log "${YELLOW}⚠️  No containers found, generating empty dashboard${NC}"
+        echo '{"generated":"'$(date -u +"%Y-%m-%dT%H:%M:%SZ")'","containers":[]}' > containers.json
+    fi
+    
+    # Generate dashboard HTML
+    generate_dashboard_html
+}
+
+# Function to prepare and copy all dashboard files to volumes
+prepare_and_copy_dashboard_files() {
+    log "Preparing and copying dashboard files to volumes..."
+    
+    # Ensure Tailscale config exists
+    if [ ! -f "tailscale-serve-dashboard.json" ]; then
+        generate_tailscale_serve_config "dashboard" "http://dashboard:80" "tailscale-serve-dashboard.json"
+    fi
+    
+    generate_nginx_config
+    
+    # Copy config files (tailscale serve config and nginx config)
+    docker run --rm -v global-dashboard_dashboard_config:/config -v "$(pwd):/source" alpine:latest sh -c "
+        cp /source/tailscale-serve-dashboard.json /config/ &&
+        cp /source/nginx-dashboard.conf /config/default.conf
+    "
+    
+    # Copy content files (dashboard HTML and containers data)
+    docker run --rm -v global-dashboard_dashboard_content:/content -v "$(pwd):/source" alpine:latest sh -c "
+        cp /source/dashboard.html /content/index.html &&
+        cp /source/containers.json /content/containers.json
+    "
+}
+
+# Function to clean up temporary dashboard files
+cleanup_dashboard_files() {
+    rm -f dashboard.html containers.json nginx-dashboard.conf tailscale-serve-dashboard.json
+}
+
+# ============================================================================
+# DISPLAY FUNCTIONS
+# ============================================================================
+
 # Function to display deployment info
 show_deployment_info() {
     echo -e "${BLUE}=== Node-RED Deployment for Branch: $BRANCH_NAME ===${NC}"
@@ -149,99 +771,29 @@ show_deployment_info() {
     echo
 }
 
-# Function to check if TS_AUTHKEY is set
-check_ts_authkey() {
-    if [ -z "$TS_AUTHKEY" ]; then
-        echo -e "${YELLOW}⚠️  WARNING: TS_AUTHKEY not set!${NC}"
-        echo "   Set with: export TS_AUTHKEY=your-tailscale-auth-key"
-        echo
-        return 1
-    fi
-    return 0
-}
+# ============================================================================
+# DEPLOYMENT FUNCTIONS
+# ============================================================================
 
-# Function to validate Tailscale connection for local deployment
-# This function addresses the issue where Tailscale containers fail to connect
-# when they have stale state from previous deployments. It:
-# 1. Waits for the container to initialize
-# 2. Checks logs for connection errors (404 node not found, authentication failures)
-# 3. If stale state is detected, clears the volume and restarts the container
-# 4. Retries up to 3 times before giving up
-validate_and_retry_tailscale_local() {
-    local branch_name="$1"
-    local compose_file="$2"
-    local container_name="nr-$branch_name-tailscale"
-    local max_attempts=3
-    local attempt=1
-    
-    log "${BLUE}🔍 Validating Tailscale connection for $container_name...${NC}"
-    log "Container logs available for troubleshooting with: docker logs $container_name"
-    
-    while [ $attempt -le $max_attempts ]; do
-        log "Attempt $attempt/$max_attempts: Checking Tailscale status..."
-        
-        # Wait for container to initialize
-        sleep 10
-        
-        # Check if container is running
-        if ! docker ps --format "table {{.Names}}" | grep -q "^$container_name$"; then
-            log "${RED}❌ Tailscale container $container_name is not running${NC}"
-            return 1
-        fi
-        
-        # Check container logs for common error patterns
-        local logs=$(docker logs "$container_name" --tail 50 2>&1)
-        
-        if echo "$logs" | grep -q "node not found\|404.*not found\|registration .*failed\|key rejected"; then
-            log "${YELLOW}⚠️  Detected stale Tailscale state in $container_name${NC}"
-            log "Error details from logs:"
-            echo "$logs" | grep -E "(node not found|404.*not found|registration .*failed|key rejected)" | sed 's/^/   /'
-            
-            if [ $attempt -lt $max_attempts ]; then
-                log "${BLUE}🔄 Clearing stale Tailscale state and retrying...${NC}"
-                clear_tailscale_state_local "$branch_name" "$compose_file"
-                attempt=$((attempt + 1))
-            else
-                log "${RED}❌ Failed to establish Tailscale connection after $max_attempts attempts${NC}"
-                return 1
-            fi
-        elif echo "$logs" | grep -q "serve config loaded\|serve config applied\|listening\|authenticated\|Listening on\|ready\|Startup complete\|magicsock.*connected"; then
-            log "${GREEN}✅ Tailscale connection validated for $container_name${NC}"
-            return 0
-        else
-            log "${YELLOW}⚠️  Tailscale container logs unclear, waiting longer...${NC}"
-            sleep 10
-            attempt=$((attempt + 1))
-        fi
-    done
-    
-    log "${RED}❌ Tailscale validation failed after $max_attempts attempts${NC}"
-    return 1
-}
+# Configuration
+DEPLOY_MODE="${DEPLOY_MODE:-local}"
+HETZNER_HOST="${HETZNER_HOST:-your-server-ip}"
+HETZNER_USER="${HETZNER_USER:-root}"
+HETZNER_SSH_KEY="${HETZNER_SSH_KEY:-~/.ssh/id_rsa}"
+CONTAINER_TAG="nr-experiment"
+GITHUB_REPO="${GITHUB_REPO:-dimitrieh/node-red}"
+GITHUB_ISSUES_REPO="${GITHUB_ISSUES_REPO:-node-red/node-red}"
 
-# Function to clear Tailscale state for local deployment
-clear_tailscale_state_local() {
-    local branch_name="$1"
-    local compose_file="$2"
-    local container_name="nr-$branch_name-tailscale"
-    local volume_name="nr_${branch_name}_tailscale"
-    
-    log "Stopping Tailscale container..."
-    docker stop "$container_name" 2>/dev/null || true
-    
-    log "Removing Tailscale container..."
-    docker rm "$container_name" 2>/dev/null || true
-    
-    log "Clearing Tailscale state volume..."
-    # Use a temporary container to clear the volume contents
-    docker run --rm -v "$volume_name:/state" alpine:latest sh -c "rm -rf /state/*" 2>/dev/null || true
-    
-    log "Restarting Tailscale container..."
-    env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f "$compose_file" up -d tailscale
-    
-    # Wait for the container to fully restart
-    sleep 5
-}
+# Parse command line flags
+REMOVE_DASHBOARD=false
+for arg in "$@"; do
+    case $arg in
+        --remove-dashboard)
+            REMOVE_DASHBOARD=true
+            shift
+            ;;
+    esac
+done
 
 # Function for local deployment
 deploy_local() {
@@ -253,7 +805,7 @@ deploy_local() {
         echo "  - Base Image:        node:18-alpine"
         echo "  - Target Image:      nr-demo:$BRANCH_NAME"
         echo "  - Security:          Non-root user, read-only filesystem"
-        echo "  - Demo Settings:     Included (user-settings.js, start-demo.sh)"
+        echo "  - Demo Settings:     Embedded in Docker image (inline configuration)"
         echo
         docker build -t "nr-demo:$BRANCH_NAME" .
         log "${GREEN}✅ Docker image built: nr-demo:$BRANCH_NAME${NC}"
@@ -267,27 +819,7 @@ deploy_local() {
     
     # Generate Tailscale serve configuration for Node-RED
     log "Generating Tailscale serve configuration..."
-    cat > tailscale-serve.json << TAILSCALE_CONFIG
-{
-  "TCP": {
-    "443": {
-      "HTTPS": true
-    }
-  },
-  "Web": {
-    "nr-${BRANCH_NAME}.${TAILNET:-tailbfedba}.ts.net:443": {
-      "Handlers": {
-        "/": {
-          "Proxy": "http://node-red:1880"
-        }
-      }
-    }
-  },
-  "AllowFunnel": {
-    "nr-${BRANCH_NAME}.${TAILNET:-tailbfedba}.ts.net:443": false
-  }
-}
-TAILSCALE_CONFIG
+    generate_tailscale_serve_config "nr-$BRANCH_NAME" "http://node-red:1880" "tailscale-serve.json"
     
     # Run docker-compose
     if [ "$1" = "up" ] || [ "$1" = "" ]; then
@@ -295,7 +827,7 @@ TAILSCALE_CONFIG
         env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f "$COMPOSE_FILE" up -d
         
         # Validate Tailscale connection and retry if needed
-        validate_and_retry_tailscale_local "$BRANCH_NAME" "$COMPOSE_FILE"
+        validate_and_retry_tailscale "nr-$BRANCH_NAME-tailscale" "nr_${BRANCH_NAME}_tailscale" "$COMPOSE_FILE" "tailscale"
     else
         log "Running: docker compose -f $COMPOSE_FILE $*"
         env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f "$COMPOSE_FILE" "$@"
@@ -309,9 +841,7 @@ TAILSCALE_CONFIG
         log "${BLUE}🧹 Cleaning up local resources...${NC}"
         
         # Remove volumes
-        log "Removing volumes..."
-        docker volume rm "nr_${BRANCH_NAME}_data" 2>/dev/null || true
-        docker volume rm "nr_${BRANCH_NAME}_tailscale" 2>/dev/null || true
+        remove_volumes "nr_${BRANCH_NAME}_data" "nr_${BRANCH_NAME}_tailscale"
         
         # Remove branch-specific image
         log "Removing image: nr-demo:$BRANCH_NAME"
@@ -386,8 +916,6 @@ deploy_remote() {
         log "📡 Git remote: $GIT_REMOTE"
     fi
     
-    # Note: Safety checks already ensure working tree is clean and synced
-    
     # Deploy via single SSH session
     log "${BLUE}🔨 Deploying to Hetzner server...${NC}"
     
@@ -407,993 +935,57 @@ deploy_remote() {
     log "   TS_AUTHKEY: ${TS_AUTHKEY:+SET (${#TS_AUTHKEY} chars)}"
     echo
     
-    # Pass all required variables as arguments to remote script
-    ssh -i "$HETZNER_SSH_KEY" "$HETZNER_USER@$HETZNER_HOST" bash -s -- \
-        "$BRANCH_NAME" \
-        "$TS_AUTHKEY" \
-        "$TAILNET_TO_PASS" \
-        "$GIT_REMOTE" \
-        "$GITHUB_REPO" \
-        "$GITHUB_ISSUES_REPO" \
-        "$REMOVE_DASHBOARD" \
-        "$@" << 'REMOTE_SCRIPT'
+    # Copy the deploy-dry.sh script to remote and execute it
+    scp -i "$HETZNER_SSH_KEY" "$0" "$HETZNER_USER@$HETZNER_HOST:/tmp/deploy-dry.sh"
     
-    set -euo pipefail
+    # Pass all required variables as environment variables to remote script
+    ssh -i "$HETZNER_SSH_KEY" "$HETZNER_USER@$HETZNER_HOST" \
+        "export BRANCH_NAME='$BRANCH_NAME' && \
+         export TS_AUTHKEY='$TS_AUTHKEY' && \
+         export TAILNET='$TAILNET_TO_PASS' && \
+         export GIT_REMOTE='$GIT_REMOTE' && \
+         export GITHUB_REPO='$GITHUB_REPO' && \
+         export GITHUB_ISSUES_REPO='$GITHUB_ISSUES_REPO' && \
+         export REMOVE_DASHBOARD='$REMOVE_DASHBOARD' && \
+         export DEPLOY_MODE='remote_execution' && \
+         bash /tmp/deploy-dry.sh $@"
     
-    # Get arguments passed from local script
-    if [ "$#" -lt 7 ]; then
-        echo "❌ Remote script requires at least 7 arguments: BRANCH_NAME TS_AUTHKEY TAILNET GIT_REMOTE GITHUB_REPO GITHUB_ISSUES_REPO REMOVE_DASHBOARD [DOCKER_ARGS...]"
-        exit 1
-    fi
-    
-    BRANCH_NAME="$1"
-    TS_AUTHKEY="$2"
-    TAILNET="$3"
-    GIT_REMOTE="$4"
-    GITHUB_REPO="$5"
-    GITHUB_ISSUES_REPO="$6"
-    REMOVE_DASHBOARD="$7"
-    shift 7
-    DOCKER_ARGS="$@"
-    
-    # Validate required variables
-    if [ -z "$BRANCH_NAME" ] || [ -z "$TS_AUTHKEY" ] || [ -z "$GIT_REMOTE" ]; then
-        echo "❌ Missing required variables in remote script"
-        exit 1
-    fi
-    
-    # Colors for remote output
-    RED='\033[0;31m'
-    GREEN='\033[0;32m'
-    YELLOW='\033[1;33m'
-    BLUE='\033[0;34m'
-    NC='\033[0m'
-    
-    # Function to log with timestamp
-    log() {
-        echo -e "[$(date '+%Y-%m-%d %H:%M:%S')] $1"
-    }
-    
-    # Function to validate Tailscale connection for remote deployment
-    validate_and_retry_tailscale_remote() {
-        local branch_name="$1"
-        local container_name="nr-$branch_name-tailscale"
-        local max_attempts=3
-        local attempt=1
-        
-        log "${BLUE}🔍 Validating Tailscale connection for $container_name...${NC}"
-    log "Container logs available for troubleshooting with: docker logs $container_name"
-        
-        while [ $attempt -le $max_attempts ]; do
-            log "Attempt $attempt/$max_attempts: Checking Tailscale status..."
-            
-            # Wait for container to initialize
-            sleep 10
-            
-            # Check if container is running
-            if ! docker ps --format "table {{.Names}}" | grep -q "^$container_name$"; then
-                log "${RED}❌ Tailscale container $container_name is not running${NC}"
-                return 1
-            fi
-            
-            # Check container logs for common error patterns
-            local logs=$(docker logs "$container_name" --tail 50 2>&1)
-            
-            if echo "$logs" | grep -q "node not found\|404.*not found\|registration .*failed\|key rejected"; then
-                log "${YELLOW}⚠️  Detected stale Tailscale state in $container_name${NC}"
-                log "Error details from logs:"
-                echo "$logs" | grep -E "(node not found|404.*not found|registration .*failed|key rejected)" | sed 's/^/   /'
-                
-                if [ $attempt -lt $max_attempts ]; then
-                    log "${BLUE}🔄 Clearing stale Tailscale state and retrying...${NC}"
-                    clear_tailscale_state_remote "$branch_name"
-                    attempt=$((attempt + 1))
-                else
-                    log "${RED}❌ Failed to establish Tailscale connection after $max_attempts attempts${NC}"
-                    return 1
-                fi
-            elif echo "$logs" | grep -q "serve config loaded\|serve config applied\|listening\|authenticated\|Listening on\|ready\|Startup complete\|magicsock.*connected"; then
-                log "${GREEN}✅ Tailscale connection validated for $container_name${NC}"
-                return 0
+    # Check SSH command exit status
+    SSH_EXIT_CODE=$?
+    if [ $SSH_EXIT_CODE -eq 0 ]; then
+        # SSH command succeeded
+        if [ "$1" = "up" ] || [ "$1" = "" ]; then
+            echo
+            log "${GREEN}✅ Remote Deployment complete!${NC}"
+            echo "   Server: $HETZNER_HOST"
+            echo "   Node-RED: https://nr-$BRANCH_NAME.${TAILNET:-[your-tailnet]}.ts.net"
+            echo "   Dashboard: https://dashboard.${TAILNET:-[your-tailnet]}.ts.net"
+        elif [ "$1" = "down" ]; then
+            echo
+            log "${GREEN}✅ Remote cleanup complete!${NC}"
+            echo "   Server: $HETZNER_HOST"
+            echo "   All traces of branch '$BRANCH_NAME' deployment have been removed"
+            if [ "$REMOVE_DASHBOARD" = "true" ]; then
+                echo "   Dashboard has been completely removed (no trace left)"
             else
-                log "${YELLOW}⚠️  Tailscale container logs unclear, waiting longer...${NC}"
-                sleep 10
-                attempt=$((attempt + 1))
+                echo "   Dashboard remains running with updated content"
             fi
-        done
-        
-        log "${RED}❌ Tailscale validation failed after $max_attempts attempts${NC}"
-        return 1
-    }
-    
-    # Function to clear Tailscale state for remote deployment
-    clear_tailscale_state_remote() {
-        local branch_name="$1"
-        local container_name="nr-$branch_name-tailscale"
-        
-        # Get the actual volume name from the container before removing it
-        local volume_name=$(docker inspect "$container_name" --format '{{range .Mounts}}{{if eq .Type "volume"}}{{if eq .Destination "/var/lib/tailscale"}}{{.Name}}{{end}}{{end}}{{end}}' 2>/dev/null || echo "")
-        
-        log "Stopping Tailscale container..."
-        docker stop "$container_name" 2>/dev/null || true
-        
-        log "Removing Tailscale container..."
-        docker rm "$container_name" 2>/dev/null || true
-        
-        if [ -n "$volume_name" ]; then
-            log "Clearing Tailscale state volume: $volume_name"
-            docker run --rm -v "$volume_name:/state" alpine:latest sh -c "rm -rf /state/*" 2>/dev/null || {
-                log "${YELLOW}Warning: Failed to clear volume with alpine, trying busybox...${NC}"
-                docker run --rm -v "$volume_name:/state" busybox sh -c "rm -rf /state/*" 2>/dev/null || true
-            }
-        else
-            log "${YELLOW}Warning: Could not determine volume name dynamically, trying possible names...${NC}"
-            # Try multiple possible volume name formats
-            for possible_volume in "nr-${branch_name}_nr_${branch_name}_tailscale" "nr_${branch_name}_tailscale"; do
-                if docker volume inspect "$possible_volume" &>/dev/null; then
-                    log "Found volume: $possible_volume, clearing..."
-                    docker run --rm -v "$possible_volume:/state" alpine:latest sh -c "rm -rf /state/*" 2>/dev/null || true
-                    break
-                fi
-            done
         fi
-        
-        log "Restarting Tailscale container..."
-        env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose.yml up -d tailscale
-        
-        # Wait for the container to fully restart
-        sleep 5
-    }
-    
-    # Function to validate dashboard Tailscale connection for remote deployment
-    validate_and_retry_dashboard_tailscale_remote() {
-        local container_name="dashboard-tailscale"
-        local max_attempts=3
-        local attempt=1
-        
-        log "${BLUE}🔍 Validating dashboard Tailscale connection for $container_name...${NC}"
-        
-        while [ $attempt -le $max_attempts ]; do
-            log "Attempt $attempt/$max_attempts: Checking dashboard Tailscale status..."
-            
-            # Wait for container to initialize
-            sleep 10
-            
-            # Check if container is running
-            if ! docker ps --format "table {{.Names}}" | grep -q "^$container_name$"; then
-                log "${RED}❌ Dashboard Tailscale container $container_name is not running${NC}"
-                return 1
-            fi
-            
-            # Check container logs for common error patterns
-            local logs=$(docker logs "$container_name" --tail 50 2>&1)
-            
-            if echo "$logs" | grep -q "node not found\|404.*not found\|registration .*failed\|key rejected"; then
-                log "${YELLOW}⚠️  Detected stale Tailscale state in dashboard container${NC}"
-                log "Error details from logs:"
-                echo "$logs" | grep -E "(node not found|404.*not found|registration .*failed|key rejected)" | sed 's/^/   /'
-                
-                if [ $attempt -lt $max_attempts ]; then
-                    log "${BLUE}🔄 Clearing dashboard Tailscale state and retrying...${NC}"
-                    clear_dashboard_tailscale_state_remote
-                    attempt=$((attempt + 1))
-                else
-                    log "${RED}❌ Failed to establish dashboard Tailscale connection after $max_attempts attempts${NC}"
-                    return 1
-                fi
-            elif echo "$logs" | grep -q "serve config loaded\|serve config applied\|listening\|authenticated\|Listening on\|ready\|Startup complete\|magicsock.*connected"; then
-                log "${GREEN}✅ Dashboard Tailscale connection validated for $container_name${NC}"
-                return 0
-            else
-                log "${YELLOW}⚠️  Dashboard Tailscale container logs unclear, waiting longer...${NC}"
-                sleep 10
-                attempt=$((attempt + 1))
-            fi
-        done
-        
-        log "${RED}❌ Dashboard Tailscale validation failed after $max_attempts attempts${NC}"
-        return 1
-    }
-    
-    # Function to clear dashboard Tailscale state for remote deployment
-    clear_dashboard_tailscale_state_remote() {
-        local container_name="dashboard-tailscale"
-        
-        # Get the actual volume name from the container before removing it
-        local volume_name=$(docker inspect "$container_name" --format '{{range .Mounts}}{{if eq .Type "volume"}}{{if eq .Destination "/var/lib/tailscale"}}{{.Name}}{{end}}{{end}}{{end}}' 2>/dev/null || echo "")
-        
-        log "Stopping dashboard Tailscale container..."
-        docker stop "$container_name" 2>/dev/null || true
-        
-        log "Removing dashboard Tailscale container..."
-        docker rm "$container_name" 2>/dev/null || true
-        
-        if [ -n "$volume_name" ]; then
-            log "Clearing dashboard Tailscale state volume: $volume_name"
-            docker run --rm -v "$volume_name:/state" alpine:latest sh -c "rm -rf /state/*" 2>/dev/null || {
-                log "${YELLOW}Warning: Failed to clear volume with alpine, trying busybox...${NC}"
-                docker run --rm -v "$volume_name:/state" busybox sh -c "rm -rf /state/*" 2>/dev/null || true
-            }
-        else
-            log "${YELLOW}Warning: Could not determine volume name dynamically, trying possible names...${NC}"
-            # Try multiple possible volume name formats
-            for possible_volume in "global-dashboard_dashboard_tailscale" "dashboard_tailscale"; do
-                if docker volume inspect "$possible_volume" &>/dev/null; then
-                    log "Found volume: $possible_volume, clearing..."
-                    docker run --rm -v "$possible_volume:/state" alpine:latest sh -c "rm -rf /state/*" 2>/dev/null || true
-                    break
-                fi
-            done
-        fi
-        
-        log "Restarting dashboard containers with fresh identity..."
-        env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose-dashboard.yml up -d --force-recreate dashboard dashboard-tailscale
-        
-        # Wait for the container to fully restart
-        sleep 5
-    }
-    
-    # Function to ensure tailscale-serve-dashboard.json exists
-    ensure_dashboard_tailscale_config() {
-        if [ ! -f "tailscale-serve-dashboard.json" ]; then
-            log "Generating missing tailscale-serve-dashboard.json..."
-            cat > tailscale-serve-dashboard.json << DASHBOARD_CONFIG
-{
-  "TCP": {
-    "443": {
-      "HTTPS": true
-    }
-  },
-  "Web": {
-    "dashboard.${TAILNET}.ts.net:443": {
-      "Handlers": {
-        "/": {
-          "Proxy": "http://dashboard:80"
-        }
-      }
-    }
-  },
-  "AllowFunnel": {
-    "dashboard.${TAILNET}.ts.net:443": false
-  }
+    else
+        # SSH command failed
+        log "${RED}❌ Remote deployment failed! (Exit code: $SSH_EXIT_CODE)${NC}"
+        exit $SSH_EXIT_CODE
+    fi
 }
-DASHBOARD_CONFIG
-        fi
-    }
-    
-    # Function to generate dashboard content by scanning all running containers server-wide
-    generate_dashboard_content() {
-        log "Scanning containers for dashboard..."
-        
-        # Find ALL containers with the nr-experiment label (server-wide scan)
-        containers=$(docker ps -q --filter "label=nr-experiment=true" 2>/dev/null || true)
-        
-        if [ -n "$containers" ]; then
-            # Generate containers.json with all running containers
-            echo "{" > containers.json
-            echo "  \"generated\": \"$(date -u +"%Y-%m-%dT%H:%M:%SZ")\"," >> containers.json
-            echo "  \"containers\": [" >> containers.json
-            
-            first=true
-            for container in $containers; do
-                if [ "$first" = false ]; then
-                    echo "," >> containers.json
-                fi
-                first=false
-                
-                name=$(docker inspect --format='{{.Name}}' "$container" | sed 's/^\///')
-                image=$(docker inspect --format='{{.Config.Image}}' "$container")
-                created=$(docker inspect --format='{{.State.StartedAt}}' "$container")
-                
-                # Get branch name from container label
-                branch=$(docker inspect --format='{{index .Config.Labels "com.docker.compose.project"}}' "$container" | sed 's/^nr-//')
-                
-                # Extract issue ID from branch name, not container name
-                issue_id=$(echo "$branch" | sed -n 's/^issue-\([0-9]\+\)$/\1/p')
-                issue_url=""
-                issue_title=""
-                
-                if [ -n "$issue_id" ]; then
-                    issue_url="https://github.com/$GITHUB_ISSUES_REPO/issues/$issue_id"
-                    # Try to fetch issue title
-                    api_url="https://api.github.com/repos/$GITHUB_ISSUES_REPO/issues/$issue_id"
-                    response=$(curl -s -f "$api_url" 2>/dev/null || echo "{}")
-                    issue_title=$(echo "$response" | grep '"title":' | head -1 | sed 's/.*"title": *"\([^"]*\)".*/\1/' | sed 's/\[NR Modernization Experiment\] *//')
-                fi
-                commit_short="unknown"
-                commit_hash="unknown"
-                
-                commit_url=""
-                branch_url=""
-                
-                # Try to get git info from the branch-specific deployment directory
-                branch_repo_dir=~/node-red-deployments-$branch
-                if [ -d "$branch_repo_dir" ]; then
-                    commit_short=$(cd "$branch_repo_dir" && git rev-parse --short=8 HEAD 2>/dev/null || echo "unknown")
-                    commit_hash=$(cd "$branch_repo_dir" && git rev-parse HEAD 2>/dev/null || echo "unknown")
-                    if [ "$commit_hash" != "unknown" ]; then
-                        commit_url="https://github.com/$GITHUB_REPO/commit/$commit_hash"
-                        branch_url="https://github.com/$GITHUB_REPO/tree/$branch"
-                    else
-                        branch_url="https://github.com/$GITHUB_REPO/tree/$branch"
-                    fi
-                else
-                    branch_url="https://github.com/$GITHUB_REPO/tree/$branch"
-                fi
-                
-                # Generate container entry
-                cat >> containers.json << CONTAINER_EOF
-    {
-        "name": "${issue_title:-$branch}",
-        "image": "$image",
-        "created": "$created",
-        "url": "https://$name.${TAILNET}.ts.net",
-        "issue_url": "$issue_url",
-        "issue_title": "$issue_title",
-        "branch": "$branch",
-        "commit": "$commit_short",
-        "commit_url": "$commit_url",
-        "branch_url": "$branch_url"
-    }
-CONTAINER_EOF
-            done
-            
-            echo "" >> containers.json
-            echo "  ]" >> containers.json
-            echo "}" >> containers.json
-            
-            log "Generated containers.json with $(echo "$containers" | wc -l) containers"
-        else
-            # Create empty containers.json when no containers are running
-            log "${YELLOW}⚠️  No containers found, generating empty dashboard${NC}"
-            echo '{"generated":"'$(date -u +"%Y-%m-%dT%H:%M:%SZ")'","containers":[]}' > containers.json
-        fi
-        
-        # Generate dashboard HTML
-        generate_dashboard_html
-    }
 
-    # Function to generate nginx configuration with no-cache headers
-    generate_nginx_config() {
-        cat > nginx-dashboard.conf << 'NGINX_CONFIG'
-server {
-    listen       80;
-    listen  [::]:80;
-    server_name  localhost;
-
-    location / {
-        root   /usr/share/nginx/html;
-        index  index.html index.htm;
-        
-        # Disable caching for dashboard to ensure fresh content
-        add_header Cache-Control "no-cache, no-store, must-revalidate" always;
-        add_header Pragma "no-cache" always;
-        add_header Expires "0" always;
-    }
-
-    # Still allow caching for static assets like images
-    location ~* \.(css|js|png|jpg|jpeg|gif|ico|svg)$ {
-        root   /usr/share/nginx/html;
-        expires 1h;
-        add_header Cache-Control "public, immutable";
-    }
-
-    error_page   500 502 503 504  /50x.html;
-    location = /50x.html {
-        root   /usr/share/nginx/html;
-    }
-}
-NGINX_CONFIG
-    }
-
-    # Function to prepare and copy all dashboard files to volumes
-    prepare_and_copy_dashboard_files() {
-        log "Preparing and copying dashboard files to volumes..."
-        ensure_dashboard_tailscale_config
-        generate_nginx_config
-        
-        # Copy config files (tailscale serve config and nginx config)
-        docker run --rm -v global-dashboard_dashboard_config:/config -v "$(pwd):/source" alpine:latest sh -c "
-            cp /source/tailscale-serve-dashboard.json /config/ &&
-            cp /source/nginx-dashboard.conf /config/default.conf
-        "
-        
-        # Copy content files (dashboard HTML and containers data)
-        docker run --rm -v global-dashboard_dashboard_content:/content -v "$(pwd):/source" alpine:latest sh -c "
-            cp /source/dashboard.html /content/index.html &&
-            cp /source/containers.json /content/containers.json
-        "
-    }
-
-    # Function to clean up temporary dashboard files
-    cleanup_dashboard_files() {
-        rm -f dashboard.html containers.json nginx-dashboard.conf tailscale-serve-dashboard.json
-    }
-
-    # Function to ensure dashboard.html exists
-    generate_dashboard_html() {
-        log "Generating dashboard.html..."
-        cat > dashboard.html << 'DASHBOARD_HTML'
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Container Dashboard</title>
-    
-    <!-- Tally popup widget -->
-    <script async src="https://tally.so/widgets/embed.js"></script>
-    <script>
-    window.TallyConfig = {
-      "formId": "31L4dW",
-      "popup": {
-        "emoji": {
-          "text": "👋",
-          "animation": "wave"
-        },
-        "hideTitle": true,
-        "open": {
-          "trigger": "time",
-          "ms": 30000
-        }
-      }
-    };
-    </script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f0f0f0;
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 20px;
-            background: #8f0000;
-            color: white;
-            padding: 40px 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-
-        .header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            font-weight: 400;
-            letter-spacing: -0.5px;
-            display: inline;
-            line-height: 1.2;
-        }
-
-        .header h1 .logo {
-            height: 1em;
-            width: auto;
-            vertical-align: middle;
-            margin-right: 0.2em;
-        }
-
-        .header p {
-            font-size: 1.1rem;
-            opacity: 0.95;
-            margin-bottom: 15px;
-        }
-
-        .header-links {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
-
-        .header-link {
-            color: white;
-            text-decoration: none;
-            padding: 8px 16px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 4px;
-            font-size: 0.9rem;
-            transition: all 0.3s ease;
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        .header-link:hover {
-            background: rgba(255, 255, 255, 0.2);
-            border-color: rgba(255, 255, 255, 0.6);
-            transform: translateY(-1px);
-        }
-
-        .meta-info {
-            color: #666;
-            font-size: 0.9rem;
-            background: white;
-            padding: 10px 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            white-space: nowrap;
-        }
-        
-        .meta-info code {
-            background: #f5f5f5;
-            padding: 2px 6px;
-            border-radius: 3px;
-            color: #8f0000;
-            font-weight: 500;
-        }
-
-        .controls {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-
-        .refresh-btn {
-            background: white;
-            color: #666;
-            border: 2px solid #ddd;
-            padding: 0 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 14px;
-            font-weight: 500;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            white-space: nowrap;
-            min-width: 120px;
-        }
-
-        .refresh-btn:hover {
-            background: rgba(143, 0, 0, 0.05);
-            color: #8f0000;
-            border-color: #8f0000;
-        }
-
-        .control-buttons {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
-
-        .status-filter {
-            display: flex;
-            align-items: center;
-            background: white;
-            border-radius: 8px;
-            border: 2px solid #ddd;
-            overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            height: 40px;
-        }
-
-        .filter-btn {
-            background: transparent;
-            color: #666;
-            border: none;
-            padding: 0 15px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 14px;
-            font-weight: 500;
-            line-height: 1;
-            min-width: 70px;
-            border-right: 1px solid #ddd;
-            position: relative;
-            white-space: nowrap;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex: 1;
-        }
-
-        .filter-btn:last-child {
-            border-right: none;
-        }
-
-        .filter-btn:hover {
-            background: rgba(143, 0, 0, 0.05);
-            color: #8f0000;
-        }
-
-        .filter-btn.active {
-            background: #8f0000;
-            color: white;
-        }
-
-        .instances-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
-
-        .instance-card {
-            background: white;
-            border-radius: 8px;
-            padding: 25px;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
-            border: 1px solid #e0e0e0;
-        }
-
-        .instance-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-            border-color: #8f0000;
-        }
-
-        .instance-card.online:hover {
-            border-color: #4CAF50;
-        }
-
-        .instance-card.checking:hover {
-            border-color: #2196F3;
-        }
-
-        .instance-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: #4CAF50;
-        }
-
-        .instance-card.checking::before {
-            background: #2196F3;
-        }
-
-        .instance-card.offline::before {
-            background: #f44336;
-        }
-
-        .instance-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 15px;
-        }
-
-        .instance-name {
-            font-size: 1.3rem;
-            font-weight: 600;
-            color: #333;
-            margin: 0;
-        }
-
-        .status-badge {
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .status-online {
-            background: #e8f5e8;
-            color: #4CAF50;
-        }
-
-        .status-offline {
-            background: #ffebee;
-            color: #f44336;
-        }
-
-        .status-checking {
-            background: #e3f2fd;
-            color: #2196F3;
-        }
-
-        .instance-info {
-            margin-bottom: 20px;
-        }
-
-        .info-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-            font-size: 0.9rem;
-        }
-
-        .info-label {
-            color: #666;
-            font-weight: 500;
-        }
-
-        .info-value {
-            color: #333;
-            font-family: 'SF Mono', Monaco, monospace;
-            font-size: 0.85rem;
-            text-align: right;
-            flex: 1;
-            margin-left: 10px;
-            word-break: break-all;
-        }
-
-        .info-value a {
-            color: #0066cc;
-            text-decoration: none;
-            transition: color 0.2s ease;
-        }
-
-        .info-value a:hover {
-            color: #8f0000;
-            text-decoration: underline;
-        }
-
-        @media (max-width: 900px) {
-            .controls {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .meta-info {
-                width: 100%;
-                text-align: center;
-            }
-
-            .control-buttons {
-                justify-content: center;
-                width: 100%;
-            }
-        }
-
-        @media (max-width: 600px) {
-            .header h1 {
-                font-size: 2rem;
-            }
-
-            .instances-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1><img src="https://us1.discourse-cdn.com/flex026/uploads/nodered/original/1X/778549404735e222c89ce5449482a189ace8cdae.png" alt="Node-RED" class="logo"> Node-RED Modernization Project Experiment Dashboard</h1>
-            <p>Live status of all currently running Node-RED experiments | Feel free to test the other experiments!</p>
-            <div class="header-links">
-                <a href="https://discourse.nodered.org/t/node-red-survey-shaping-the-future-of-node-reds-user-experience/98346" target="_blank" rel="noopener noreferrer" class="header-link">Modernization Project</a>
-                <a href="https://github.com/node-red/node-red/issues" target="_blank" rel="noopener noreferrer" class="header-link">Issue Tracker</a>
-            </div>
-        </div>
-
-        <div class="controls">
-            <div class="meta-info" id="meta-info">Loading...</div>
-            <div class="control-buttons">
-                <button class="refresh-btn" onclick="checkAllStatus()">Check status</button>
-                <div class="status-filter">
-                    <button class="filter-btn active" data-filter="all" id="all-btn">All (<span id="total-count">0</span>)</button>
-                    <button class="filter-btn" data-filter="online" id="online-btn">Online (<span id="online-count">0</span>)</button>
-                    <button class="filter-btn" data-filter="offline" id="offline-btn">Offline (<span id="offline-count">0</span>)</button>
-                </div>
-            </div>
-        </div>
-        <div id="instances" class="instances-grid"></div>
-    </div>
-
-    <script>
-        let containersData = null;
-        let currentFilter = 'all';
-
-        function getRelativeTime(date) {
-            const now = new Date();
-            const diffMs = now - date;
-            const diffSecs = Math.floor(diffMs / 1000);
-            const diffMins = Math.floor(diffSecs / 60);
-            const diffHours = Math.floor(diffMins / 60);
-            const diffDays = Math.floor(diffHours / 24);
-            
-            if (diffSecs < 60) return `${diffSecs} seconds ago`;
-            if (diffMins < 60) return `${diffMins} minutes ago`;
-            if (diffHours < 24) return `${diffHours} hours ago`;
-            return `${diffDays} days ago`;
-        }
-
-        async function loadContainersData() {
-            try {
-                const response = await fetch('containers.json');
-                containersData = await response.json();
-                
-                const metaInfo = document.getElementById('meta-info');
-                const generatedDate = new Date(containersData.generated);
-                const generated = generatedDate.toLocaleString();
-                const relativeTime = getRelativeTime(generatedDate);
-                metaInfo.innerHTML = `Generated: <code>${relativeTime}</code> (${generated})`;
-                
-                containersData.containers.forEach(container => {
-                    container.urlStatus = 'checking';
-                });
-                
-                displayContainers();
-                updateStats();
-                checkAllStatus();
-            } catch (error) {
-                console.error('Error loading containers data:', error);
-                document.getElementById('instances').innerHTML = 
-                    '<div style="grid-column: 1/-1; text-align: center; color: #666; font-size: 1.2rem; margin: 50px 0;">❌ Failed to load containers data</div>';
-            }
-        }
-
-        async function checkAllStatus() {
-            if (!containersData) return;
-
-            const promises = containersData.containers.map(async (container) => {
-                container.urlStatus = 'checking';
-                displayContainers();
-                
-                try {
-                    const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 5000);
-                    
-                    const response = await fetch(container.url, { 
-                        method: 'HEAD',
-                        signal: controller.signal,
-                        mode: 'no-cors'
-                    });
-                    
-                    clearTimeout(timeoutId);
-                    container.urlStatus = 'online';
-                } catch (error) {
-                    container.urlStatus = 'offline';
-                }
-                return container;
-            });
-
-            await Promise.all(promises);
-            displayContainers();
-            updateStats();
-        }
-
-        function displayContainers() {
-            if (!containersData) return;
-            
-            const container = document.getElementById('instances');
-            const filteredContainers = getFilteredContainers();
-
-            if (filteredContainers.length === 0) {
-                container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #666; font-size: 1.2rem; margin: 50px 0;">No containers match the current filter</div>';
-                return;
-            }
-
-            container.innerHTML = filteredContainers.map(cont => createContainerCard(cont)).join('');
-
-            container.querySelectorAll('.instance-card').forEach(card => {
-                card.addEventListener('click', function(event) {
-                    if (event.target.tagName === 'A' || event.target.closest('a')) {
-                        return;
-                    }
-                    const url = this.getAttribute('data-url');
-                    window.open(url, '_blank');
-                });
-            });
-        }
-
-        function createContainerCard(container) {
-            const urlStatus = container.urlStatus || 'unknown';
-            const statusClass = urlStatus === 'online' ? 'online' : urlStatus === 'checking' ? 'checking' : urlStatus;
-            
-            const deployedDate = new Date(container.created);
-            const deployedTime = deployedDate.toLocaleString();
-            const deployedRelative = getRelativeTime(deployedDate);
-            
-            let versionInfo = '';
-            if (container.branch && container.commit && container.branch_url && container.commit_url) {
-                versionInfo = `<a href="${container.branch_url}" target="_blank">${container.branch}</a> | <a href="${container.commit_url}" target="_blank">${container.commit}</a>`;
-            }
-            
-            return `
-                <div class="instance-card ${statusClass}" data-url="${container.url}">
-                    <div class="instance-header">
-                        <h3 class="instance-name">${container.issue_title ? container.issue_title.replace(/^\[NR Modernization Experiment\]\s*/, '') : container.name}</h3>
-                        <span class="status-badge status-${urlStatus}">${urlStatus}</span>
-                    </div>
-                    <div class="instance-info">
-                        <div class="info-row">
-                            <span class="info-label">Deployed:</span>
-                            <span class="info-value" title="${deployedTime}">${deployedRelative}</span>
-                        </div>
-                        ${versionInfo ? `
-                        <div class="info-row">
-                            <span class="info-label">Version:</span>
-                            <span class="info-value">${versionInfo}</span>
-                        </div>
-                        ` : ''}
-                        <div class="info-row">
-                            <span class="info-label">Image:</span>
-                            <span class="info-value">${container.image}</span>
-                        </div>
-                        ${container.issue_url ? `
-                        <div class="info-row">
-                            <span class="info-label">Issue:</span>
-                            <span class="info-value"><a href="${container.issue_url}" target="_blank">${container.issue_url}</a></span>
-                        </div>
-                        ` : ''}
-                        <div class="info-row">
-                            <span class="info-label">URL:</span>
-                            <span class="info-value"><a href="${container.url}" target="_blank">${container.url}</a></span>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        function getFilteredContainers() {
-            if (!containersData) return [];
-            
-            if (currentFilter === 'all') {
-                return containersData.containers;
-            }
-            
-            return containersData.containers.filter(container => {
-                return container.urlStatus === currentFilter;
-            });
-        }
-
-        function updateStats() {
-            if (!containersData) return;
-            
-            const stats = {
-                total: containersData.containers.length,
-                online: containersData.containers.filter(c => c.urlStatus === 'online').length,
-                offline: containersData.containers.filter(c => c.urlStatus === 'offline').length
-            };
-
-            document.getElementById('total-count').textContent = stats.total;
-            document.getElementById('online-count').textContent = stats.online;
-            document.getElementById('offline-count').textContent = stats.offline;
-        }
-
-        document.addEventListener('DOMContentLoaded', loadContainersData);
-
-        document.querySelectorAll('.filter-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                document.querySelector('.filter-btn.active').classList.remove('active');
-                this.classList.add('active');
-                currentFilter = this.getAttribute('data-filter');
-                displayContainers();
-            });
-        });
-    </script>
-</body>
-</html>
-DASHBOARD_HTML
-    }
-    
-    log "${BLUE}=== Remote Script Started ===${NC}"
+# Function for remote execution (when script is running on remote server)
+deploy_remote_execution() {
+    log "${BLUE}=== Remote Script Execution ===${NC}"
     log "📋 Received variables:"
     log "   Branch: $BRANCH_NAME"
     log "   Tailnet: $TAILNET"
     log "   Git Remote: $GIT_REMOTE"
     log "   Remove Dashboard: $REMOVE_DASHBOARD"
-    log "   Docker Args: $DOCKER_ARGS"
     log "   TS_AUTHKEY: ${TS_AUTHKEY:+SET (${#TS_AUTHKEY} chars)}"
     
     # Validate critical variables were received
@@ -1409,47 +1001,15 @@ DASHBOARD_HTML
     
     echo
     
+    # Ensure Docker and git are installed
+    ensure_docker
+    ensure_git
+    
     # Set deployment directory
     REPO_DIR=~/node-red-deployments-$BRANCH_NAME
     
-    # Phase 1: Start with temporary logging for git operations
-    TEMP_LOG="/tmp/deploy-$BRANCH_NAME-$(date +%s).log"
-    exec 1> >(tee -a "$TEMP_LOG")
-    exec 2>&1
-    
-    log "${BLUE}=== Starting deployment for branch: $BRANCH_NAME ===${NC}"
-    log "Arguments: $DOCKER_ARGS"
-    
-    # Ensure Docker is installed
-    if ! command -v docker &> /dev/null; then
-        log "${YELLOW}🐳 Installing Docker...${NC}"
-        curl -fsSL https://get.docker.com -o get-docker.sh
-        sh get-docker.sh
-        rm get-docker.sh
-        systemctl enable docker
-        systemctl start docker
-    fi
-    
-    # Wait for Docker to be ready
-    while ! docker version &> /dev/null; do
-        log "Waiting for Docker to be ready..."
-        systemctl start docker 2>/dev/null || true
-        sleep 5
-    done
-    log "${GREEN}✅ Docker is ready${NC}"
-    
-    # Ensure git is installed
-    if ! command -v git &> /dev/null; then
-        log "${YELLOW}📦 Installing git...${NC}"
-        if command -v apt-get &> /dev/null; then
-            apt-get update && apt-get install -y git jq curl
-        elif command -v yum &> /dev/null; then
-            yum install -y git jq curl
-        fi
-    fi
-    
     # Only build and deploy for 'up' commands
-    if [[ "$DOCKER_ARGS" == *"up"* ]]; then
+    if [[ "$@" == *"up"* ]]; then
         log "${BLUE}🔄 Updating code and building...${NC}"
         
         # Git-first approach: handle repository operations
@@ -1481,20 +1041,8 @@ DASHBOARD_HTML
             fi
         fi
         
-        # Phase 2: Switch to persistent logging only on git success
-        if [ "$GIT_SUCCESS" = true ]; then
-            log "Git operations completed successfully, setting up persistent logging..."
-            LOG_FILE="$REPO_DIR/deployment.log"
-            
-            # Move temp log to final location and continue logging there
-            mv "$TEMP_LOG" "$LOG_FILE"
-            exec 1> >(tee -a "$LOG_FILE")
-            exec 2>&1
-            
-            log "${GREEN}✅ Git operations successful, continuing deployment...${NC}"
-        else
-            log "${RED}❌ Git operations failed, cleaning up and exiting${NC}"
-            rm -f "$TEMP_LOG"
+        if [ "$GIT_SUCCESS" != true ]; then
+            log "${RED}❌ Git operations failed, exiting${NC}"
             exit 1
         fi
         
@@ -1503,53 +1051,10 @@ DASHBOARD_HTML
         sed -e "s/BRANCH_PLACEHOLDER/$BRANCH_NAME/g" \
             docker-compose.template.yml > docker-compose.yml
         
-        # Generate Tailscale serve configuration for Node-RED
-        log "Generating Tailscale serve configuration..."
-        cat > tailscale-serve.json << TAILSCALE_CONFIG
-{
-  "TCP": {
-    "443": {
-      "HTTPS": true
-    }
-  },
-  "Web": {
-    "nr-${BRANCH_NAME}.${TAILNET}.ts.net:443": {
-      "Handlers": {
-        "/": {
-          "Proxy": "http://node-red:1880"
-        }
-      }
-    }
-  },
-  "AllowFunnel": {
-    "nr-${BRANCH_NAME}.${TAILNET}.ts.net:443": false
-  }
-}
-TAILSCALE_CONFIG
-        
-        # Generate Tailscale serve configuration for dashboard
-        log "Generating Tailscale dashboard serve configuration..."
-        cat > tailscale-serve-dashboard.json << DASHBOARD_CONFIG
-{
-  "TCP": {
-    "443": {
-      "HTTPS": true
-    }
-  },
-  "Web": {
-    "dashboard.${TAILNET}.ts.net:443": {
-      "Handlers": {
-        "/": {
-          "Proxy": "http://dashboard:80"
-        }
-      }
-    }
-  },
-  "AllowFunnel": {
-    "dashboard.${TAILNET}.ts.net:443": false
-  }
-}
-DASHBOARD_CONFIG
+        # Generate Tailscale serve configurations
+        log "Generating Tailscale serve configurations..."
+        generate_tailscale_serve_config "nr-$BRANCH_NAME" "http://node-red:1880" "tailscale-serve.json" "$TAILNET"
+        generate_tailscale_serve_config "dashboard" "http://dashboard:80" "tailscale-serve-dashboard.json" "$TAILNET"
         
         # Build Docker image
         log "${BLUE}Building Docker image: nr-demo:$BRANCH_NAME${NC}"
@@ -1560,12 +1065,11 @@ DASHBOARD_CONFIG
         
         # Deploy with docker-compose
         log "${BLUE}Deploying with docker-compose...${NC}"
-        log "Debug: TS_AUTHKEY before docker compose: ${TS_AUTHKEY:+SET (${#TS_AUTHKEY} chars)}"
         if env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose.yml up -d; then
             log "${GREEN}✅ Main deployment successful${NC}"
             
             # Validate Tailscale connection and retry if needed
-            if ! validate_and_retry_tailscale_remote "$BRANCH_NAME"; then
+            if ! validate_and_retry_tailscale "nr-$BRANCH_NAME-tailscale" "" "docker-compose.yml" "tailscale"; then
                 log "${RED}❌ Tailscale validation failed, deployment aborted${NC}"
                 exit 1
             fi
@@ -1578,71 +1082,36 @@ DASHBOARD_CONFIG
         if [ -f "docker-compose-dashboard.yml" ]; then
             log "${BLUE}Generating and deploying dashboard...${NC}"
             
-            # Generate dashboard content using common function
+            # Generate dashboard content
             generate_dashboard_content
             
-            # Always recreate dashboard container with fresh volumes (preserve tailscale sidecar)
-            log "Recreating dashboard container with fresh volumes..."
+            # Deploy dashboard
+            log "Deploying dashboard container..."
+            env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose-dashboard.yml up -d
             
-            # Stop and remove ONLY dashboard container + volumes (preserve tailscale)
-            docker stop dashboard 2>/dev/null || true
-            docker rm dashboard 2>/dev/null || true
-            docker volume rm global-dashboard_dashboard_content 2>/dev/null || true
-            docker volume rm global-dashboard_dashboard_config 2>/dev/null || true
-            
-            # Deploy fresh dashboard container with new volumes
-            log "Deploying fresh dashboard container..."
-            env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose-dashboard.yml up -d dashboard
-            
-            # Copy fresh dashboard files to the new volumes
+            # Copy dashboard files to volumes
             prepare_and_copy_dashboard_files
             
-            # Preserve tailscale sidecar (only restart if needed for connection)
-            env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose-dashboard.yml up -d dashboard-tailscale
-            
-            # Check if dashboard is running
-            if docker ps --filter "name=dashboard" --filter "status=running" | grep -q dashboard; then
-                log "${GREEN}✅ Dashboard deployed successfully${NC}"
-                
-                # Validate dashboard Tailscale connection
-                if ! validate_and_retry_dashboard_tailscale_remote; then
-                    log "${YELLOW}⚠️  Dashboard Tailscale validation failed, but continuing...${NC}"
-                fi
-            else
-                # If dashboard failed, try complete recreation including tailscale for first-time setup
-                log "${YELLOW}⚠️  Dashboard needs initial setup, trying with fresh tailscale...${NC}"
-                # For first-time setup, recreate both containers completely
-                docker stop dashboard dashboard-tailscale 2>/dev/null || true
-                docker rm dashboard dashboard-tailscale 2>/dev/null || true
-                docker volume rm global-dashboard_dashboard_content global-dashboard_dashboard_config global-dashboard_dashboard_tailscale 2>/dev/null || true
-                
-                if env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose-dashboard.yml -p global-dashboard up -d; then
-                    log "${GREEN}✅ Dashboard deployed successfully with fresh setup${NC}"
-                    
-                    # Validate dashboard Tailscale connection
-                    if ! validate_and_retry_dashboard_tailscale_remote; then
-                        log "${YELLOW}⚠️  Dashboard Tailscale validation failed, but continuing...${NC}"
-                    fi
-                else
-                    log "${YELLOW}⚠️  Dashboard deployment failed${NC}"
-                fi
+            # Validate dashboard Tailscale connection
+            if ! validate_and_retry_tailscale "dashboard-tailscale" "" "docker-compose-dashboard.yml" "dashboard-tailscale"; then
+                log "${YELLOW}⚠️  Dashboard Tailscale validation failed, but continuing...${NC}"
             fi
             
-            # Clean up generated files from current directory
-            log "Cleaning up temporary dashboard files..."
+            # Clean up generated files
             cleanup_dashboard_files
+            
+            log "${GREEN}✅ Dashboard deployed successfully${NC}"
         else
             log "${YELLOW}⚠️  docker-compose-dashboard.yml not found, skipping dashboard deployment${NC}"
         fi
         
-        
     else
-        log "${BLUE}⏭️  Handling '$DOCKER_ARGS' command${NC}"
+        log "${BLUE}⏭️  Handling '$@' command${NC}"
         
         # Check if deployment directory exists
         if [ ! -d "$REPO_DIR" ]; then
             log "${YELLOW}⚠️  No deployment directory found for branch $BRANCH_NAME${NC}"
-            if [[ "$DOCKER_ARGS" == *"down"* ]]; then
+            if [[ "$@" == *"down"* ]]; then
                 log "Nothing to clean up for branch $BRANCH_NAME"
                 exit 0
             else
@@ -1653,11 +1122,11 @@ DASHBOARD_CONFIG
         cd "$REPO_DIR"
         
         # Run the docker command
-        if [[ "$DOCKER_ARGS" == *"down"* ]]; then
-            # For down commands, try docker-compose first, but fallback to cleanup by name
+        if [[ "$@" == *"down"* ]]; then
+            # For down commands
             if [ -f "docker-compose.yml" ]; then
-                log "Running: docker compose $DOCKER_ARGS"
-                env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose.yml $DOCKER_ARGS 2>/dev/null || true
+                log "Running: docker compose down"
+                env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose.yml down 2>/dev/null || true
             else
                 log "docker-compose.yml not found, cleaning up by container/project names..."
                 # Stop and remove containers by project name
@@ -1666,13 +1135,7 @@ DASHBOARD_CONFIG
                 # Remove networks by project name
                 docker network rm "nr-${BRANCH_NAME}_nr-${BRANCH_NAME}-net" 2>/dev/null || true
             fi
-        else
-            log "Running: docker compose $DOCKER_ARGS"
-            env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose.yml $DOCKER_ARGS
-        fi
-        
-        # If this is a down command, do full cleanup
-        if [[ "$DOCKER_ARGS" == *"down"* ]]; then
+            
             log "${BLUE}🧹 Performing full cleanup for branch $BRANCH_NAME...${NC}"
             
             # Remove branch-specific image
@@ -1681,138 +1144,86 @@ DASHBOARD_CONFIG
             
             # Handle dashboard based on REMOVE_DASHBOARD flag
             if [ "$REMOVE_DASHBOARD" = "true" ]; then
-                log "${BLUE}🗑️  Removing dashboard completely (--remove-dashboard flag detected)...${NC}"
+                log "${BLUE}🗑️  Removing dashboard completely...${NC}"
                 
-                # Copy dashboard compose file for safe access if it exists
-                if [ -f "docker-compose-dashboard.yml" ]; then
-                    cp docker-compose-dashboard.yml ~/docker-compose-dashboard.yml
-                fi
-                
-                # Stop and remove dashboard containers (try both locations)
-                log "Stopping dashboard containers..."
+                # Stop and remove dashboard
                 if [ -f "docker-compose-dashboard.yml" ]; then
                     docker compose -f docker-compose-dashboard.yml down 2>/dev/null || true
-                elif [ -f ~/docker-compose-dashboard.yml ]; then
-                    docker compose -f ~/docker-compose-dashboard.yml down 2>/dev/null || true
-                else
-                    # Fallback: use project name directly when compose files are missing
-                    log "No compose file found, using project name fallback..."
-                    docker compose -p global-dashboard down 2>/dev/null || true
                 fi
                 
                 # Remove dashboard volumes
-                log "Removing dashboard volumes..."
-                docker volume rm global-dashboard_dashboard_content global-dashboard_dashboard_config global-dashboard_dashboard_tailscale 2>/dev/null || true
+                remove_volumes "global-dashboard_dashboard_content" "global-dashboard_dashboard_config" "global-dashboard_dashboard_tailscale"
                 
                 # Remove dashboard network
-                log "Removing dashboard network..."
                 docker network rm global-dashboard_dashboard-net 2>/dev/null || true
-                
-                # Clean up dashboard compose file
-                log "Cleaning up dashboard compose file..."
-                rm -f ~/docker-compose-dashboard.yml
                 
                 log "${GREEN}✅ Dashboard completely removed${NC}"
                 
             elif [ -f "docker-compose-dashboard.yml" ]; then
                 log "${BLUE}Updating dashboard to reflect current server state...${NC}"
                 
-                # Copy dashboard compose file to home directory for safe access
-                cp docker-compose-dashboard.yml ~/docker-compose-dashboard.yml
-                
-                # Temporarily move to root to generate dashboard content
+                # Generate updated dashboard content
                 cd ~
-                
-                # Generate dashboard content using common function (server-wide scan)
                 generate_dashboard_content
                 
-                # Recreate dashboard container with updated data (preserve tailscale)
-                log "Recreating dashboard with current server state..."
-                
-                # Stop and remove dashboard container + volumes (preserve tailscale)
+                # Update dashboard with fresh data
                 docker stop dashboard 2>/dev/null || true
                 docker rm dashboard 2>/dev/null || true
-                docker volume rm global-dashboard_dashboard_content 2>/dev/null || true
-                docker volume rm global-dashboard_dashboard_config 2>/dev/null || true
+                remove_volumes "global-dashboard_dashboard_content" "global-dashboard_dashboard_config"
                 
-                # Deploy fresh dashboard with updated data
-                env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose-dashboard.yml up -d dashboard
+                env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f ~/node-red-deployments-$BRANCH_NAME/docker-compose-dashboard.yml up -d dashboard
                 
-                # Copy updated files to fresh volumes
                 prepare_and_copy_dashboard_files
-                
-                # Preserve tailscale sidecar (no restart unless connection issues)
-                env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose-dashboard.yml up -d dashboard-tailscale
-                
-                # Clean up temporary files
                 cleanup_dashboard_files
                 
                 log "${GREEN}✅ Dashboard updated successfully${NC}"
             fi
             
-            # Selective cleanup (dashboard volumes already handled above)
+            # Selective cleanup
             log "Performing selective docker cleanup..."
             docker image prune -af
             docker container prune -f
-            # Note: Not pruning volumes to avoid removing other project volumes
             
-            # Remove the entire deployment directory (dashboard state handled separately above)
+            # Remove the entire deployment directory
             log "Removing deployment directory: $REPO_DIR"
             rm -rf "$REPO_DIR"
             
-            # Clean up temporary dashboard compose file
-            rm -f ~/docker-compose-dashboard.yml
-            
             log "${GREEN}✅ Full cleanup complete for branch $BRANCH_NAME${NC}"
-            log "   Removed containers, images, and deployment directory"
-            log "   Dashboard updated to exclude removed branch"
+        else
+            # For other commands
+            log "Running: docker compose $@"
+            env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose.yml "$@"
         fi
     fi
     
-    log "${GREEN}=== Deployment script completed ===${NC}"
-    
-REMOTE_SCRIPT
-    
-    # Check SSH command exit status
-    SSH_EXIT_CODE=$?
-    if [ $SSH_EXIT_CODE -eq 0 ]; then
-        # SSH command succeeded
-        if [ "$1" = "up" ] || [ "$1" = "" ]; then
-            echo
-            log "${GREEN}✅ Remote Deployment complete!${NC}"
-            echo "   Server: $HETZNER_HOST"
-            echo "   Node-RED: https://nr-$BRANCH_NAME.${TAILNET:-[your-tailnet]}.ts.net"
-            echo "   Dashboard: https://dashboard.${TAILNET:-[your-tailnet]}.ts.net"
-        elif [ "$1" = "down" ]; then
-            echo
-            log "${GREEN}✅ Remote cleanup complete!${NC}"
-            echo "   Server: $HETZNER_HOST"
-            echo "   All traces of branch '$BRANCH_NAME' deployment have been removed"
-            if [ "$REMOVE_DASHBOARD" = "true" ]; then
-                echo "   Dashboard has been completely removed (no trace left)"
-            else
-                echo "   Dashboard remains running with updated content"
-            fi
-        fi
-    else
-        # SSH command failed
-        log "${RED}❌ Remote deployment failed! (Exit code: $SSH_EXIT_CODE)${NC}"
-        exit $SSH_EXIT_CODE
-    fi
+    log "${GREEN}=== Remote script completed ===${NC}"
 }
 
-# Main script execution
-# Run safety checks first
-check_uncommitted_changes
+# ============================================================================
+# MAIN SCRIPT EXECUTION
+# ============================================================================
 
-show_deployment_info
-
-# Export for docker-compose
-export BRANCH_NAME
-
-# Determine deployment mode and execute
-if [ "$DEPLOY_MODE" = "remote" ] || [ "$DEPLOY_MODE" = "hetzner" ]; then
-    deploy_remote "$@"
-else
-    deploy_local "$@"
+# Only execute main logic if not being sourced for testing
+if [ "${BASH_SOURCE[0]:-}" = "${0:-}" ] && [ "$DEPLOY_MODE" != "test" ]; then
+    # Check if we're running in remote execution mode
+    if [ "$DEPLOY_MODE" = "remote_execution" ]; then
+        # We're running on the remote server
+        deploy_remote_execution "$@"
+    else
+        # We're running locally
+        # Run safety checks first
+        check_uncommitted_changes
+        
+        show_deployment_info
+        
+        # Export for docker-compose
+        export BRANCH_NAME
+        
+        # Determine deployment mode and execute
+        if [ "$DEPLOY_MODE" = "remote" ] || [ "$DEPLOY_MODE" = "hetzner" ]; then
+            deploy_remote "$@"
+        else
+            deploy_local "$@"
+        fi
+    fi
 fi

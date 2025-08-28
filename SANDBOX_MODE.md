@@ -6,8 +6,9 @@ This configuration provides a safe sandbox environment for Node-RED where users 
 ## Quick Start
 
 ```bash
-# Just run the startup script - no configuration needed!
-./start-demo.sh
+# Build and run the Docker image
+docker build -t nr-demo .
+docker run -p 1880:1880 nr-demo
 ```
 
 Then open http://localhost:1880 in your browser.
@@ -86,7 +87,7 @@ Behind the scenes:
 
 ## Configuration Details
 
-### Key Settings in `user-settings.js`:
+### Key Security Configuration (Embedded in Dockerfile):
 
 ```javascript
 // Flows not saved to disk
@@ -98,9 +99,8 @@ userDir: '/tmp/node-red-sandbox/'
 // Full editor UI available
 editorTheme: {
     header: {
-        title: "Node-RED Sandbox - Try it out! (Changes are temporary)"
+        title: "Node-RED Experiment (Sandboxed mode)"
     }
-    // No menu restrictions
 }
 
 // Smart middleware
@@ -113,6 +113,8 @@ httpAdminMiddleware: function(req, res, next) {
     // ...
 }
 ```
+
+**Note:** All configuration is now embedded directly in the Docker image for security.
 
 ## Use Cases
 
@@ -147,24 +149,22 @@ httpAdminMiddleware: function(req, res, next) {
 
 ## Customization
 
-### Change the Header Message
-Edit `editorTheme.header.title` in `user-settings.js`:
-```javascript
-header: {
-    title: "Your Custom Sandbox Message"
-}
-```
+### Toggle Demo Mode
+To disable demo mode and run in production:
+1. Edit the Dockerfile
+2. Comment out the demo mode section (lines 31-176)
+3. Uncomment the production mode CMD (line 182)
+4. Rebuild the image
 
-### Adjust Temporary Directory
-Change `userDir` and `fileWorkingDirectory`:
+### Change the Header Message
+Edit line 108 in the Dockerfile's demo-settings.js:
 ```javascript
-userDir: '/custom/tmp/path/'
-fileWorkingDirectory: '/custom/tmp/path/'
+title: "Your Custom Sandbox Message - " + ...
 ```
 
 ### Modify Port
 ```bash
-PORT=3000 ./start-demo.sh
+docker run -p 3000:1880 nr-demo
 ```
 
 ## FAQ
@@ -190,14 +190,15 @@ PORT=3000 ./start-demo.sh
 
 ## Troubleshooting
 
-### "Permission denied" when running start-demo.sh
-```bash
-chmod +x start-demo.sh
-```
-
 ### Port already in use
 ```bash
-PORT=3000 ./start-demo.sh
+docker run -p 3001:1880 nr-demo
+```
+
+### Check if demo mode is active
+Look for the sandbox messages in the container logs:
+```bash
+docker logs <container-name>
 ```
 
 ### Want to see what's being blocked?
