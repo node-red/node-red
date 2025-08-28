@@ -175,7 +175,7 @@ jobs:
           HETZNER_USER: ${{ secrets.HETZNER_USER }}
           HETZNER_SSH_KEY: ~/.ssh/id_rsa
           TS_AUTHKEY: ${{ secrets.TS_AUTHKEY }}
-          TAILNET: ${{ secrets.TAILNET }}
+          TAILNET: ${{ vars.TAILNET }}
           TALLY_TOKEN: ${{ secrets.TALLY_TOKEN }}
           GITHUB_REPO: ${{ env.GITHUB_REPO }}
           GITHUB_ISSUES_REPO: ${{ env.GITHUB_ISSUES_REPO }}
@@ -257,7 +257,7 @@ jobs:
           HETZNER_USER: ${{ secrets.HETZNER_USER }}
           HETZNER_SSH_KEY: ~/.ssh/id_rsa
           TS_AUTHKEY: ${{ secrets.TS_AUTHKEY }}
-          TAILNET: ${{ secrets.TAILNET }}
+          TAILNET: ${{ vars.TAILNET }}
           TALLY_TOKEN: ${{ secrets.TALLY_TOKEN }}
           GITHUB_REPO: ${{ env.GITHUB_REPO }}
           GITHUB_ISSUES_REPO: ${{ env.GITHUB_ISSUES_REPO }}
