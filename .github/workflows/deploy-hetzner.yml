@@ -1,0 +1,351 @@
+name: Deploy to Hetzner
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to deploy'
+        required: true
+        default: 'issue-5254'
+        type: string
+      action:
+        description: 'Deployment action'
+        required: true
+        default: 'deploy'
+        type: choice
+        options:
+          - deploy
+          - cleanup
+      remove_dashboard:
+        description: 'Remove dashboard completely during cleanup'
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+# Global environment variables
+env:
+  GITHUB_REPO: ${{ vars.GITHUB_REPO || 'dimitrieh/node-red' }}
+  GITHUB_ISSUES_REPO: ${{ vars.GITHUB_ISSUES_REPO || 'node-red/node-red' }}
+
+jobs:
+  validate-branch:
+    name: Validate Branch Rebase
+    runs-on: ubuntu-latest
+    outputs:
+      branch_valid: ${{ steps.validate.outputs.valid }}
+      validation_message: ${{ steps.validate.outputs.message }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ github.token }}
+
+      - name: Fetch all branches
+        run: |
+          git fetch --all --prune
+          echo "Available branches:"
+          git branch -a
+
+      - name: Validate branch rebase on experiment-template
+        id: validate
+        shell: bash
+        env:
+          BRANCH_NAME: ${{ github.event.inputs.branch }}
+          BASE_BRANCH: experiment-template
+        run: |
+          set -euo pipefail
+          
+          echo "::group::🔍 Validating branch: $BRANCH_NAME"
+          echo "📋 Base branch: $BASE_BRANCH"
+          
+          # Check if target branch exists
+          if ! git show-ref --verify --quiet "refs/remotes/origin/$BRANCH_NAME"; then
+            echo "::error::Branch '$BRANCH_NAME' does not exist on remote"
+            echo "valid=false" >> "$GITHUB_OUTPUT"
+            echo "message=Branch '$BRANCH_NAME' does not exist on remote" >> "$GITHUB_OUTPUT"
+            echo "::endgroup::"
+            exit 0
+          fi
+          
+          # Check if base branch exists
+          if ! git show-ref --verify --quiet "refs/remotes/origin/$BASE_BRANCH"; then
+            echo "::error::Base branch '$BASE_BRANCH' does not exist on remote"
+            echo "valid=false" >> "$GITHUB_OUTPUT"
+            echo "message=Base branch '$BASE_BRANCH' does not exist on remote" >> "$GITHUB_OUTPUT"
+            echo "::endgroup::"
+            exit 0
+          fi
+          
+          # Get latest commits
+          git checkout "origin/$BASE_BRANCH"
+          BASE_COMMIT=$(git rev-parse HEAD)
+          
+          git checkout "origin/$BRANCH_NAME"
+          BRANCH_COMMIT=$(git rev-parse HEAD)
+          
+          echo "📍 Base branch ($BASE_BRANCH) latest commit: $BASE_COMMIT"
+          echo "📍 Target branch ($BRANCH_NAME) latest commit: $BRANCH_COMMIT"
+          
+          # Check if base branch is ancestor of target branch
+          if ! git merge-base --is-ancestor "$BASE_COMMIT" "$BRANCH_COMMIT"; then
+            echo "::error::Branch '$BRANCH_NAME' is not rebased on latest '$BASE_BRANCH'"
+            echo "::notice::Please rebase: git rebase origin/$BASE_BRANCH"
+            echo "valid=false" >> "$GITHUB_OUTPUT"
+            echo "message=Branch '$BRANCH_NAME' is not rebased on latest '$BASE_BRANCH'. Please run: git rebase origin/$BASE_BRANCH" >> "$GITHUB_OUTPUT"
+            echo "::endgroup::"
+            exit 0
+          fi
+          
+          # Check for merge commits from base branch (indicates merge instead of rebase)
+          MERGE_COMMITS=$(git log --oneline --merges "$BASE_COMMIT..$BRANCH_COMMIT" --grep="Merge.*$BASE_BRANCH" | wc -l || echo "0")
+          if [ "$MERGE_COMMITS" -gt 0 ]; then
+            echo "::warning::Found $MERGE_COMMITS merge commit(s) from '$BASE_BRANCH'"
+            echo "💡 Consider using rebase instead of merge for cleaner history"
+            # Note: This is a warning, not a failure
+          fi
+          
+          # Get the merge base to check how recent the rebase is
+          MERGE_BASE=$(git merge-base "origin/$BASE_BRANCH" "origin/$BRANCH_NAME")
+          COMMITS_BEHIND=$(git rev-list --count "$MERGE_BASE..origin/$BASE_BRANCH" || echo "0")
+          
+          if [ "$COMMITS_BEHIND" -gt 0 ]; then
+            echo "::warning::Branch '$BRANCH_NAME' is $COMMITS_BEHIND commit(s) behind latest '$BASE_BRANCH'"
+            echo "💡 Consider rebasing to include latest changes: git rebase origin/$BASE_BRANCH"
+            # Note: This is a warning, not a failure for now
+          fi
+          
+          # All validations passed
+          echo "✅ Branch '$BRANCH_NAME' is properly rebased on '$BASE_BRANCH'"
+          echo "📊 Commits behind base: $COMMITS_BEHIND"
+          echo "🎯 Ready for deployment"
+          echo "::endgroup::"
+          
+          echo "valid=true" >> "$GITHUB_OUTPUT"
+          echo "message=Branch '$BRANCH_NAME' is properly rebased and ready for deployment" >> "$GITHUB_OUTPUT"
+
+      - name: Display validation result
+        run: |
+          echo "## Branch Validation Result" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.validate.outputs.valid }}" = "true" ]; then
+            echo "✅ **PASSED**: ${{ steps.validate.outputs.message }}" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ **FAILED**: ${{ steps.validate.outputs.message }}" >> $GITHUB_STEP_SUMMARY
+          fi
+
+  deploy:
+    name: Deploy to Hetzner
+    needs: validate-branch
+    if: needs.validate-branch.outputs.branch_valid == 'true' && github.event.inputs.action == 'deploy'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup SSH key
+        shell: bash
+        env:
+          SSH_KEY: ${{ secrets.HETZNER_SSH_KEY }}
+          SSH_HOST: ${{ secrets.HETZNER_HOST }}
+        run: |
+          # Create SSH directory with proper permissions
+          install -m 700 -d ~/.ssh
+          
+          # Install SSH private key
+          echo "$SSH_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          
+          # Add host key to known_hosts for security
+          ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
+      - name: Deploy to Hetzner
+        shell: bash
+        env:
+          DEPLOY_MODE: remote
+          HETZNER_HOST: ${{ secrets.HETZNER_HOST }}
+          HETZNER_USER: ${{ secrets.HETZNER_USER }}
+          HETZNER_SSH_KEY: ~/.ssh/id_rsa
+          TS_AUTHKEY: ${{ secrets.TS_AUTHKEY }}
+          TAILNET: ${{ secrets.TAILNET }}
+          TALLY_TOKEN: ${{ secrets.TALLY_TOKEN }}
+          GITHUB_REPO: ${{ env.GITHUB_REPO }}
+          GITHUB_ISSUES_REPO: ${{ env.GITHUB_ISSUES_REPO }}
+          BRANCH_NAME: ${{ github.event.inputs.branch }}
+        run: |
+          set -euo pipefail
+          
+          echo "::group::🚀 Starting deployment to Hetzner"
+          echo "📋 Branch: $BRANCH_NAME"
+          echo "🖥️  Server: $HETZNER_HOST"
+          echo "🔗 Tailnet: $TAILNET"
+          echo "::endgroup::"
+          
+          # Execute deployment with error handling
+          if bash deploy.sh up; then
+            echo "::notice::Deployment completed successfully"
+          else
+            echo "::error::Deployment failed"
+            exit 1
+          fi
+          
+          # Write results to job summary
+          {
+            echo "## 🎯 Deployment Results"
+            echo ""
+            echo "✅ **SUCCESS**: Branch \`$BRANCH_NAME\` deployed to Hetzner"
+            echo ""
+            echo "### 🔗 Access URLs"
+            echo "- **Node-RED**: https://nr-$BRANCH_NAME.$TAILNET.ts.net"
+            echo "- **Dashboard**: https://dashboard.$TAILNET.ts.net"
+            echo ""
+            echo "### 📋 Details"
+            echo "- **Server**: \`$HETZNER_HOST\`"
+            echo "- **Branch**: \`$BRANCH_NAME\`"
+            echo "- **Timestamp**: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Cleanup SSH key
+        if: always()
+        shell: bash
+        run: |
+          # Securely remove SSH private key
+          if [ -f ~/.ssh/id_rsa ]; then
+            shred -u ~/.ssh/id_rsa 2>/dev/null || rm -f ~/.ssh/id_rsa
+          fi
+
+  cleanup:
+    name: Cleanup Hetzner Deployment
+    needs: validate-branch
+    if: github.event.inputs.action == 'cleanup'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup SSH key
+        shell: bash
+        env:
+          SSH_KEY: ${{ secrets.HETZNER_SSH_KEY }}
+          SSH_HOST: ${{ secrets.HETZNER_HOST }}
+        run: |
+          # Create SSH directory with proper permissions
+          install -m 700 -d ~/.ssh
+          
+          # Install SSH private key
+          echo "$SSH_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          
+          # Add host key to known_hosts for security
+          ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
+      - name: Cleanup Hetzner deployment
+        shell: bash
+        env:
+          DEPLOY_MODE: remote
+          HETZNER_HOST: ${{ secrets.HETZNER_HOST }}
+          HETZNER_USER: ${{ secrets.HETZNER_USER }}
+          HETZNER_SSH_KEY: ~/.ssh/id_rsa
+          TS_AUTHKEY: ${{ secrets.TS_AUTHKEY }}
+          TAILNET: ${{ secrets.TAILNET }}
+          TALLY_TOKEN: ${{ secrets.TALLY_TOKEN }}
+          GITHUB_REPO: ${{ env.GITHUB_REPO }}
+          GITHUB_ISSUES_REPO: ${{ env.GITHUB_ISSUES_REPO }}
+          BRANCH_NAME: ${{ github.event.inputs.branch }}
+          REMOVE_DASHBOARD: ${{ github.event.inputs.remove_dashboard }}
+        run: |
+          set -euo pipefail
+          
+          echo "::group::🧹 Starting cleanup of Hetzner deployment"
+          echo "📋 Branch: $BRANCH_NAME"
+          echo "🗑️  Remove Dashboard: $REMOVE_DASHBOARD"
+          echo "🖥️  Server: $HETZNER_HOST"
+          echo "::endgroup::"
+          
+          # Execute cleanup with optional dashboard removal
+          if [ "$REMOVE_DASHBOARD" = "true" ]; then
+            if bash deploy.sh down --remove-dashboard; then
+              echo "::notice::Cleanup with dashboard removal completed successfully"
+            else
+              echo "::error::Cleanup failed"
+              exit 1
+            fi
+          else
+            if bash deploy.sh down; then
+              echo "::notice::Cleanup completed successfully"
+            else
+              echo "::error::Cleanup failed"
+              exit 1
+            fi
+          fi
+          
+          # Write results to job summary
+          dashboard_status=$([ "$REMOVE_DASHBOARD" = "true" ] && echo "Completely removed" || echo "Updated and preserved")
+          {
+            echo "## 🧹 Cleanup Results"
+            echo ""
+            echo "✅ **SUCCESS**: Branch \`$BRANCH_NAME\` cleanup completed"
+            echo ""
+            echo "### 📋 Details"
+            echo "- **Server**: \`$HETZNER_HOST\`"
+            echo "- **Branch**: \`$BRANCH_NAME\`"
+            echo "- **Dashboard**: $dashboard_status"
+            echo "- **Timestamp**: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Cleanup SSH key
+        if: always()
+        shell: bash
+        run: |
+          # Securely remove SSH private key
+          if [ -f ~/.ssh/id_rsa ]; then
+            shred -u ~/.ssh/id_rsa 2>/dev/null || rm -f ~/.ssh/id_rsa
+          fi
+
+  validation-failed:
+    name: Branch Validation Failed
+    needs: validate-branch
+    if: needs.validate-branch.outputs.branch_valid != 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Display validation failure
+        shell: bash
+        env:
+          BRANCH_NAME: ${{ github.event.inputs.branch }}
+          VALIDATION_MESSAGE: ${{ needs.validate-branch.outputs.validation_message }}
+        run: |
+          echo "::error::Branch validation failed: $VALIDATION_MESSAGE"
+          
+          # Write detailed failure information to job summary
+          {
+            echo "## ❌ Branch Validation Failed"
+            echo ""
+            echo "**Branch**: \`$BRANCH_NAME\`"
+            echo ""
+            echo "**Reason**: $VALIDATION_MESSAGE"
+            echo ""
+            echo "### 🔧 Required Actions"
+            echo ""
+            echo "1. **Rebase your branch on the latest \`experiment-template\`**:"
+            echo "   \`\`\`bash"
+            echo "   git fetch origin"
+            echo "   git checkout $BRANCH_NAME"
+            echo "   git rebase origin/experiment-template"
+            echo "   git push --force-with-lease origin $BRANCH_NAME"
+            echo "   \`\`\`"
+            echo ""
+            echo "2. **Re-run this workflow** after fixing the branch"
+            echo ""
+            echo "### 📖 Additional Resources"
+            echo "- [Git Rebase Documentation](https://git-scm.com/docs/git-rebase)"
+            echo "- [Force Push Safely with --force-with-lease](https://git-scm.com/docs/git-push#Documentation/git-push.txt---force-with-leaseltrefnamegt)"
+          } >> "$GITHUB_STEP_SUMMARY"
+          
+          echo "❌ Deployment cancelled due to branch validation failure"
+          exit 1
