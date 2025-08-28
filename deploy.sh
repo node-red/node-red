@@ -447,13 +447,19 @@ duplicate_survey() {
     log "${GREEN}✅ [TALLY] Template data fetched successfully${NC}"
     log "${BLUE}🔄 [TALLY] Step 3: Creating form data with new name...${NC}"
     
-    # Simple approach: just change the name in the template data
-    # Replace the name field in the JSON using sed
-    local new_form_data=$(echo "$template_data" | sed "s/\"name\":\"[^\"]*\"/\"name\":\"$new_survey_name\"/g")
+    # Replace the name field in the JSON using jq for reliable JSON manipulation
+    local new_form_data=$(echo "$template_data" | jq --arg name "$new_survey_name" '.name = $name' 2>/dev/null)
     
-    # Verify the name was replaced
-    if ! echo "$new_form_data" | grep -q "\"name\":\"$new_survey_name\""; then
-        log "${RED}❌ [TALLY] Failed to replace name in template data${NC}"
+    # Verify the name was replaced and JSON is valid
+    if ! echo "$new_form_data" | jq . > /dev/null 2>&1; then
+        log "${RED}❌ [TALLY] Failed to create valid JSON with new name${NC}"
+        return 1
+    fi
+    
+    # Double-check the name was set correctly
+    local actual_name=$(echo "$new_form_data" | jq -r '.name' 2>/dev/null)
+    if [ "$actual_name" != "$new_survey_name" ]; then
+        log "${RED}❌ [TALLY] Name replacement failed - expected '$new_survey_name', got '$actual_name'${NC}"
         return 1
     fi
     
