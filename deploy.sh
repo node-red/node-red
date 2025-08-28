@@ -415,14 +415,9 @@ duplicate_survey() {
         return 1
     fi
     
-    log "${BLUE}🔍 [TALLY] Step 1: Getting template ID for '$template_name'...${NC}"
-    # First get template ID
-    local template_id=$(get_survey_id "$template_name" "$tally_token")
-    
-    if [ -z "$template_id" ]; then
-        log "${RED}❌ [TALLY] Template survey '$template_name' not found or ID extraction failed${NC}"
-        return 1
-    fi
+    log "${BLUE}🔍 [TALLY] Step 1: Using hardcoded template ID for '$template_name'...${NC}"
+    # Use hardcoded template ID instead of searching by name
+    local template_id="3jj6Ga"
     
     log "${GREEN}✅ [TALLY] Template ID found: '$template_id'${NC}"
     log "${BLUE}📡 [TALLY] Step 2: Fetching complete template form data...${NC}"
