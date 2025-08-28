@@ -286,14 +286,17 @@ check_ts_authkey() {
 # GIT OPERATIONS
 # ============================================================================
 
-# Get current git branch and sanitize it for Docker/Tailscale naming
-BRANCH_NAME=$(git branch --show-current | sed 's/[^a-zA-Z0-9]/-/g' | tr '[:upper:]' '[:lower:]')
-
-# Validate branch name
-if [ -z "$BRANCH_NAME" ]; then
-    echo -e "${RED}❌ Error: Could not determine git branch${NC}"
-    exit 1
-fi
+# Function to get and validate branch name (only called during local execution)
+get_branch_name() {
+    # Get current git branch and sanitize it for Docker/Tailscale naming
+    BRANCH_NAME=$(git branch --show-current | sed 's/[^a-zA-Z0-9]/-/g' | tr '[:upper:]' '[:lower:]')
+    
+    # Validate branch name
+    if [ -z "$BRANCH_NAME" ]; then
+        echo -e "${RED}❌ Error: Could not determine git branch${NC}"
+        exit 1
+    fi
+}
 
 # Function to check for uncommitted changes
 check_uncommitted_changes() {
@@ -1217,6 +1220,9 @@ if [ "${BASH_SOURCE[0]:-}" = "${0:-}" ] && [ "$DEPLOY_MODE" != "test" ]; then
         deploy_remote_execution "$@"
     else
         # We're running locally
+        # Get branch name first (only for local execution)
+        get_branch_name
+        
         # Run safety checks first
         check_uncommitted_changes
         
