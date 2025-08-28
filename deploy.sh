@@ -528,6 +528,24 @@ duplicate_survey() {
     if [ "$created_name" != "$new_survey_name" ]; then
         log "${YELLOW}⚠️  [TALLY] Warning: Created survey name '$created_name' doesn't match intended '$new_survey_name'${NC}"
         log "${YELLOW}🔍 [TALLY] This might indicate a Tally API issue or name normalization${NC}"
+        
+        # Additional verification: Fetch the survey via API to confirm the actual name
+        log "${BLUE}🔍 [TALLY] Verifying survey name via API...${NC}"
+        local api_response=$(curl -s -H "Authorization: Bearer $tally_token" \
+            "https://api.tally.so/forms/$new_survey_id" 2>/dev/null || echo "{}")
+        
+        if [ ${#api_response} -gt 10 ] && echo "$api_response" | jq . > /dev/null 2>&1; then
+            local api_name=$(echo "$api_response" | jq -r '.name // "unknown"' 2>/dev/null)
+            log "${BLUE}📡 [TALLY] API verification - Survey name: '$api_name'${NC}"
+            
+            if [ "$api_name" = "$new_survey_name" ]; then
+                log "${GREEN}✅ [TALLY] API verification successful - names match${NC}"
+            else
+                log "${RED}❌ [TALLY] API verification failed - expected '$new_survey_name', API says '$api_name'${NC}"
+            fi
+        else
+            log "${YELLOW}⚠️  [TALLY] API verification failed - could not fetch survey details${NC}"
+        fi
     fi
     
     echo "$new_survey_id"
