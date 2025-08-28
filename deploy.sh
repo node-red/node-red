@@ -201,7 +201,8 @@ get_container_git_info() {
     local commit_url=""
     local branch_url="https://github.com/$github_repo/tree/$branch"
     
-    if [ -d "$branch_repo_dir" ]; then
+    # Check if branch_repo_dir exists and is a valid git repository
+    if [ -d "$branch_repo_dir/.git" ]; then
         commit_short=$(cd "$branch_repo_dir" && git rev-parse --short=8 HEAD 2>/dev/null || echo "unknown")
         commit_hash=$(cd "$branch_repo_dir" && git rev-parse HEAD 2>/dev/null || echo "unknown")
         if [ "$commit_hash" != "unknown" ]; then
@@ -1162,8 +1163,13 @@ deploy_remote_execution() {
             elif [ -f "docker-compose-dashboard.yml" ]; then
                 log "${BLUE}Updating dashboard to reflect current server state...${NC}"
                 
-                # Generate updated dashboard content
+                # Copy dashboard compose file to home directory for safe access
+                cp docker-compose-dashboard.yml ~/docker-compose-dashboard.yml
+                
+                # Temporarily move to home to generate dashboard content
                 cd ~
+                
+                # Generate updated dashboard content (server-wide scan)
                 generate_dashboard_content
                 
                 # Update dashboard with fresh data
