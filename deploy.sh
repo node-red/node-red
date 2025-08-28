@@ -447,12 +447,18 @@ duplicate_survey() {
     log "${GREEN}✅ [TALLY] Template data fetched successfully${NC}"
     log "${BLUE}🔄 [TALLY] Step 3: Creating form data with new name...${NC}"
     
+    # Debug: Show original template name from data
+    local original_name=$(echo "$template_data" | jq -r '.name // "null"' 2>/dev/null)
+    log "${BLUE}🔍 [TALLY] Original template name: '$original_name'${NC}"
+    log "${BLUE}🎯 [TALLY] Target survey name: '$new_survey_name'${NC}"
+    
     # Replace the name field in the JSON using jq for reliable JSON manipulation
     local new_form_data=$(echo "$template_data" | jq --arg name "$new_survey_name" '.name = $name' 2>/dev/null)
     
     # Verify the name was replaced and JSON is valid
     if ! echo "$new_form_data" | jq . > /dev/null 2>&1; then
         log "${RED}❌ [TALLY] Failed to create valid JSON with new name${NC}"
+        log "${RED}🔍 [TALLY] jq command: jq --arg name '$new_survey_name' '.name = \$name'${NC}"
         return 1
     fi
     
@@ -460,8 +466,12 @@ duplicate_survey() {
     local actual_name=$(echo "$new_form_data" | jq -r '.name' 2>/dev/null)
     if [ "$actual_name" != "$new_survey_name" ]; then
         log "${RED}❌ [TALLY] Name replacement failed - expected '$new_survey_name', got '$actual_name'${NC}"
+        log "${RED}🔍 [TALLY] Name length: expected=${#new_survey_name}, actual=${#actual_name}${NC}"
+        log "${RED}🔍 [TALLY] Name bytes: expected=$(echo -n "$new_survey_name" | od -t x1 -A n | tr -d ' '), actual=$(echo -n "$actual_name" | od -t x1 -A n | tr -d ' ')${NC}"
         return 1
     fi
+    
+    log "${GREEN}✅ [TALLY] Name successfully replaced: '$actual_name'${NC}"
     
     if [ -z "$new_form_data" ]; then
         log "${RED}❌ [TALLY] Failed to process template data${NC}"
@@ -509,7 +519,17 @@ duplicate_survey() {
         return 1
     fi
     
+    # Verify the created survey has the correct name by checking the response
+    local created_name=$(echo "$create_response" | jq -r '.name // "unknown"' 2>/dev/null)
     log "${GREEN}✅ [TALLY] Successfully duplicated survey with ID: '$new_survey_id'${NC}"
+    log "${GREEN}🎯 [TALLY] Created survey name: '$created_name'${NC}"
+    
+    # Final verification: check if created name matches what we intended
+    if [ "$created_name" != "$new_survey_name" ]; then
+        log "${YELLOW}⚠️  [TALLY] Warning: Created survey name '$created_name' doesn't match intended '$new_survey_name'${NC}"
+        log "${YELLOW}🔍 [TALLY] This might indicate a Tally API issue or name normalization${NC}"
+    fi
+    
     echo "$new_survey_id"
 }
 
@@ -530,6 +550,12 @@ setup_issue_survey() {
     
     log "${GREEN}✅ [TALLY] Detected issue branch with ID: $issue_id${NC}"
     log "${BLUE}🗣️  [TALLY] Setting up survey for issue branch: $branch${NC}"
+    
+    # Debug: Show branch name details
+    log "${BLUE}🔍 [TALLY] Branch name debug info:${NC}"
+    log "${BLUE}   - Raw branch: '$branch'${NC}"
+    log "${BLUE}   - Length: ${#branch} characters${NC}"
+    log "${BLUE}   - Hex dump: $(echo -n "$branch" | od -t x1 -A n | tr -d ' ')${NC}"
     
     # Get Tally token from environment (passed from local machine) or local config
     local tally_token="$TALLY_TOKEN"
