@@ -24,7 +24,7 @@ fi
 
 # Function to log with timestamp
 log() {
-    echo -e "[$(date '+%Y-%m-%d %H:%M:%S')] $1"
+    echo -e "[$(date '+%Y-%m-%d %H:%M:%S')] $1" >&2
 }
 
 # Generic function to generate Tailscale serve configuration
