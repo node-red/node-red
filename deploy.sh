@@ -78,6 +78,21 @@ validate_tailscale_connection() {
             return 1
         fi
         
+        # NEW: Direct status check for long-running containers
+        log "Checking Tailscale connection status directly..."
+        if docker exec "$container_name" tailscale status &>/dev/null; then
+            if docker exec "$container_name" tailscale serve status 2>&1 | grep -q "proxy"; then
+                log "${GREEN}✅ Tailscale connection validated via status check for $container_name${NC}"
+                return 0
+            else
+                log "${YELLOW}⚠️  Tailscale connected but serve not configured for $container_name${NC}"
+                # Continue to log pattern checking for further diagnosis
+            fi
+        else
+            log "${YELLOW}⚠️  Tailscale status check failed, checking logs for details...${NC}"
+            # Continue to existing log pattern checking
+        fi
+        
         # Check container logs for common error patterns
         local logs=$(docker logs "$container_name" --tail 50 2>&1)
         
