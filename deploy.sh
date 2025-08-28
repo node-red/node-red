@@ -51,7 +51,7 @@ generate_tailscale_serve_config() {
     }
   },
   "AllowFunnel": {
-    "${hostname}.${tailnet}.ts.net:443": false
+    "${hostname}.${tailnet}.ts.net:443": true
   }
 }
 EOF
