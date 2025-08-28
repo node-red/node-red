@@ -308,6 +308,127 @@ check_ts_authkey() {
 }
 
 # ============================================================================
+# TALLY SURVEY FUNCTIONS
+# ============================================================================
+
+# Function to check if survey exists for branch
+check_survey_exists() {
+    local survey_name="$1"
+    local tally_token="$2"
+    
+    if [ -z "$tally_token" ]; then
+        return 1
+    fi
+    
+    # Use Tally API to list forms and check if survey exists
+    local response=$(curl -s -H "Authorization: Bearer $tally_token" \
+        "https://api.tally.so/forms" 2>/dev/null || echo "{}")
+    
+    # Parse response to find matching survey name
+    echo "$response" | grep -q "\"name\":.*\"$survey_name\""
+}
+
+# Function to get survey ID by name
+get_survey_id() {
+    local survey_name="$1"
+    local tally_token="$2"
+    
+    if [ -z "$tally_token" ]; then
+        return 1
+    fi
+    
+    local response=$(curl -s -H "Authorization: Bearer $tally_token" \
+        "https://api.tally.so/forms" 2>/dev/null || echo "{}")
+    
+    # Extract form ID for matching survey name (simplified parsing)
+    echo "$response" | grep -A5 -B5 "\"name\":.*\"$survey_name\"" | \
+        grep "\"id\":" | head -1 | sed 's/.*"id": *"\([^"]*\)".*/\1/'
+}
+
+# Function to create survey from template
+create_survey_from_template() {
+    local new_survey_name="$1"
+    local template_name="$2"
+    local tally_token="$3"
+    
+    if [ -z "$tally_token" ]; then
+        return 1
+    fi
+    
+    log "Creating survey '$new_survey_name' from template '$template_name'..."
+    
+    # First get template ID
+    local template_id=$(get_survey_id "$template_name" "$tally_token")
+    
+    if [ -z "$template_id" ]; then
+        log "${RED}❌ Template survey '$template_name' not found${NC}"
+        return 1
+    fi
+    
+    # Create new survey from template using Tally API
+    local create_response=$(curl -s -X POST \
+        -H "Authorization: Bearer $tally_token" \
+        -H "Content-Type: application/json" \
+        -d "{\"name\":\"$new_survey_name\",\"templateId\":\"$template_id\"}" \
+        "https://api.tally.so/forms" 2>/dev/null || echo "{}")
+    
+    # Extract new survey ID
+    echo "$create_response" | grep '"id":' | head -1 | sed 's/.*"id": *"\([^"]*\)".*/\1/'
+}
+
+# Function to setup survey for issue branches
+setup_issue_survey() {
+    local branch="$1"
+    
+    # Extract issue ID from branch name using existing pattern
+    local issue_id=$(echo "$branch" | sed -n 's/^issue-\([0-9]\+\)$/\1/p')
+    
+    if [ -z "$issue_id" ]; then
+        # Not an issue branch, no survey needed
+        export TALLY_SURVEY_ID=""
+        return 0
+    fi
+    
+    log "${BLUE}🗣️  Setting up survey for issue branch: $branch${NC}"
+    
+    # Load Tally token (reuse existing pattern from deploy.sh)
+    local tally_token=""
+    if [ -f ~/.localtallyrc ]; then
+        source ~/.localtallyrc
+        tally_token="$TALLY_TOKEN"
+    fi
+    
+    if [ -z "$tally_token" ]; then
+        log "${YELLOW}⚠️  No Tally token found, skipping survey setup${NC}"
+        export TALLY_SURVEY_ID=""
+        return 0
+    fi
+    
+    # Survey name matches branch name
+    local survey_name="$branch"
+    local template_name="nr-experiment-template"
+    
+    # Check if survey already exists
+    if check_survey_exists "$survey_name" "$tally_token"; then
+        log "Survey '$survey_name' already exists, getting ID..."
+        local survey_id=$(get_survey_id "$survey_name" "$tally_token")
+    else
+        log "Creating new survey '$survey_name' from template '$template_name'..."
+        local survey_id=$(create_survey_from_template "$survey_name" "$template_name" "$tally_token")
+    fi
+    
+    if [ -n "$survey_id" ]; then
+        export TALLY_SURVEY_ID="$survey_id"
+        log "${GREEN}✅ Survey ready: $survey_name (ID: $survey_id)${NC}"
+    else
+        log "${YELLOW}⚠️  Failed to setup survey, continuing without it${NC}"
+        export TALLY_SURVEY_ID=""
+    fi
+    
+    return 0
+}
+
+# ============================================================================
 # GIT OPERATIONS
 # ============================================================================
 
@@ -828,6 +949,9 @@ done
 deploy_local() {
     log "${GREEN}🏠 Local Deployment Mode${NC}"
     
+    # Setup survey for issue branches
+    setup_issue_survey "$BRANCH_NAME"
+    
     # Build Docker image if needed
     if [ "$1" = "up" ] || [ "$1" = "" ] || ! docker image inspect "nr-demo:$BRANCH_NAME" >/dev/null 2>&1; then
         log "${BLUE}Building Docker image for branch: $BRANCH_NAME${NC}"
@@ -853,13 +977,13 @@ deploy_local() {
     # Run docker-compose
     if [ "$1" = "up" ] || [ "$1" = "" ]; then
         log "Running: docker compose -f $COMPOSE_FILE up -d"
-        env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f "$COMPOSE_FILE" up -d
+        env TS_AUTHKEY="$TS_AUTHKEY" TALLY_SURVEY_ID="$TALLY_SURVEY_ID" docker compose -f "$COMPOSE_FILE" up -d
         
         # Validate Tailscale connection and retry if needed
         validate_and_retry_tailscale "nr-$BRANCH_NAME-tailscale" "nr_${BRANCH_NAME}_tailscale" "$COMPOSE_FILE" "tailscale"
     else
         log "Running: docker compose -f $COMPOSE_FILE $*"
-        env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f "$COMPOSE_FILE" "$@"
+        env TS_AUTHKEY="$TS_AUTHKEY" TALLY_SURVEY_ID="$TALLY_SURVEY_ID" docker compose -f "$COMPOSE_FILE" "$@"
     fi
     
     if [ "$1" = "up" ] || [ "$1" = "" ]; then
@@ -1075,6 +1199,9 @@ deploy_remote_execution() {
             exit 1
         fi
         
+        # Setup survey for issue branches
+        setup_issue_survey "$BRANCH_NAME"
+        
         # Generate docker-compose file from template
         log "Generating docker-compose.yml from template..."
         sed -e "s/BRANCH_PLACEHOLDER/$BRANCH_NAME/g" \
@@ -1094,7 +1221,7 @@ deploy_remote_execution() {
         
         # Deploy with docker-compose
         log "${BLUE}Deploying with docker-compose...${NC}"
-        if env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose.yml up -d; then
+        if env TS_AUTHKEY="$TS_AUTHKEY" TALLY_SURVEY_ID="$TALLY_SURVEY_ID" docker compose -f docker-compose.yml up -d; then
             log "${GREEN}✅ Main deployment successful${NC}"
             
             # Validate Tailscale connection and retry if needed
@@ -1226,7 +1353,7 @@ deploy_remote_execution() {
         else
             # For other commands
             log "Running: docker compose $@"
-            env TS_AUTHKEY="$TS_AUTHKEY" docker compose -f docker-compose.yml "$@"
+            env TS_AUTHKEY="$TS_AUTHKEY" TALLY_SURVEY_ID="$TALLY_SURVEY_ID" docker compose -f docker-compose.yml "$@"
         fi
     fi
     

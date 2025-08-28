@@ -8,6 +8,7 @@ services:
       - NODE_PATH=/usr/src/node-red/node_modules
       - FLOWS=flows.json
       - BRANCH_NAME=BRANCH_PLACEHOLDER
+      - TALLY_SURVEY_ID=${TALLY_SURVEY_ID:-}
     deploy:
       resources:
         limits:
