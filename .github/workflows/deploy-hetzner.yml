@@ -1,6 +1,10 @@
 name: Deploy to Hetzner
 
 on:
+  push:
+    branches:
+      - 'issue-*'
+      - 'experiment-template'
   workflow_dispatch:
     inputs:
       branch:
@@ -54,7 +58,7 @@ jobs:
         id: validate
         shell: bash
         env:
-          BRANCH_NAME: ${{ github.event.inputs.branch }}
+          BRANCH_NAME: ${{ github.event.inputs.branch || github.ref_name }}
           BASE_BRANCH: experiment-template
         run: |
           set -euo pipefail
@@ -139,7 +143,7 @@ jobs:
   deploy:
     name: Deploy to Hetzner
     needs: validate-branch
-    if: needs.validate-branch.outputs.branch_valid == 'true' && github.event.inputs.action == 'deploy'
+    if: needs.validate-branch.outputs.branch_valid == 'true' && (github.event.inputs.action == 'deploy' || github.event_name == 'push')
     runs-on: ubuntu-latest
     environment: nr-experiments
     steps:
@@ -175,7 +179,7 @@ jobs:
           TALLY_TOKEN: ${{ secrets.TALLY_TOKEN }}
           GITHUB_REPO: ${{ env.GITHUB_REPO }}
           GITHUB_ISSUES_REPO: ${{ env.GITHUB_ISSUES_REPO }}
-          BRANCH_NAME: ${{ github.event.inputs.branch }}
+          BRANCH_NAME: ${{ github.event.inputs.branch || github.ref_name }}
         run: |
           set -euo pipefail
           
@@ -257,7 +261,7 @@ jobs:
           TALLY_TOKEN: ${{ secrets.TALLY_TOKEN }}
           GITHUB_REPO: ${{ env.GITHUB_REPO }}
           GITHUB_ISSUES_REPO: ${{ env.GITHUB_ISSUES_REPO }}
-          BRANCH_NAME: ${{ github.event.inputs.branch }}
+          BRANCH_NAME: ${{ github.event.inputs.branch || github.ref_name }}
           REMOVE_DASHBOARD: ${{ github.event.inputs.remove_dashboard }}
         run: |
           set -euo pipefail
@@ -317,7 +321,7 @@ jobs:
       - name: Display validation failure
         shell: bash
         env:
-          BRANCH_NAME: ${{ github.event.inputs.branch }}
+          BRANCH_NAME: ${{ github.event.inputs.branch || github.ref_name }}
           VALIDATION_MESSAGE: ${{ needs.validate-branch.outputs.validation_message }}
         run: |
           echo "::error::Branch validation failed: $VALIDATION_MESSAGE"
