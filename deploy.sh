@@ -334,8 +334,8 @@ check_survey_exists() {
         return 1
     fi
     
-    # Parse response to find matching survey name using bash-native tools
-    if echo "$response" | grep -q "\"name\":.*\"$survey_name\""; then
+    # Parse response to find matching survey name using bash-native tools with exact match
+    if echo "$response" | grep -q "\"name\":\"$survey_name\""; then
         local survey_found="FOUND"
     else
         local survey_found="NOT_FOUND"
@@ -375,8 +375,8 @@ get_survey_id() {
         return 1
     fi
     
-    # Extract form ID for matching survey name using bash-native tools
-    local survey_id=$(echo "$response" | grep -A5 -B5 "\"name\":.*\"$survey_name\"" | \
+    # Extract form ID for matching survey name using bash-native tools with exact match
+    local survey_id=$(echo "$response" | grep -A5 -B5 "\"name\":\"$survey_name\"" | \
         grep "\"id\":" | head -1 | sed 's/.*"id": *"\([^"]*\)".*/\1/')
     
     if [ -n "$survey_id" ]; then
