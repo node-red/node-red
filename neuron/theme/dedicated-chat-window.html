@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeuronGPT Chat</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1D1D1D;
+            color: white;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background: #1D1D1D;
+        }
+        
+        .chat-header {
+            background: #1D1D1D;
+            color: white;
+            padding: 16px 24px;
+            border-bottom: 1px solid #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+        
+        .chat-header-title {
+            display: flex;
+            align-items: center;
+            font-size: 18px;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            padding: 16px;
+            overflow-y: auto;
+            background: #1D1D1D;
+            scrollbar-width: thin;
+            scrollbar-color: #c1c1c1 #1D1D1D;
+        }
+        
+        .chat-messages::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .chat-messages::-webkit-scrollbar-track {
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+        
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+        
+        .chat-messages::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+        
+        .chat-input-area {
+            padding: 16px 24px;
+            border-top: 1px solid #333;
+            background: #1D1D1D;
+            display: flex;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+        
+        .chat-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            outline: none;
+            background: #1D1D1D;
+            color: white;
+        }
+        
+        .chat-input::placeholder {
+            color: #a0aec0;
+        }
+        
+        .chat-send {
+            padding: 12px 24px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        
+        .chat-send:hover {
+            background: #0056b3;
+        }
+        
+        .chat-message {
+            margin-bottom: 16px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            max-width: 80%;
+            word-wrap: break-word;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .chat-user {
+            background: #007bff;
+            color: white;
+            margin-left: auto;
+            text-align: right;
+        }
+        
+        .chat-assistant {
+            background: #1D1D1D;
+            color: white;
+            border: 1px solid #4a5568;
+        }
+        
+        .chat-system {
+            background: #e8f5e8;
+            color: #2d5a2d;
+            border: 1px solid #c3e6c3;
+            text-align: center;
+            font-style: italic;
+            margin: 0 auto;
+        }
+        
+        .message-time {
+            font-size: 11px;
+            opacity: 0.7;
+            margin-top: 6px;
+        }
+        
+        .chat-status {
+            padding: 8px 24px;
+            background: #1D1D1D;
+            color: #a0aec0;
+            font-size: 12px;
+            border-top: 1px solid #4a5568;
+        }
+        
+        /* Typing animation */
+        @keyframes dot1 { 0%, 20% { opacity: 0; } 40% { opacity: 1; } 100% { opacity: 0; } }
+        @keyframes dot2 { 0%, 20% { opacity: 0; } 40% { opacity: 1; } 100% { opacity: 0; } }
+        @keyframes dot3 { 0%, 20% { opacity: 0; } 40% { opacity: 1; } 100% { opacity: 0; } }
+        
+        .typing-dots span:nth-child(1) { animation-delay: 0s; }
+        .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+        
+        /* Markdown formatting styles */
+        h3, h4 {
+            margin: 16px 0 8px 0;
+            font-weight: bold;
+            color: inherit;
+        }
+        
+        h3 { font-size: 16px; }
+        h4 { font-size: 14px; }
+        
+        strong { font-weight: bold; }
+        em { font-style: italic; }
+        
+        pre {
+            background: #1D1D1D;
+            color: #e2e8f0;
+            padding: 12px;
+            border-radius: 6px;
+            margin: 8px 0;
+            overflow-x: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        
+        code {
+            background: #1D1D1D;
+            color: #e2e8f0;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        
+        .list-item {
+            margin: 2px 0;
+            padding-left: 16px;
+            position: relative;
+        }
+        
+        .list-item .number {
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+        }
+        
+        .list-item .bullet {
+            position: absolute;
+            left: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <div class="chat-header-title">
+                <svg width="24" height="24" viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg" style="margin-right: 10px;">
+                    <path d="M116.736 373.991C116.736 373.991 117.296 250.322 188.729 231.521C289.649 204.96 297.03 397.603 398.286 371.564C482.834 349.821 483.029 229 483.029 229" stroke="white" stroke-width="40.6992" stroke-linecap="square"/>
+                </svg>
+                <span>NeuronGPT Chat</span>
+            </div>
+            <button onclick="window.close()" style="background: none; border: none; color: white; font-size: 18px; cursor: pointer; padding: 8px;">✕</button>
+        </div>
+        <div class="chat-messages" id="chat-messages">
+            <!-- Messages will be loaded here -->
+        </div>
+        <div class="chat-input-area">
+            <input type="text" placeholder="Ask about Neuron software..." class="chat-input" id="chat-input">
+            <button class="chat-send" id="chat-send">Send</button>
+        </div>
+        <div class="chat-status">
+            <small>Chat window - Original window will be restored when you close this</small>
+        </div>
+    </div>
+    
+    <script>
+        // Load chat data from localStorage
+        function loadChatData() {
+            try {
+                const chatData = localStorage.getItem('neuron-chat-widget-data');
+                if (chatData) {
+                    const parsedData = JSON.parse(chatData);
+                    console.log('📱 [DEDICATED CHAT] Loaded chat data:', parsedData);
+                    
+                    // Load chat history if available (new format)
+                    if (parsedData.chatHistory && Array.isArray(parsedData.chatHistory)) {
+                        console.log('📱 [DEDICATED CHAT] Loading', parsedData.chatHistory.length, 'messages from history');
+                        const messagesContainer = document.getElementById('chat-messages');
+                        if (messagesContainer) {
+                            messagesContainer.innerHTML = '';
+                            parsedData.chatHistory.forEach(message => {
+                                addMessage(message.content, message.role);
+                            });
+                        }
+                    }
+                    // Fallback to old format
+                    else if (parsedData.messages && parsedData.messages.length > 0) {
+                        console.log('📱 [DEDICATED CHAT] Loading', parsedData.messages.length, 'messages from old format');
+                        const messagesContainer = document.getElementById('chat-messages');
+                        if (messagesContainer) {
+                            messagesContainer.innerHTML = '';
+                            parsedData.messages.forEach(msg => {
+                                addMessage(msg.text, msg.sender);
+                            });
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('�� [NEW WINDOW] Error loading chat data:', error);
+            }
+        }
+        
+        // Enhanced markdown parser for AI responses with better spacing control
+        function parseMarkdown(text) {
+            if (!text || typeof text !== 'string') {
+                return text;
+            }
+            
+            let formatted = text;
+            
+            // Headings (## Heading)
+            formatted = formatted.replace(/^##\s+(.+)$/gm, '<h3>$1</h3>');
+            formatted = formatted.replace(/^###\s+(.+)$/gm, '<h4>$1</h4>');
+            
+            // Bold text (**text**)
+            formatted = formatted.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+            
+            // Italic text (*text*)
+            formatted = formatted.replace(/\*(.+?)\*/g, '<em>$1</em>');
+            
+            // Numbered lists (1. item, 2. item, etc.)
+            formatted = formatted.replace(/^(\d+)\.\s+(.+)$/gm, '<div class="list-item"><span class="number">$1.</span>$2</div>');
+            
+            // Bullet points (- item)
+            formatted = formatted.replace(/^-\s+(.+)$/gm, '<div class="list-item"><span class="bullet">•</span>$2</div>');
+            
+            // Code blocks (```json)
+            formatted = formatted.replace(/```(\w+)?\n([\s\S]*?)```/g, '<pre>$2</pre>');
+            
+            // Inline code (`code`)
+            formatted = formatted.replace(/`([^`]+)`/g, '<code>$1</code>');
+            
+            // Handle spacing more intelligently
+            // First, normalize multiple consecutive newlines to exactly 2 newlines (for paragraph separation)
+            formatted = formatted.replace(/\n{3,}/g, '\n\n');
+            
+            // Replace double newlines with single <br> for paragraph separation
+            formatted = formatted.replace(/\n\n/g, '<br>');
+            
+            // Replace single newlines with spaces (to keep list items and inline content together)
+            formatted = formatted.replace(/\n/g, ' ');
+            
+            // Clean up any double spaces that might have been created
+            formatted = formatted.replace(/\s{2,}/g, ' ');
+            
+            return formatted;
+        }
+        
+        // Add message to chat with markdown parsing
+        function addMessage(text, sender) {
+            const messages = document.getElementById('chat-messages');
+            if (!messages) return;
+            
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'chat-message chat-' + sender;
+            
+            // Parse markdown for AI responses (assistant/system messages)
+            let formattedText = text;
+            if (sender === 'assistant' || sender === 'system') {
+                formattedText = parseMarkdown(text);
+            }
+            
+            msgDiv.innerHTML = '<div class="message-content">' + formattedText + '</div><div class="message-time">' + new Date().toLocaleTimeString() + '</div>';
+            
+            messages.appendChild(msgDiv);
+            messages.scrollTop = messages.scrollHeight;
+            
+            // Save message to localStorage for sync with main widget
+            saveMessageToLocalStorage(text, sender);
+        }
+        
+        // Save message to localStorage for synchronization
+        function saveMessageToLocalStorage(text, sender) {
+            try {
+                const chatData = localStorage.getItem('neuron-chat-widget-data') || '{}';
+                const parsedData = JSON.parse(chatData);
+                
+                // Initialize chat history if it doesn't exist
+                if (!parsedData.chatHistory) {
+                    parsedData.chatHistory = [];
+                }
+                
+                // Add new message
+                const message = {
+                    role: sender === 'user' ? 'user' : 'assistant',
+                    content: text,
+                    timestamp: new Date().toISOString(),
+                    type: 'message'
+                };
+                
+                parsedData.chatHistory.push(message);
+                
+                // Keep only last 50 messages to prevent localStorage from getting too large
+                if (parsedData.chatHistory.length > 50) {
+                    parsedData.chatHistory = parsedData.chatHistory.slice(-50);
+                }
+                
+                // Save back to localStorage
+                localStorage.setItem('neuron-chat-widget-data', JSON.stringify(parsedData));
+                
+                console.log('💾 [CHAT SYNC] Saved message to localStorage:', message);
+            } catch (error) {
+                console.error('💾 [CHAT SYNC] Error saving message to localStorage:', error);
+            }
+        }
+        
+        // Send message functionality
+        async function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const text = input.value.trim();
+            if (!text) return;
+            
+            addMessage(text, 'user');
+            input.value = '';
+            
+            // Show typing indicator
+            const typing = addTypingIndicator();
+            
+            try {
+                // Send to external server with flow context
+                const response = await sendToExternalServer(text);
+                typing.remove();
+                addMessage(response.content, 'assistant');
+                updateStatus('Connected to external server', 'success');
+            } catch (error) {
+                console.error('Error sending message:', error);
+                typing.remove();
+                addMessage("Sorry, I'm having trouble connecting to the external server. Please check if the server is running.", 'assistant');
+                updateStatus('Connection error', 'error');
+            }
+        }
+        
+                // Send message to external server
+        async function sendToExternalServer(message) {
+            // Check if user is authenticated
+            const token = localStorage.getItem('neuron-auth-token');
+            if (!token) {
+                throw new Error('Authentication required. Please log in through the main chat widget.');
+            }
+
+            const requestBody = {
+                message: message,
+                context: 'Neuron software context',
+                flowContext: null,  // Will be populated if available
+                rawFlowJson: null   // Will be populated if available
+            };
+
+            // Try to get flow context from localStorage if available
+            try {
+                const chatData = localStorage.getItem('neuron-chat-widget-data');
+                if (chatData) {
+                    const parsedData = JSON.parse(chatData);
+                    if (parsedData.flowContext) {
+                        requestBody.flowContext = parsedData.flowContext;
+                    }
+                    if (parsedData.rawFlowJson) {
+                        requestBody.rawFlowJson = parsedData.rawFlowJson;
+                    }
+                }
+            } catch (error) {
+                console.warn('Could not get flow context from localStorage:', error);
+            }
+
+            const response = await fetch('https://your-digitalocean-app.ondigitalocean.app/api/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(requestBody)
+            });
+            
+            if (!response.ok) {
+                throw new Error('Server error: ' + response.status + ' ' + response.statusText);
+            }
+            
+            return await response.json();
+        }
+        
+        // Add typing indicator
+        function addTypingIndicator() {
+            const messages = document.getElementById('chat-messages');
+            const typing = document.createElement('div');
+            typing.className = 'chat-message chat-assistant';
+            typing.id = 'typing-indicator';
+            typing.innerHTML = '<div class="message-content"><span style="margin-right: 8px; font-style: italic;">Thinking</span><span class="typing-dots"><span style="animation: dot1 1.4s infinite;">.</span><span style="animation: dot2 1.4s infinite;">.</span><span style="animation: dot3 1.4s infinite;">.</span></span></div>';
+            
+            messages.appendChild(typing);
+            messages.scrollTop = messages.scrollHeight;
+            return typing;
+        }
+        
+        // Update status
+        function updateStatus(message, type) {
+            const status = document.querySelector('.chat-status small');
+            if (status) {
+                status.textContent = message;
+                status.style.color = type === 'success' ? '#68d391' : type === 'error' ? '#fc8181' : '#a0aec0';
+            }
+        }
+        
+        // Event listeners
+        document.getElementById('chat-send').addEventListener('click', sendMessage);
+        document.getElementById('chat-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+        
+        // Load chat data when page loads
+        window.addEventListener('load', function() {
+            // Check authentication first
+            const token = localStorage.getItem('neuron-auth-token');
+            if (!token) {
+                showLoginRequired();
+                return;
+            }
+            loadChatData();
+        });
+
+        // Show login required message
+        function showLoginRequired() {
+            const messages = document.getElementById('chat-messages');
+            if (messages) {
+                messages.innerHTML = `
+                    <div style="text-align: center; padding: 40px 20px; color: #a0aec0;">
+                        <div style="margin-bottom: 20px;">
+                            <svg width="48" height="48" viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M116.736 373.991C116.736 373.991 117.296 250.322 188.729 231.521C289.649 204.96 297.03 397.603 398.286 371.564C482.834 349.821 483.029 229 483.029 229" stroke="#a0aec0" stroke-width="40.6992" stroke-linecap="square"/>
+                            </svg>
+                        </div>
+                        <h3 style="color: white; margin-bottom: 16px;">Authentication Required</h3>
+                        <p style="margin-bottom: 24px; line-height: 1.5;">
+                            Please log in through the main NeuronGPT chat widget first.
+                        </p>
+                        <button onclick="window.close()" style="
+                            background: #3182ce;
+                            color: white;
+                            border: none;
+                            padding: 12px 24px;
+                            border-radius: 6px;
+                            font-size: 14px;
+                            font-weight: 600;
+                            cursor: pointer;
+                        ">Close Window</button>
+                    </div>
+                `;
+            }
+        }
+        
+        // Add window close event listener to ensure sync
+        window.addEventListener('beforeunload', function() {
+            console.log('📱 [DEDICATED CHAT] Window closing, ensuring chat sync...');
+            // Force a final save of any pending messages
+            const input = document.getElementById('chat-input');
+            if (input && input.value.trim()) {
+                saveMessageToLocalStorage(input.value.trim(), 'user');
+            }
+        });
+    </script>
+</body>
+</html>

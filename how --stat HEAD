@@ -1,0 +1,16 @@
+[33mcommit 2a7081c0de895ad48bcd974b2bd7c2a6a7580705[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mJamesSuggestions[m[33m, [m[1;31morigin/JamesSuggestions[m[33m)[m
+Author: dunnerz <74564541+dunnerz@users.noreply.github.com>
+Date:   Sat Aug 23 03:17:36 2025 +0100
+
+    UI updates
+    
+    UI updates to match our colour scheme better. Adjusted the palette names and order (not touched sub-flow). Also added a new logo/ tagline. Also added a Neuron link to our docs in the menu.
+
+README.md
+neuron-settings.js
+neuron/theme/ai-node-builder.png
+neuron/theme/balance-service.js
+neuron/theme/header-balance.css
+neuron/theme/menu-customizer.js
+neuron/theme/neuronLogo.png
+package.json

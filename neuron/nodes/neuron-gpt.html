@@ -1,0 +1,64 @@
+<script type="text/html" data-template-name="neuron-gpt">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-apiKey"><i class="fa fa-key"></i> OpenAI API Key</label>
+        <input type="text" id="node-input-apiKey" placeholder="sk-..." style="width: 100%;">
+    </div>
+    <div class="form-row">
+        <label for="node-input-webSearch"><i class="fa fa-search"></i> Enable Web Search</label>
+        <input type="checkbox" id="node-input-webSearch" style="width: auto;">
+    </div>
+    <div class="form-row">
+        <label for="node-input-model"><i class="fa fa-brain"></i> AI Model</label>
+        <select id="node-input-model" style="width: 100%;">
+            <option value="gpt-4">GPT-4 (Recommended)</option>
+            <option value="gpt-3.5-turbo">GPT-3.5 Turbo (Faster)</option>
+        </select>
+    </div>
+</script>
+
+<script type="text/html" data-help-name="neuron-gpt">
+    <p><strong>NeuronGPT - AI Assistant for Neuron Software</strong></p>
+    <p>This node provides an AI chat interface that understands your Neuron application context.</p>
+    
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">string</span></dt>
+        <dd>The user's question or message</dd>
+    </dl>
+    
+    <h3>Outputs</h3>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">string</span></dt>
+        <dd>The AI's response</dd>
+        <dt>context <span class="property-type">object</span></dt>
+        <dd>Additional context and links</dd>
+    </dl>
+    
+    <h3>Configuration</h3>
+    <ul>
+        <li><strong>Name:</strong> A name for this node</li>
+        <li><strong>OpenAI API Key:</strong> Your OpenAI API key (starts with 'sk-')</li>
+        <li><strong>Enable Web Search:</strong> Allow the AI to search the web for current Node-RED information</li>
+        <li><strong>AI Model:</strong> Choose between GPT-4 (better) or GPT-3.5 Turbo (faster)</li>
+    </ul>
+    
+    <h3>Features</h3>
+    <ul>
+        <li>Context-aware responses about Neuron software</li>
+        <li>Web search for current Node-RED information</li>
+        <li>Integrated with Node-RED flows</li>
+        <li>Smart filtering to focus on relevant topics</li>
+    </ul>
+    
+    <h3>Usage</h3>
+    <p>Send any text message to this node, and it will respond with AI-generated help about your Neuron application, Node-RED, or the Neuron SDK.</p>
+    
+    <h3>Example</h3>
+    <p>Send: "How do I create a flow for machine-to-machine trading?"</p>
+    <p>Response: AI-generated guidance specific to your Neuron application</p>
+</script>
+
