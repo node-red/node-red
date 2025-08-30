@@ -1,99 +1,10 @@
 /**
  * NeuronGPT Chat Widget - Modular Version
- * Main entry point that imports all services and initializes the widget
+ * Main entry point with all services defined inline
  */
 
-// Import all services
-import { ConfigService, configService } from './services/ConfigService.js';
-import { LogService, logService } from './services/LogService.js';
-import { EventService, eventService } from './services/EventService.js';
-import { AuthService, authService } from './services/AuthService.js';
-import { ChatHistoryService, chatHistoryService } from './services/ChatHistoryService.js';
-import { FlowSyncService, flowSyncService } from './services/FlowSyncService.js';
-
-// Import the widget controller
-import { WidgetController } from './components/WidgetController.js';
-
-// Create the main widget instance
-const widgetController = new WidgetController();
-
-// Initialize services
-configService.loadConfiguration();
-logService.setLevel('info');
-
-// Set up global API
-window.NeuronGPTWidget = {
-    // Services
-    ConfigService: configService,
-    LogService: logService,
-    EventService: eventService,
-    AuthService: authService,
-    ChatHistoryService: chatHistoryService,
-    FlowSyncService: flowSyncService,
-    
-    // Controller
-    WidgetController: widgetController,
-    
-    // Test functions
-    testFlowExport() {
-        console.log('🧪 [TEST] Testing flow export...');
-        if (this.FlowSyncService) {
-            this.FlowSyncService.manualSync();
-        }
-    },
-    
-    testFlowSync() {
-        console.log('🧪 [TEST] Testing flow sync...');
-        if (this.FlowSyncService) {
-            console.log('Flow sync status:', this.FlowSyncService.getFlowExportStatus());
-        }
-    },
-    
-    testChatHistory() {
-        console.log('🧪 [TEST] Testing chat history...');
-        if (this.ChatHistoryService) {
-            console.log('Chat history stats:', this.ChatHistoryService.getStorageStats());
-        }
-    },
-    
-    testAuth() {
-        console.log('🧪 [TEST] Testing authentication...');
-        if (this.AuthService) {
-            console.log('Auth state:', this.AuthService.getAuthState());
-        }
-    },
-    
-    testConfig() {
-        console.log('🧪 [TEST] Testing configuration...');
-        if (this.ConfigService) {
-            console.log('Config:', this.ConfigService.getAll());
-        }
-    }
-};
-
-// Initialize the widget when DOM is ready
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
-        console.log('🧠 [NEURONGPT] DOM ready, initializing modular widget...');
-        widgetController.initialize();
-    });
-} else {
-    console.log('🧠 [NEURONGPT] DOM already ready, initializing modular widget...');
-    widgetController.initialize();
-}
-
-// Export for module usage
-export {
-    ConfigService,
-    LogService,
-    EventService,
-    AuthService,
-    ChatHistoryService,
-    FlowSyncService,
-    WidgetController,
-    widgetController,
-    window.NeuronGPTWidget
-};
+(function() {
+    'use strict';
 
 /**
  * Authentication Service for NeuronGPT Widget
@@ -102,32 +13,58 @@ export {
 
 class AuthService {
     constructor() {
-        this.state = {
-            isAuthenticated: false,
-            accessToken: null,
-            user: null,
-            tokenExpiry: null
-        };
-        
-        this.storageKeys = {
-            token: 'neuron-auth-token',
-            user: 'neuron-user-info',
-            expiry: 'neuron-token-expiry'
-        };
-        
-        // Load saved state on initialization
+        this.isAuthenticated = false;
+        this.accessToken = null;
+        this.refreshToken = null;
+        this.tokenExpiry = null;
+        this.userInfo = null;
         this.loadAuthState();
     }
 
     /**
-     * Check if user is authenticated
-     * @returns {boolean} Authentication status
+     * Load authentication state from localStorage
      */
-    isUserAuthenticated() {
-        if (!this.state.accessToken) return false;
+    loadAuthState() {
+        try {
+            const accessToken = localStorage.getItem('chat-token');
+            const refreshToken = localStorage.getItem('refresh-token');
+            const tokenExpiry = localStorage.getItem('token-expires-at');
+            
+            if (accessToken) {
+                this.accessToken = accessToken;
+                this.refreshToken = refreshToken;
+                this.tokenExpiry = tokenExpiry;
+                this.isAuthenticated = this.checkTokenValidity();
+                
+                if (this.isAuthenticated) {
+                    this.extractUserInfo(accessToken);
+                }
+            }
+            
+            console.log('🔍 [AUTH] Auth state loaded:', {
+                isAuthenticated: this.isAuthenticated,
+                hasToken: !!this.accessToken,
+                tokenExpiry: this.tokenExpiry
+            });
+        } catch (error) {
+            console.error('❌ [AUTH] Error loading auth state:', error);
+            this.isAuthenticated = false;
+        }
+    }
+
+    /**
+     * Check if the current token is still valid
+     */
+    checkTokenValidity() {
+        if (!this.accessToken || !this.tokenExpiry) {
+            return false;
+        }
         
-        if (this.state.tokenExpiry && Date.now() > this.state.tokenExpiry) {
-            // Token expired, clear auth state
+        const currentTime = Date.now();
+        const expiryTime = parseInt(this.tokenExpiry);
+        
+        if (isNaN(expiryTime) || currentTime >= expiryTime) {
+            console.log('⚠️ [AUTH] Token expired, clearing auth state');
             this.clearAuthState();
             return false;
         }
@@ -136,195 +73,91 @@ class AuthService {
     }
 
     /**
-     * Get current authentication state
-     * @returns {Object} Current auth state
+     * Extract user information from JWT token
      */
-    getAuthState() {
-        return { ...this.state };
-    }
-
-    /**
-     * Get current user information
-     * @returns {Object|null} User object or null
-     */
-    getUser() {
-        return this.state.user;
-    }
-
-    /**
-     * Get current access token
-     * @returns {string|null} Access token or null
-     */
-    getToken() {
-        return this.state.accessToken;
-    }
-
-    /**
-     * Check if token is expired
-     * @returns {boolean} Whether token is expired
-     */
-    isTokenExpired() {
-        if (!this.state.tokenExpiry) return true;
-        return Date.now() > this.state.tokenExpiry;
-    }
-
-    /**
-     * Get token expiry time
-     * @returns {Date|null} Token expiry date or null
-     */
-    getTokenExpiry() {
-        return this.state.tokenExpiry ? new Date(this.state.tokenExpiry) : null;
-    }
-
-    /**
-     * Save authentication state
-     * @param {string} token - Access token
-     * @param {Object} user - User information
-     * @param {number} expiryHours - Token expiry in hours (default: 1)
-     */
-    saveAuthState(token, user, expiryHours = 1) {
-        this.state.accessToken = token;
-        this.state.user = user;
-        this.state.isAuthenticated = true;
-        this.state.tokenExpiry = Date.now() + (expiryHours * 60 * 60 * 1000);
-        
-        // Save to localStorage
+    extractUserInfo(token) {
         try {
-            localStorage.setItem(this.storageKeys.token, token);
-            localStorage.setItem(this.storageKeys.user, JSON.stringify(user));
-            localStorage.setItem(this.storageKeys.expiry, this.state.tokenExpiry.toString());
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            this.userInfo = {
+                id: payload.sub,
+                username: payload.preferred_username || payload.username,
+                email: payload.email,
+                name: payload.name
+            };
+            console.log('✅ [AUTH] User info extracted:', this.userInfo);
         } catch (error) {
-            console.error('❌ [AUTH] Failed to save to localStorage:', error);
+            console.error('❌ [AUTH] Error extracting user info:', error);
+            this.userInfo = null;
         }
     }
 
     /**
-     * Load authentication state from localStorage
-     * @returns {boolean} Whether state was loaded successfully
+     * Check if user is authenticated
      */
-    loadAuthState() {
-        try {
-            const token = localStorage.getItem(this.storageKeys.token);
-            const userInfo = localStorage.getItem(this.storageKeys.user);
-            const expiry = localStorage.getItem(this.storageKeys.expiry);
-            
-            if (token && userInfo && expiry) {
-                const expiryTime = parseInt(expiry);
-                if (Date.now() < expiryTime) {
-                    this.state.accessToken = token;
-                    this.state.user = JSON.parse(userInfo);
-                    this.state.isAuthenticated = true;
-                    this.state.tokenExpiry = expiryTime;
-                    return true;
-                } else {
-                    // Token expired, clean up
-                    this.clearAuthState();
-                }
-            }
-        } catch (error) {
-            console.error('❌ [AUTH] Failed to load from localStorage:', error);
-            this.clearAuthState();
-        }
-        
-        return false;
+    isUserAuthenticated() {
+        return this.isAuthenticated && this.checkTokenValidity();
+    }
+
+    /**
+     * Get the current access token
+     */
+    getAccessToken() {
+        return this.isUserAuthenticated() ? this.accessToken : null;
     }
 
     /**
      * Clear authentication state
      */
     clearAuthState() {
-        this.state = {
-            isAuthenticated: false,
-            accessToken: null,
-            user: null,
-            tokenExpiry: null
-        };
+        this.isAuthenticated = false;
+        this.accessToken = null;
+        this.refreshToken = null;
+        this.tokenExpiry = null;
+        this.userInfo = null;
         
-        // Clear from localStorage
-        try {
-            localStorage.removeItem(this.storageKeys.token);
-            localStorage.removeItem(this.storageKeys.user);
-            localStorage.removeItem(this.storageKeys.expiry);
-        } catch (error) {
-            console.error('❌ [AUTH] Failed to clear localStorage:', error);
-        }
+        localStorage.removeItem('chat-token');
+        localStorage.removeItem('refresh-token');
+        localStorage.removeItem('token-expires-at');
+        localStorage.removeItem('token-type');
+        
+        console.log('🧹 [AUTH] Auth state cleared');
     }
 
-    /**
-     * Refresh authentication state
-     * @returns {boolean} Whether refresh was successful
-     */
-    refreshAuthState() {
-        return this.loadAuthState();
-    }
-
-    /**
-     * Update user information
-     * @param {Object} user - Updated user information
-     */
-    updateUser(user) {
-        if (this.state.user) {
-            this.state.user = { ...this.state.user, ...user };
+            /**
+         * Handle successful authentication
+         */
+        handleSuccessfulAuth(accessToken, refreshToken, expiresIn) {
+            this.accessToken = accessToken;
+            this.refreshToken = refreshToken;
+            this.tokenExpiry = Date.now() + (parseInt(expiresIn) * 1000);
+            this.isAuthenticated = true;
             
-            // Update localStorage
-            try {
-                localStorage.setItem(this.storageKeys.user, JSON.stringify(this.state.user));
-            } catch (error) {
-                console.error('❌ [AUTH] Failed to update user in localStorage:', error);
+            localStorage.setItem('chat-token', accessToken);
+            if (refreshToken) {
+                localStorage.setItem('refresh-token', refreshToken);
             }
-        }
-    }
-
-    /**
-     * Extend token expiry
-     * @param {number} additionalHours - Additional hours to add
-     */
-    extendToken(additionalHours = 1) {
-        if (this.state.tokenExpiry) {
-            this.state.tokenExpiry += (additionalHours * 60 * 60 * 1000);
+            localStorage.setItem('token-expires-at', this.tokenExpiry.toString());
             
-            // Update localStorage
-            try {
-                localStorage.setItem(this.storageKeys.expiry, this.state.tokenExpiry.toString());
-            } catch (error) {
-                console.error('❌ [AUTH] Failed to update expiry in localStorage:', error);
+            this.extractUserInfo(accessToken);
+            console.log('✅ [AUTH] Authentication successful, user info:', this.userInfo);
+        }
+
+        /**
+         * Get authentication headers for API requests
+         * @returns {Object} Headers object
+         */
+        getAuthHeaders() {
+            if (!this.isUserAuthenticated()) {
+                return {};
             }
+            
+            return {
+                'Authorization': `Bearer ${this.accessToken}`
+            };
         }
     }
 
-    /**
-     * Get authentication headers for API requests
-     * @returns {Object} Headers object
-     */
-    getAuthHeaders() {
-        if (!this.isUserAuthenticated()) {
-            return {};
-        }
-        
-        return {
-            'Authorization': `Bearer ${this.state.accessToken}`
-        };
-    }
-
-    /**
-     * Validate token format
-     * @param {string} token - Token to validate
-     * @returns {boolean} Whether token format is valid
-     */
-    validateTokenFormat(token) {
-        // Basic JWT format validation
-        if (!token || typeof token !== 'string') return false;
-        
-        const parts = token.split('.');
-        return parts.length === 3;
-    }
-}
-
-// Create singleton instance
-const authService = new AuthService();
-
-// Export both the class and the instance
-export { AuthService, authService as default };
+// Class definition complete
 
 /**
  * Chat History Service for NeuronGPT Widget
@@ -690,11 +523,7 @@ class ChatHistoryService {
     }
 }
 
-// Create singleton instance
-const chatHistoryService = new ChatHistoryService();
-
-// Export both the class and the instance
-export { ChatHistoryService, chatHistoryService as default };
+// Class definition complete
 
 /**
  * Configuration Service for NeuronGPT Widget
@@ -763,11 +592,7 @@ class ConfigService {
     }
 }
 
-// Create singleton instance
-const configService = new ConfigService();
-
-// Export both the class and the instance
-export { ConfigService, configService as default };
+// Class definition complete
 
 /**
  * Event Service for NeuronGPT Widget
@@ -946,11 +771,8 @@ class EventService {
     }
 }
 
-// Create singleton instance
-const eventService = new EventService();
+// Class definition complete
 
-// Export both the class and the instance
-export { EventService, eventService as default };
 
 /**
  * Flow Synchronization Service for NeuronGPT Widget
@@ -1429,11 +1251,7 @@ class FlowSyncService {
     }
 }
 
-// Create singleton instance
-const flowSyncService = new FlowSyncService();
-
-// Export both the class and the instance
-export { FlowSyncService, flowSyncService as default };
+// Class definition complete
 
 /**
  * Logging Service for NeuronGPT Widget
@@ -1554,11 +1372,7 @@ class LogService {
     }
 }
 
-// Create singleton instance
-const logService = new LogService();
-
-// Export both the class and the instance
-export { LogService, logService as default };
+// Class definition complete
 
 /**
  * Widget Controller for NeuronGPT Widget
@@ -1571,30 +1385,70 @@ class WidgetController {
         this.isInitialized = false;
         this.flowStatusElement = null;
         
-        // Bind methods to preserve context
-        this.initialize = this.initialize.bind(this);
-        this.waitForNodeRED = this.waitForNodeRED.bind(this);
-        this.createWidget = this.createWidget.bind(this);
-        this.applyWidgetStyles = this.applyWidgetStyles.bind(this);
-        this.setupEventListeners = this.setupEventListeners.bind(this);
-        this.showLoginScreen = this.showLoginScreen.bind(this);
-        this.setupLoginEventListeners = this.setupLoginEventListeners.bind(this);
-        this.handleDirectLogin = this.handleDirectLogin.bind(this);
-        this.showChatInterface = this.showChatInterface.bind(this);
-        this.getChatInterfaceHTML = this.getChatInterfaceHTML.bind(this);
-        this.initializeChatFunctionality = this.initializeChatFunctionality.bind(this);
-        this.initializeFlowSync = this.initializeFlowSync.bind(this);
-        this.setupFlowSyncEventListeners = this.setupFlowSyncEventListeners.bind(this);
-        this.addFlowExportStatusIndicator = this.addFlowExportStatusIndicator.bind(this);
-        this.updateFlowExportStatus = this.updateFlowExportStatus.bind(this);
-        this.loadChatHistory = this.loadChatHistory.bind(this);
-        this.addMessage = this.addMessage.bind(this);
-        this.sendMessage = this.sendMessage.bind(this);
-        this.sendToExternalServer = this.sendToExternalServer.bind(this);
-        this.addTypingIndicator = this.addTypingIndicator.bind(this);
-        this.getCurrentFlowContext = this.getCurrentFlowContext.bind(this);
-        this.getCurrentFlowJson = this.getCurrentFlowJson.bind(this);
-        this.openDedicatedChatWindow = this.openDedicatedChatWindow.bind(this);
+        // Note: Method binding will be handled after all methods are defined
+        // to avoid "Cannot read properties of undefined" errors
+    }
+
+    /**
+     * Check for new authentication tokens in localStorage
+     * This method scans for tokens and updates the auth service
+     */
+    checkForNewTokens() {
+        try {
+            console.log('🔍 [AUTH] Checking for new tokens in localStorage...');
+            
+            // Check for tokens in localStorage
+            const accessToken = localStorage.getItem('chat-token');
+            const refreshToken = localStorage.getItem('refresh-token');
+            const expiresIn = localStorage.getItem('token-expires-at');
+            
+            if (accessToken && window.NeuronGPTWidget && window.NeuronGPTWidget.AuthService) {
+                console.log('✅ [AUTH] Found new access token, updating auth service...');
+                
+                // Update the auth service with the new tokens
+                window.NeuronGPTWidget.AuthService.handleSuccessfulAuth(
+                    accessToken,
+                    refreshToken,
+                    expiresIn || '3600' // Default to 1 hour if not specified
+                );
+                
+                // Refresh the widget to show chat interface
+                this.refreshWidgetAfterAuth();
+                
+                return true;
+            }
+            
+            return false;
+        } catch (error) {
+            console.error('❌ [AUTH] Error checking for new tokens:', error);
+            return false;
+        }
+    }
+
+    /**
+     * Refresh the widget after successful authentication
+     */
+    refreshWidgetAfterAuth() {
+        try {
+            console.log('🔄 [AUTH] Refreshing widget after authentication...');
+            
+            // Check if user is now authenticated
+            if (window.NeuronGPTWidget && window.NeuronGPTWidget.AuthService) {
+                if (window.NeuronGPTWidget.AuthService.isUserAuthenticated()) {
+                    console.log('✅ [AUTH] User authenticated, transitioning to chat interface');
+                    
+                    // Show chat interface
+                    this.showChatInterface();
+                    
+                    // Show success message
+                    setTimeout(() => {
+                        this.addMessage("Successfully logged in! You can now start chatting.", 'system');
+                    }, 500);
+                }
+            }
+        } catch (error) {
+            console.error('❌ [AUTH] Error refreshing widget after auth:', error);
+        }
     }
 
     /**
@@ -1603,23 +1457,52 @@ class WidgetController {
     async initialize() {
         try {
             console.log('🧠 [WIDGET] Starting enhanced widget initialization...');
+            console.log('🧠 [WIDGET] This context:', this);
+            console.log('🧠 [WIDGET] Available methods:', Object.getOwnPropertyNames(Object.getPrototypeOf(this)));
             
             // Load configuration first if available
             if (window.NeuronGPTWidget && window.NeuronGPTWidget.ConfigService) {
+                console.log('🧠 [WIDGET] ConfigService found, loading configuration...');
                 window.NeuronGPTWidget.ConfigService.loadConfiguration();
+            } else {
+                console.warn('⚠️ [WIDGET] ConfigService not found');
+            }
+            
+            // Check if user is already authenticated
+            if (window.NeuronGPTWidget && window.NeuronGPTWidget.AuthService) {
+                console.log('🔍 [WIDGET] Checking existing authentication state...');
+                
+                // Check for new tokens that might have been set by the auth-success page
+                this.checkForNewTokens();
+                
+                if (window.NeuronGPTWidget.AuthService.isUserAuthenticated()) {
+                    console.log('✅ [WIDGET] User already authenticated, showing chat interface');
+                } else {
+                    console.log('⚠️ [WIDGET] User not authenticated, will show login screen');
+                }
+            } else {
+                console.warn('⚠️ [WIDGET] AuthService not found');
             }
             
             // Wait for Node-RED to be ready
+            console.log('🧠 [WIDGET] Waiting for Node-RED to be ready...');
             await this.waitForNodeRED();
+            console.log('🧠 [WIDGET] Node-RED is ready');
             
             // Create the widget
+            console.log('🧠 [WIDGET] Creating widget...');
             this.createWidget();
+            console.log('🧠 [WIDGET] Widget created');
             
             // Set up event listeners
+            console.log('🧠 [WIDGET] Setting up event listeners...');
             this.setupEventListeners();
+            console.log('🧠 [WIDGET] Event listeners set up');
             
             // Initialize flow synchronization
+            console.log('🧠 [WIDGET] Initializing flow synchronization...');
             await this.initializeFlowSync();
+            console.log('🧠 [WIDGET] Flow synchronization initialized');
             
             this.isInitialized = true;
             console.log('🧠 [WIDGET] Enhanced widget initialization completed successfully');
@@ -1631,6 +1514,7 @@ class WidgetController {
             
         } catch (error) {
             console.error('❌ [WIDGET] Enhanced widget initialization failed:', error);
+            console.error('❌ [WIDGET] Error stack:', error.stack);
         }
     }
 
@@ -1655,6 +1539,10 @@ class WidgetController {
      * Create the widget DOM element
      */
     createWidget() {
+        console.log('🧠 [WIDGET] createWidget method called');
+        console.log('🧠 [WIDGET] Document body:', document.body);
+        console.log('🧠 [WIDGET] Document ready state:', document.readyState);
+        
         // Check if widget already exists
         if (document.getElementById('neuron-chat-widget')) {
             console.log('🧠 [WIDGET] Widget already exists');
@@ -1662,6 +1550,7 @@ class WidgetController {
             return;
         }
 
+        console.log('🧠 [WIDGET] Creating new widget element...');
         this.widget = document.createElement('div');
         this.widget.id = 'neuron-chat-widget';
         this.widget.innerHTML = `
@@ -1690,9 +1579,38 @@ class WidgetController {
         // Apply styles
         this.applyWidgetStyles();
         
+        // Ensure widget is visible
+        this.widget.style.display = 'block';
+        this.widget.style.visibility = 'visible';
+        this.widget.style.opacity = '1';
+        console.log('🧠 [WIDGET] Widget styles applied and visibility ensured');
+        
         // Add to page
+        console.log('🧠 [WIDGET] Adding widget to document body...');
         document.body.appendChild(this.widget);
+        console.log('🧠 [WIDGET] Widget added to DOM');
+        console.log('🧠 [WIDGET] Widget element in DOM:', document.getElementById('neuron-chat-widget'));
         console.log('🧠 [WIDGET] Widget created successfully');
+        
+        // Check if user is already authenticated and show appropriate interface
+        if (window.NeuronGPTWidget && window.NeuronGPTWidget.AuthService) {
+            if (window.NeuronGPTWidget.AuthService.isUserAuthenticated()) {
+                console.log('✅ [WIDGET] User authenticated, showing chat interface');
+                this.showChatInterface();
+                
+                // Show logout button
+                const logoutBtn = this.widget.querySelector('.chat-logout');
+                if (logoutBtn) {
+                    logoutBtn.style.display = 'flex';
+                }
+            } else {
+                console.log('⚠️ [WIDGET] User not authenticated, showing login screen');
+                this.showLoginScreen();
+            }
+        } else {
+            console.log('⚠️ [WIDGET] AuthService not available, showing login screen');
+            this.showLoginScreen();
+        }
     }
 
     /**
@@ -1719,6 +1637,8 @@ class WidgetController {
             transition: all 0.3s ease;
             overflow: hidden;
             resize: none;
+            visibility: visible !important;
+            opacity: 1 !important;
         `;
         
         // Header styles
@@ -1813,11 +1733,7 @@ class WidgetController {
         const logoutBtn = this.widget.querySelector('.chat-logout');
         if (logoutBtn) {
             logoutBtn.addEventListener('click', () => {
-                if (window.NeuronGPTWidget && window.NeuronGPTWidget.AuthService) {
-                    window.NeuronGPTWidget.AuthService.clearAuthState();
-                }
-                this.showLoginScreen();
-                logoutBtn.style.display = 'none';
+                this.handleKeycloakLogout();
             });
         }
         
@@ -1828,16 +1744,72 @@ class WidgetController {
                 this.openDedicatedChatWindow();
             });
         }
+        
+        // Set up periodic token checking for authentication completion
+        this.setupTokenChecking();
+        
+        // Listen for messages from the auth-success page
+        this.setupMessageListener();
+    }
+
+    /**
+     * Set up message listener for authentication completion
+     */
+    setupMessageListener() {
+        window.addEventListener('message', (event) => {
+            if (event.data === 'authentication-complete') {
+                console.log('✅ [AUTH] Received authentication completion message');
+                // Check for new tokens immediately
+                setTimeout(() => {
+                    this.checkForNewTokens();
+                }, 500);
+            }
+        });
+        
+        console.log('👂 [AUTH] Message listener set up for authentication completion');
+    }
+
+    /**
+     * Set up periodic checking for new authentication tokens
+     */
+    setupTokenChecking() {
+        // Check for new tokens every 2 seconds for the first 30 seconds
+        let checkCount = 0;
+        const maxChecks = 15; // 15 checks * 2 seconds = 30 seconds
+        
+        const tokenCheckInterval = setInterval(() => {
+            checkCount++;
+            
+            // Check if we have new tokens
+            if (this.checkForNewTokens()) {
+                console.log('✅ [AUTH] New tokens detected, stopping periodic checks');
+                clearInterval(tokenCheckInterval);
+                return;
+            }
+            
+            // Stop checking after max attempts
+            if (checkCount >= maxChecks) {
+                console.log('⏰ [AUTH] Token check timeout reached, stopping periodic checks');
+                clearInterval(tokenCheckInterval);
+            }
+        }, 2000);
+        
+        console.log('🔄 [AUTH] Periodic token checking started (every 2s for 30s)');
     }
 
     /**
      * Show login screen
      */
     showLoginScreen() {
-        if (!this.widget) return;
+        console.log('🧠 [LOGIN] showLoginScreen called');
+        if (!this.widget) {
+            console.error('❌ [LOGIN] No widget found');
+            return;
+        }
         
         const chatBody = this.widget.querySelector('.chat-body');
         if (chatBody) {
+            console.log('🧠 [LOGIN] Chat body found, setting innerHTML');
             chatBody.innerHTML = `
                 <div class="login-container" style="
                     display: flex;
@@ -1855,55 +1827,48 @@ class WidgetController {
                     </div>
                     <h3 style="color: white; margin-bottom: 16px; font-size: 18px;">Welcome to NeuronGPT</h3>
                     <p style="color: #a0aec0; margin-bottom: 24px; font-size: 14px; line-height: 1.5;">
-                        Please authenticate to access AI assistance for your Neuron flows
+                        Please authenticate with Keycloak to access AI assistance for your Neuron flows
                     </p>
                     <div style="margin-bottom: 20px; width: 100%; max-width: 300px;">
-                        <input type="text" id="username-input" placeholder="Username" style="
-                            width: 100%;
-                            padding: 12px 16px;
-                            border: 1px solid #ddd;
-                            border-radius: 6px;
-                            font-size: 14px;
-                            outline: none;
-                            background: #2D2D2D;
+                        <button id="login-button" style="
+                            background: #3182ce;
                             color: white;
-                            margin-bottom: 12px;
-                            box-sizing: border-box;
-                        ">
-                        <input type="password" id="password-input" placeholder="Password" style="
+                            border: none;
+                            padding: 16px 32px;
+                            border-radius: 8px;
+                            font-size: 16px;
+                            font-weight: 600;
+                            cursor: pointer;
+                            transition: all 0.2s;
+                            margin-bottom: 16px;
                             width: 100%;
-                            padding: 12px 16px;
-                            border: 1px solid #ddd;
-                            border-radius: 6px;
-                            font-size: 14px;
-                            outline: none;
-                            background: #2D2D2D;
-                            color: white;
-                            margin-bottom: 20px;
-                            box-sizing: border-box;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            gap: 8px;
                         ">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" fill="currentColor"/>
+                            </svg>
+                            Login with Keycloak
+                        </button>
                     </div>
-                    <button id="login-button" style="
-                        background: #3182ce;
-                        color: white;
-                        border: none;
-                        padding: 12px 24px;
-                        border-radius: 6px;
-                        font-size: 14px;
-                        font-weight: 600;
-                        cursor: pointer;
-                        transition: background 0.2s;
-                        margin-bottom: 16px;
-                    ">Login</button>
                     <div id="login-status" style="
                         font-size: 12px;
                         color: #a0aec0;
                         min-height: 20px;
                     "></div>
+                    <div style="margin-top: 16px; padding: 12px; background: rgba(255,255,255,0.05); border-radius: 6px; font-size: 11px; color: #a0aec0;">
+                        <strong>Note:</strong> A popup window will open for authentication. Please allow popups for this site.
+                    </div>
                 </div>
             `;
             
             this.setupLoginEventListeners();
+            console.log('🧠 [LOGIN] Login screen HTML set and event listeners configured');
+            console.log('✅ [LOGIN] Login screen setup completed successfully');
+        } else {
+            console.error('❌ [LOGIN] Chat body not found');
         }
     }
 
@@ -1911,103 +1876,304 @@ class WidgetController {
      * Set up login event listeners
      */
     setupLoginEventListeners() {
+        console.log('🧠 [LOGIN] Setting up login event listeners...');
+        
         // Login button
         const loginBtn = document.getElementById('login-button');
         if (loginBtn) {
-            loginBtn.addEventListener('click', () => this.handleDirectLogin());
+            console.log('✅ [LOGIN] Login button found, adding click listener');
+            loginBtn.addEventListener('click', () => this.handleKeycloakLogin());
+        } else {
+            console.error('❌ [LOGIN] Login button not found');
         }
         
-        // Enter key support
-        const usernameInput = document.getElementById('username-input');
-        const passwordInput = document.getElementById('password-input');
-        
-        if (usernameInput && passwordInput) {
-            passwordInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    this.handleDirectLogin();
-                }
-            });
-            
-            usernameInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    passwordInput.focus();
-                }
-            });
-        }
+        console.log('✅ [LOGIN] Login event listeners setup completed');
     }
 
     /**
-     * Handle direct login with username/password
+     * Handle Keycloak login with popup
      */
-    async handleDirectLogin() {
-        const usernameInput = document.getElementById('username-input');
-        const passwordInput = document.getElementById('password-input');
+    async handleKeycloakLogin() {
+        console.log('🧠 [LOGIN] handleKeycloakLogin called');
+        
         const loginBtn = document.getElementById('login-button');
         const statusDiv = document.getElementById('login-status');
         
-        if (!usernameInput || !passwordInput || !loginBtn || !statusDiv) return;
-        
-        const username = usernameInput.value.trim();
-        const password = passwordInput.value.trim();
-        
-        if (!username || !password) {
-            statusDiv.textContent = 'Please enter both username and password';
-            statusDiv.style.color = '#fc8181';
+        if (!loginBtn || !statusDiv) {
+            console.error('❌ [LOGIN] Login button or status div not found');
             return;
         }
         
-        // Disable inputs and show loading
-        usernameInput.disabled = true;
-        passwordInput.disabled = true;
+        console.log('✅ [LOGIN] Login elements found, proceeding with authentication');
+        
+        // Disable button and show loading
         loginBtn.disabled = true;
-        loginBtn.textContent = 'Logging in...';
-        statusDiv.textContent = 'Authenticating...';
+        loginBtn.textContent = 'Opening login...';
+        statusDiv.textContent = 'Opening authentication window...';
         statusDiv.style.color = '#68d391';
         
         try {
-            // Simulate API call delay
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            
-            // For testing purposes, accept any login
-            const mockUser = {
-                id: 'test-user',
-                username: username,
-                email: username + '@example.com',
-                name: username
-            };
-            
-            const mockToken = 'mock-jwt-token-' + Date.now();
-            
-            // Save authentication state
-            if (window.NeuronGPTWidget && window.NeuronGPTWidget.AuthService) {
-                window.NeuronGPTWidget.AuthService.saveAuthState(mockToken, mockUser);
+            // Get configuration
+            let serverUrl = 'https://neuron-gpt-cp9am.ondigitalocean.app';
+            if (window.NeuronGPTWidget && window.NeuronGPTWidget.ConfigService) {
+                serverUrl = window.NeuronGPTWidget.ConfigService.get('serverUrl');
             }
             
-            // Show success and transition to chat
-            statusDiv.textContent = 'Login successful!';
-            statusDiv.style.color = '#68d391';
+            // Create popup window for Keycloak authentication
+            // Redirect to our auth-success page after authentication
+            const authUrl = `${serverUrl}/api/forward/auth?redirect_uri=${encodeURIComponent(window.location.origin + '/neuron/theme/auth-success.html')}`;
+            console.log('🔍 [LOGIN] Opening authentication popup with URL:', authUrl);
             
-            // Show logout button
-            const logoutBtn = this.widget.querySelector('.chat-logout');
-            if (logoutBtn) {
-                logoutBtn.style.display = 'flex';
+            // Try to open popup with more specific features
+            const popup = window.open(
+                authUrl,
+                'keycloak-auth',
+                'width=800,height=600,scrollbars=yes,resizable=yes,status=yes,location=yes,menubar=no,toolbar=no'
+            );
+            
+            if (!popup) {
+                throw new Error('Popup blocked. Please allow popups for this site.');
             }
             
-            // Transition to chat interface after a short delay
+            // Check if popup was actually opened and loaded
             setTimeout(() => {
-                this.showChatInterface();
+                if (popup.closed || popup.location.href === 'about:blank') {
+                    console.error('❌ [LOGIN] Popup failed to load properly or was blocked');
+                    popup.close();
+                    throw new Error('Popup failed to load. Please check your popup blocker settings.');
+                }
             }, 1000);
             
+            console.log('✅ [LOGIN] Authentication popup opened successfully');
+            
+            // Monitor popup for authentication completion
+            console.log('🔍 [LOGIN] Starting popup monitoring...');
+            let popupClosed = false;
+            
+            const checkAuth = setInterval(async () => {
+                try {
+                    // Check if popup is closed
+                    if (popup.closed && !popupClosed) {
+                        popupClosed = true;
+                        console.log('🔍 [LOGIN] Popup closed, checking authentication state...');
+                        clearInterval(checkAuth);
+                        
+                        // Check if we have authentication tokens in localStorage
+                        if (window.NeuronGPTWidget && window.NeuronGPTWidget.AuthService) {
+                            console.log('🔍 [LOGIN] Popup closed, checking authentication state...');
+                            
+                            // Try to refresh auth state from localStorage
+                            window.NeuronGPTWidget.AuthService.refreshAuthState();
+                            
+                            console.log('🔍 [LOGIN] Auth state after popup close:', window.NeuronGPTWidget.AuthService.getAuthState());
+                            
+                            if (window.NeuronGPTWidget.AuthService.isUserAuthenticated()) {
+                                // Authentication successful
+                                console.log('✅ [LOGIN] Authentication successful after popup close, transitioning to chat');
+                                statusDiv.textContent = 'Login successful!';
+                                statusDiv.style.color = '#68d391';
+                                
+                                // Show logout button
+                                const logoutBtn = this.widget.querySelector('.chat-logout');
+                                if (logoutBtn) {
+                                    logoutBtn.style.display = 'flex';
+                                }
+                                
+                                // Transition to chat interface
+                                setTimeout(() => {
+                                    this.showChatInterface();
+                                }, 1000);
+                                return;
+                            } else {
+                                // Check if we need to manually extract tokens
+                                console.log('⚠️ [LOGIN] Authentication not detected after popup close, checking for manual token extraction');
+                                
+                                const token = localStorage.getItem('neuron-auth-token');
+                                const user = localStorage.getItem('neuron-user-info');
+                                const expiry = localStorage.getItem('neuron-token-expiry');
+                                
+                                console.log('🔍 [LOGIN] Manual token check after popup close:', { token: !!token, user: !!user, expiry: !!expiry });
+                                
+                                if (token && user && expiry) {
+                                    try {
+                                        const userData = JSON.parse(user);
+                                        const expiryTime = parseInt(expiry);
+                                        
+                                        if (Date.now() < expiryTime) {
+                                            window.NeuronGPTWidget.AuthService.saveAuthState(token, userData, (expiryTime - Date.now()) / (60 * 60 * 1000));
+                                            console.log('✅ [LOGIN] Manually set authentication state after popup close');
+                                            
+                                            statusDiv.textContent = 'Login successful!';
+                                            statusDiv.style.color = '#68d391';
+                                            
+                                            const logoutBtn = this.widget.querySelector('.chat-logout');
+                                            if (logoutBtn) {
+                                                logoutBtn.style.display = 'flex';
+                                            }
+                                            
+                                            setTimeout(() => {
+                                                this.showChatInterface();
+                                            }, 1000);
+                                            return;
+                                        }
+                                    } catch (error) {
+                                        console.error('❌ [LOGIN] Error parsing manual tokens after popup close:', error);
+                                    }
+                                }
+                            }
+                        }
+                        
+                        // User closed popup without authentication
+                        statusDiv.textContent = 'Authentication cancelled';
+                        statusDiv.style.color = '#f6ad55';
+                        loginBtn.disabled = false;
+                        loginBtn.textContent = 'Login with Keycloak';
+                        return;
+                    }
+                    
+                    // Check if popup has redirected to callback URL (indicating successful auth)
+                    try {
+                        const popupUrl = popup.location.href;
+                        console.log('🔍 [LOGIN] Popup URL check:', popupUrl);
+                        
+                        // Check for various authentication completion indicators
+                        if (popupUrl.includes('/api/auth/callback') || 
+                            popupUrl.includes('/demo') || 
+                            popupUrl.includes('/auth/callback') ||
+                            popupUrl.includes('success') ||
+                            popupUrl.includes('authenticated')) {
+                            
+                            console.log('✅ [LOGIN] Authentication callback detected, closing popup');
+                            // Authentication completed, close popup
+                            popup.close();
+                            clearInterval(checkAuth);
+                            
+                            // Wait a moment for tokens to be processed, then check auth state
+                            setTimeout(async () => {
+                                console.log('🔍 [LOGIN] Checking authentication state after popup close...');
+                                
+                                if (window.NeuronGPTWidget && window.NeuronGPTWidget.AuthService) {
+                                    // Try to refresh auth state from localStorage
+                                    window.NeuronGPTWidget.AuthService.refreshAuthState();
+                                    
+                                    console.log('🔍 [LOGIN] Auth state after refresh:', window.NeuronGPTWidget.AuthService.getAuthState());
+                                    
+                                    if (window.NeuronGPTWidget.AuthService.isUserAuthenticated()) {
+                                        // Authentication successful
+                                        console.log('✅ [LOGIN] Authentication successful, transitioning to chat');
+                                        statusDiv.textContent = 'Login successful!';
+                                        statusDiv.style.color = '#68d391';
+                                        
+                                        // Show logout button
+                                        const logoutBtn = this.widget.querySelector('.chat-logout');
+                                        if (logoutBtn) {
+                                            logoutBtn.style.display = 'flex';
+                                        }
+                                        
+                                        // Transition to chat interface
+                                        setTimeout(() => {
+                                            this.showChatInterface();
+                                        }, 1000);
+                                    } else {
+                                        // Authentication failed - check if we need to manually extract tokens
+                                        console.log('⚠️ [LOGIN] Authentication not detected, checking for manual token extraction');
+                                        
+                                        // Try to manually check for tokens in localStorage
+                                        const token = localStorage.getItem('neuron-auth-token');
+                                        const user = localStorage.getItem('neuron-user-info');
+                                        const expiry = localStorage.getItem('neuron-token-expiry');
+                                        
+                                        console.log('🔍 [LOGIN] Manual token check:', { token: !!token, user: !!user, expiry: !!expiry });
+                                        
+                                        if (token && user && expiry) {
+                                            // We have tokens, manually set them
+                                            try {
+                                                const userData = JSON.parse(user);
+                                                const expiryTime = parseInt(expiry);
+                                                
+                                                if (Date.now() < expiryTime) {
+                                                    window.NeuronGPTWidget.AuthService.saveAuthState(token, userData, (expiryTime - Date.now()) / (60 * 60 * 1000));
+                                                    console.log('✅ [LOGIN] Manually set authentication state');
+                                                    
+                                                    // Now transition to chat
+                                                    statusDiv.textContent = 'Login successful!';
+                                                    statusDiv.style.color = '#68d391';
+                                                    
+                                                    const logoutBtn = this.widget.querySelector('.chat-logout');
+                                                    if (logoutBtn) {
+                                                        logoutBtn.style.display = 'flex';
+                                                    }
+                                                    
+                                                    setTimeout(() => {
+                                                        this.showChatInterface();
+                                                    }, 1000);
+                                                    return;
+                                                }
+                                            } catch (error) {
+                                                console.error('❌ [LOGIN] Error parsing manual tokens:', error);
+                                            }
+                                        }
+                                        
+                                        // Still no authentication
+                                        statusDiv.textContent = 'Authentication failed';
+                                        statusDiv.style.color = '#fc8181';
+                                        loginBtn.disabled = false;
+                                        loginBtn.textContent = 'Login with Keycloak';
+                                    }
+                                }
+                            }, 1000);
+                        }
+                    } catch (e) {
+                        // Cross-origin error, popup is still on auth page
+                        console.log('🔍 [LOGIN] Cross-origin error (expected during auth), popup still on auth page');
+                        // Continue monitoring
+                    }
+                    
+                } catch (error) {
+                    console.error('❌ [LOGIN] Error checking authentication:', error);
+                }
+            }, 500); // Check every 500ms
+            
+            // Set a timeout to stop checking after 5 minutes
+            console.log('🔍 [LOGIN] Setting authentication timeout (5 minutes)');
+            setTimeout(() => {
+                console.log('⚠️ [LOGIN] Authentication timeout reached');
+                clearInterval(checkAuth);
+                if (!popup.closed) {
+                    console.log('🔍 [LOGIN] Closing popup due to timeout');
+                    popup.close();
+                }
+                if (loginBtn.disabled) {
+                    statusDiv.textContent = 'Authentication timeout';
+                    statusDiv.style.color = '#f6ad55';
+                    loginBtn.disabled = false;
+                    loginBtn.textContent = 'Login with Keycloak';
+                }
+            }, 300000); // 5 minutes
+            
+            // Add a fallback: check if user manually navigated to demo page
+            console.log('🔍 [LOGIN] Setting up fallback authentication check');
+            const fallbackCheck = setInterval(() => {
+                // Check if the current page is the demo page (indicating successful auth)
+                if (window.location.href.includes('/demo')) {
+                    console.log('✅ [LOGIN] Fallback: User is on demo page, authentication successful');
+                    clearInterval(fallbackCheck);
+                    
+                    // Try to extract authentication from the demo page
+                    this.handleDemoPageAuthentication(statusDiv, loginBtn);
+                }
+            }, 2000); // Check every 2 seconds
+            
         } catch (error) {
-            console.error('❌ [LOGIN] Login failed:', error);
+            console.error('❌ [LOGIN] Keycloak login failed:', error);
             statusDiv.textContent = 'Login failed: ' + error.message;
             statusDiv.style.color = '#fc8181';
             
-            // Re-enable inputs
-            usernameInput.disabled = false;
-            passwordInput.disabled = false;
+            // Re-enable button
             loginBtn.disabled = false;
-            loginBtn.textContent = 'Login';
+            loginBtn.textContent = 'Login with Keycloak';
+            
+            console.log('🔍 [LOGIN] Login button re-enabled after error');
         }
     }
 
@@ -2015,13 +2181,31 @@ class WidgetController {
      * Show chat interface
      */
     showChatInterface() {
-        if (!this.widget) return;
+        console.log('🧠 [CHAT] showChatInterface called');
+        
+        // Check if user is authenticated before showing chat interface
+        if (window.NeuronGPTWidget && window.NeuronGPTWidget.AuthService) {
+            if (!window.NeuronGPTWidget.AuthService.isUserAuthenticated()) {
+                console.log('⚠️ [CHAT] User not authenticated, showing login screen instead');
+                this.showLoginScreen();
+                return;
+            }
+        }
+        
+        if (!this.widget) {
+            console.error('❌ [CHAT] No widget found');
+            return;
+        }
         
         const chatBody = this.widget.querySelector('.chat-body');
         if (chatBody) {
+            console.log('🧠 [CHAT] Chat body found, setting innerHTML');
             chatBody.innerHTML = this.getChatInterfaceHTML();
             this.initializeChatFunctionality();
             this.addFlowExportStatusIndicator();
+            console.log('✅ [CHAT] Chat interface initialized successfully');
+        } else {
+            console.error('❌ [CHAT] Chat body not found');
         }
     }
 
@@ -2369,8 +2553,10 @@ class WidgetController {
         
         // Add auth header if available
         if (window.NeuronGPTWidget && window.NeuronGPTWidget.AuthService) {
-            const authHeaders = window.NeuronGPTWidget.AuthService.getAuthHeaders();
-            Object.assign(headers, authHeaders);
+            const accessToken = window.NeuronGPTWidget.AuthService.getAccessToken();
+            if (accessToken) {
+                headers['Authorization'] = `Bearer ${accessToken}`;
+            }
         }
         
         const response = await fetch(`${serverUrl}${apiEndpoint}`, {
@@ -2462,6 +2648,160 @@ class WidgetController {
     }
 
     /**
+     * Handle Keycloak logout
+     */
+    async handleKeycloakLogout() {
+        try {
+            // Clear local auth state first
+            if (window.NeuronGPTWidget && window.NeuronGPTWidget.AuthService) {
+                window.NeuronGPTWidget.AuthService.clearAuthState();
+            }
+            
+            // Get configuration
+            let serverUrl = 'https://neuron-gpt-cp9am.ondigitalocean.app';
+            if (window.NeuronGPTWidget && window.NeuronGPTWidget.ConfigService) {
+                serverUrl = window.NeuronGPTWidget.ConfigService.get('serverUrl');
+            }
+            
+            // Open logout popup
+            const logoutPopup = window.open(
+                `${serverUrl}/api/auth/logout?redirect_uri=${encodeURIComponent(window.location.origin + '/neuron/theme/auth-success.html')}`,
+                'keycloak-logout',
+                'width=600,height=400,scrollbars=yes,resizable=yes'
+            );
+            
+            if (logoutPopup) {
+                // Close popup after a short delay
+                setTimeout(() => {
+                    logoutPopup.close();
+                }, 3000);
+            }
+            
+            // Hide logout button
+            const logoutBtn = this.widget.querySelector('.chat-logout');
+            if (logoutBtn) {
+                logoutBtn.style.display = 'none';
+            }
+            
+            // Show login screen
+            this.showLoginScreen();
+            
+        } catch (error) {
+            console.error('❌ [LOGOUT] Keycloak logout failed:', error);
+            
+            // Fallback: just clear local state and show login
+            if (window.NeuronGPTWidget && window.NeuronGPTWidget.AuthService) {
+                window.NeuronGPTWidget.AuthService.clearAuthState();
+            }
+            
+            const logoutBtn = this.widget.querySelector('.chat-logout');
+            if (logoutBtn) {
+                logoutBtn.style.display = 'none';
+            }
+            
+            this.showLoginScreen();
+        }
+    }
+
+    /**
+     * Handle authentication from demo page
+     * @param {HTMLElement} statusDiv - Status display element
+     * @param {HTMLElement} loginBtn - Login button element
+     */
+    handleDemoPageAuthentication(statusDiv, loginBtn) {
+        try {
+            console.log('🧠 [DEMO AUTH] Handling demo page authentication...');
+            
+            // Check if we have authentication tokens in localStorage
+            if (window.NeuronGPTWidget && window.NeuronGPTWidget.AuthService) {
+                // Try to refresh auth state from localStorage
+                window.NeuronGPTWidget.AuthService.refreshAuthState();
+                
+                if (window.NeuronGPTWidget.AuthService.isUserAuthenticated()) {
+                    console.log('✅ [DEMO AUTH] Authentication successful from demo page');
+                    
+                    if (statusDiv) {
+                        statusDiv.textContent = 'Login successful!';
+                        statusDiv.style.color = '#68d391';
+                    }
+                    
+                    // Show logout button
+                    const logoutBtn = this.widget.querySelector('.chat-logout');
+                    if (logoutBtn) {
+                        logoutBtn.style.display = 'flex';
+                    }
+                    
+                    // Transition to chat interface
+                    setTimeout(() => {
+                        this.showChatInterface();
+                    }, 1000);
+                    return;
+                }
+            }
+            
+            // Authentication failed
+            if (statusDiv) {
+                statusDiv.textContent = 'Authentication failed';
+                statusDiv.style.color = '#fc8181';
+            }
+            
+            if (loginBtn) {
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'Login with Keycloak';
+            }
+            
+        } catch (error) {
+            console.error('❌ [DEMO AUTH] Error handling demo page authentication:', error);
+            
+            if (statusDiv) {
+                statusDiv.textContent = 'Authentication error';
+                statusDiv.style.color = '#fc8181';
+            }
+            
+            if (loginBtn) {
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'Login with Keycloak';
+            }
+        }
+    }
+
+    /**
+     * Bind all methods to preserve context
+     * This method is called after all methods are defined
+     */
+    bindMethods() {
+        try {
+            console.log('🧠 [WIDGET] Binding methods to preserve context...');
+            
+            // Bind all methods that need to preserve 'this' context
+            const methodsToBind = [
+                'initialize', 'waitForNodeRED', 'createWidget', 'applyWidgetStyles',
+                'setupEventListeners', 'showLoginScreen', 'setupLoginEventListeners',
+                'handleKeycloakLogin', 'showChatInterface', 'getChatInterfaceHTML',
+                'initializeChatFunctionality', 'initializeFlowSync', 'setupFlowSyncEventListeners',
+                'addFlowExportStatusIndicator', 'updateFlowExportStatus', 'loadChatHistory',
+                'addMessage', 'sendMessage', 'sendToExternalServer', 'addTypingIndicator',
+                'getCurrentFlowContext', 'getCurrentFlowJson', 'openDedicatedChatWindow',
+                'handleKeycloakLogout', 'handleDemoPageAuthentication', 'checkForNewTokens',
+                'refreshWidgetAfterAuth', 'setupTokenChecking', 'setupMessageListener'
+            ];
+            
+            methodsToBind.forEach(methodName => {
+                if (typeof this[methodName] === 'function') {
+                    this[methodName] = this[methodName].bind(this);
+                    console.log(`✅ [WIDGET] Bound method: ${methodName}`);
+                } else {
+                    console.warn(`⚠️ [WIDGET] Method not found for binding: ${methodName}`);
+                }
+            });
+            
+            console.log('🧠 [WIDGET] Method binding completed');
+        } catch (error) {
+            console.error('❌ [WIDGET] Error binding methods:', error);
+        }
+    }
+
+    /**
      * Open dedicated chat window
      */
     openDedicatedChatWindow() {
@@ -2478,5 +2818,87 @@ class WidgetController {
     }
 }
 
-// Export the class
-export { WidgetController };
+// Class definition complete
+
+// Create singleton instances
+const authService = new AuthService();
+const chatHistoryService = new ChatHistoryService();
+const configService = new ConfigService();
+const eventService = new EventService();
+const flowSyncService = new FlowSyncService();
+const logService = new LogService();
+const widgetController = new WidgetController();
+
+// Bind methods after all classes are defined
+widgetController.bindMethods();
+
+// Initialize services
+configService.loadConfiguration();
+logService.setLevel('info');
+
+// Set up global API
+window.NeuronGPTWidget = {
+    // Services
+    ConfigService: configService,
+    LogService: logService,
+    EventService: eventService,
+    AuthService: authService,
+    ChatHistoryService: chatHistoryService,
+    FlowSyncService: flowSyncService,
+    
+    // Controller
+    WidgetController: widgetController,
+    
+    // Test functions
+    testFlowExport() {
+        console.log('🧪 [TEST] Testing flow export...');
+        if (this.FlowSyncService) {
+            this.FlowSyncService.manualSync();
+        }
+    },
+    
+    testFlowSync() {
+        console.log('🧪 [TEST] Testing flow sync...');
+        if (this.FlowSyncService) {
+            console.log('Flow sync status:', this.FlowSyncService.getFlowExportStatus());
+        }
+    },
+    
+    testChatHistory() {
+        console.log('🧪 [TEST] Testing chat history...');
+        if (this.ChatHistoryService) {
+            console.log('Chat history stats:', this.ChatHistoryService.getStorageStats());
+        }
+    },
+    
+    testAuth() {
+        console.log('🧪 [TEST] Testing authentication...');
+        if (this.AuthService) {
+            console.log('Auth state:', this.AuthService.getAuthState());
+        }
+    },
+    
+    testConfig() {
+        console.log('🧪 [TEST] Testing configuration...');
+        if (this.ConfigService) {
+            console.log('Config:', this.ConfigService.getAll());
+        }
+    }
+};
+
+// Initialize the widget when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log('🧠 [NEURONGPT] DOM ready, initializing modular widget...');
+        console.log('🧠 [NEURONGPT] Widget controller:', widgetController);
+        console.log('🧠 [NEURONGPT] Widget controller methods:', Object.getOwnPropertyNames(Object.getPrototypeOf(widgetController)));
+        widgetController.initialize();
+    });
+} else {
+    console.log('🧠 [NEURONGPT] DOM already ready, initializing modular widget...');
+    console.log('🧠 [NEURONGPT] Widget controller:', widgetController);
+    console.log('🧠 [NEURONGPT] Widget controller methods:', Object.getOwnPropertyNames(Object.getPrototypeOf(widgetController)));
+    widgetController.initialize();
+}
+
+})(); // End of IIFE

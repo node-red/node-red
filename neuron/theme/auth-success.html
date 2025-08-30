@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authentication Successful - Neuron</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1D1D1D 0%, #2D2D2D 100%);
+            color: white;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            text-align: center;
+        }
+        
+        .success-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            padding: 40px;
+            max-width: 500px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        .success-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            animation: bounce 2s infinite;
+        }
+        
+        .success-title {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #4CAF50;
+        }
+        
+        .success-message {
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 24px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .countdown {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 24px;
+        }
+        
+        .close-button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .close-button:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+        
+        .token-info {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 16px;
+            margin: 20px 0;
+            font-family: monospace;
+            font-size: 12px;
+            text-align: left;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-10px);
+            }
+            60% {
+                transform: translateY(-5px);
+            }
+        }
+        
+        .loading {
+            display: none;
+            margin-top: 20px;
+        }
+        
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid #4CAF50;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="success-container">
+        <div class="success-icon">✅</div>
+        <h1 class="success-title">Authentication Successful!</h1>
+        <p class="success-message">
+            You have been successfully authenticated with Keycloak.<br>
+            You can now close this window and return to Neuron.
+        </p>
+        
+        <div class="countdown" id="countdown">
+            This window will close automatically in <span id="timer">5</span> seconds...
+        </div>
+        
+        <button class="close-button" onclick="closeWindow()">
+            Close Window Now
+        </button>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Processing authentication...</p>
+        </div>
+        
+        <div class="token-info" id="tokenInfo" style="display: none;">
+            <strong>Token Information:</strong><br>
+            <div id="tokenDetails"></div>
+        </div>
+    </div>
+
+    <script>
+        // Extract tokens from URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const accessToken = urlParams.get('access_token');
+        const refreshToken = urlParams.get('refresh_token');
+        const expiresIn = urlParams.get('expires_in');
+        const tokenType = urlParams.get('token_type');
+        
+        // Store tokens in localStorage for the widget to access
+        if (accessToken) {
+            localStorage.setItem('chat-token', accessToken);
+            if (refreshToken) {
+                localStorage.setItem('refresh-token', refreshToken);
+            }
+            if (expiresIn) {
+                const expiresAt = Date.now() + (parseInt(expiresIn) * 1000);
+                localStorage.setItem('token-expires-at', expiresAt);
+            }
+            if (tokenType) {
+                localStorage.setItem('token-type', tokenType);
+            }
+            
+            console.log('✅ [AUTH SUCCESS] Tokens stored in localStorage');
+            console.log('✅ [AUTH SUCCESS] Access token length:', accessToken.length);
+            
+            // Show token info in debug mode
+            if (window.location.search.includes('debug=true')) {
+                document.getElementById('tokenInfo').style.display = 'block';
+                document.getElementById('tokenDetails').innerHTML = `
+                    Access Token: ${accessToken.substring(0, 20)}...<br>
+                    Token Type: ${tokenType}<br>
+                    Expires In: ${expiresIn} seconds<br>
+                    Refresh Token: ${refreshToken ? 'Yes' : 'No'}
+                `;
+            }
+        } else {
+            console.error('❌ [AUTH SUCCESS] No access token found in URL');
+        }
+        
+        // Auto-close countdown
+        let countdown = 5;
+        const timerElement = document.getElementById('timer');
+        const countdownElement = document.getElementById('countdown');
+        
+        const countdownInterval = setInterval(() => {
+            countdown--;
+            timerElement.textContent = countdown;
+            
+            if (countdown <= 0) {
+                clearInterval(countdownInterval);
+                closeWindow();
+            }
+        }, 1000);
+        
+        // Function to close the window
+        function closeWindow() {
+            // Try to close the window
+            if (window.opener) {
+                // If opened from another window, close this one
+                window.close();
+            } else {
+                // If not opened from another window, redirect to main app
+                window.location.href = '/';
+            }
+        }
+        
+        // Listen for messages from parent window
+        window.addEventListener('message', function(event) {
+            if (event.data === 'close-auth-window') {
+                closeWindow();
+            }
+        });
+        
+        // Notify parent window that authentication is complete
+        if (window.opener) {
+            try {
+                window.opener.postMessage('authentication-complete', '*');
+            } catch (e) {
+                console.log('Could not notify parent window:', e);
+            }
+        }
+        
+        // Show loading state briefly
+        document.getElementById('loading').style.display = 'block';
+        setTimeout(() => {
+            document.getElementById('loading').style.display = 'none';
+        }, 2000);
+    </script>
+</body>
+</html>
