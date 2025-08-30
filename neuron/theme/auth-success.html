@@ -204,8 +204,19 @@
                 // If opened from another window, close this one
                 window.close();
             } else {
-                // If not opened from another window, redirect to main app
-                window.location.href = '/';
+                // If not opened from another window, try to go back or close
+                try {
+                    // Try to go back in history
+                    if (window.history.length > 1) {
+                        window.history.back();
+                    } else {
+                        // If no history, try to close the window
+                        window.close();
+                    }
+                } catch (e) {
+                    // If all else fails, just close the window
+                    window.close();
+                }
             }
         }
         
