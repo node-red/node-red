@@ -204,18 +204,15 @@
                 // If opened from another window, close this one
                 window.close();
             } else {
-                // If not opened from another window, try to go back or close
+                // If not opened from another window, just close the window
+                // Don't go back in history as it might contain auth callback URLs
                 try {
-                    // Try to go back in history
-                    if (window.history.length > 1) {
-                        window.history.back();
-                    } else {
-                        // If no history, try to close the window
-                        window.close();
-                    }
-                } catch (e) {
-                    // If all else fails, just close the window
                     window.close();
+                } catch (e) {
+                    // If we can't close, redirect to a safe location
+                    // Redirect to the main Node-RED app without any auth parameters
+                    const baseUrl = window.location.origin;
+                    window.location.href = baseUrl;
                 }
             }
         }
