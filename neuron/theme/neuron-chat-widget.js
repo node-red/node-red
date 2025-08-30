@@ -1440,6 +1440,9 @@ class WidgetController {
                     // Show chat interface
                     this.showChatInterface();
                     
+                    // Update logout button visibility
+                    this.updateLogoutButtonVisibility(true);
+                    
                     // Show success message
                     setTimeout(() => {
                         this.addMessage("Successfully logged in! You can now start chatting.", 'system');
@@ -1597,19 +1600,16 @@ class WidgetController {
             if (window.NeuronGPTWidget.AuthService.isUserAuthenticated()) {
                 console.log('✅ [WIDGET] User authenticated, showing chat interface');
                 this.showChatInterface();
-                
-                // Show logout button
-                const logoutBtn = this.widget.querySelector('.chat-logout');
-                if (logoutBtn) {
-                    logoutBtn.style.display = 'flex';
-                }
+                this.updateLogoutButtonVisibility(true);
             } else {
                 console.log('⚠️ [WIDGET] User not authenticated, showing login screen');
                 this.showLoginScreen();
+                this.updateLogoutButtonVisibility(false);
             }
         } else {
             console.log('⚠️ [WIDGET] AuthService not available, showing login screen');
             this.showLoginScreen();
+            this.updateLogoutButtonVisibility(false);
         }
     }
 
@@ -1770,6 +1770,23 @@ class WidgetController {
     }
 
     /**
+     * Update logout button visibility based on authentication state
+     * @param {boolean} isAuthenticated - Whether user is authenticated
+     */
+    updateLogoutButtonVisibility(isAuthenticated) {
+        const logoutBtn = this.widget.querySelector('.chat-logout');
+        if (logoutBtn) {
+            if (isAuthenticated) {
+                logoutBtn.style.display = 'flex';
+                console.log('✅ [WIDGET] Logout button shown');
+            } else {
+                logoutBtn.style.display = 'none';
+                console.log('✅ [WIDGET] Logout button hidden');
+            }
+        }
+    }
+
+    /**
      * Set up periodic checking for new authentication tokens
      */
     setupTokenChecking() {
@@ -1865,6 +1882,10 @@ class WidgetController {
             `;
             
             this.setupLoginEventListeners();
+            
+            // Ensure logout button is hidden when showing login screen
+            this.updateLogoutButtonVisibility(false);
+            
             console.log('🧠 [LOGIN] Login screen HTML set and event listeners configured');
             console.log('✅ [LOGIN] Login screen setup completed successfully');
         } else {
@@ -2203,6 +2224,10 @@ class WidgetController {
             chatBody.innerHTML = this.getChatInterfaceHTML();
             this.initializeChatFunctionality();
             this.addFlowExportStatusIndicator();
+            
+            // Ensure logout button is shown when displaying chat interface
+            this.updateLogoutButtonVisibility(true);
+            
             console.log('✅ [CHAT] Chat interface initialized successfully');
         } else {
             console.error('❌ [CHAT] Chat body not found');
@@ -2783,7 +2808,7 @@ class WidgetController {
                 'addMessage', 'sendMessage', 'sendToExternalServer', 'addTypingIndicator',
                 'getCurrentFlowContext', 'getCurrentFlowJson', 'openDedicatedChatWindow',
                 'handleKeycloakLogout', 'handleDemoPageAuthentication', 'checkForNewTokens',
-                'refreshWidgetAfterAuth', 'setupTokenChecking', 'setupMessageListener'
+                'refreshWidgetAfterAuth', 'setupTokenChecking', 'setupMessageListener', 'updateLogoutButtonVisibility'
             ];
             
             methodsToBind.forEach(methodName => {
