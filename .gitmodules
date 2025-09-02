@@ -1,6 +1,3 @@
 [submodule "neuron/nodes/neuron-registration"]
 	path = neuron/nodes/neuron-registration
 	url = https://github.com/NeuronInnovations/neuron-registration.git
-[submodule "external"]
-	path = external
-	url = https://github.com/NeuronInnovations/neuron-gpt

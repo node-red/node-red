@@ -3,241 +3,213 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Authentication Successful - Neuron</title>
+                    <title>Authentication Success - Neuron Co-Pilot</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #1D1D1D 0%, #2D2D2D 100%);
+            background: #1D1D1D;
             color: white;
             margin: 0;
-            padding: 0;
+            padding: 20px;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
+            justify-content: center;
             min-height: 100vh;
-            text-align: center;
         }
         
-        .success-container {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 16px;
-            padding: 40px;
+        .container {
+            text-align: center;
             max-width: 500px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         }
         
         .success-icon {
             font-size: 64px;
             margin-bottom: 20px;
-            animation: bounce 2s infinite;
         }
         
-        .success-title {
-            font-size: 28px;
+        .title {
+            font-size: 24px;
             font-weight: 600;
             margin-bottom: 16px;
-            color: #4CAF50;
         }
         
-        .success-message {
+        .message {
             font-size: 16px;
-            line-height: 1.6;
             margin-bottom: 24px;
-            color: rgba(255, 255, 255, 0.8);
+            opacity: 0.8;
+            line-height: 1.5;
         }
         
-        .countdown {
+        .status {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 24px;
+            font-family: monospace;
             font-size: 14px;
-            color: rgba(255, 255, 255, 0.6);
-            margin-bottom: 24px;
+            text-align: left;
         }
         
-        .close-button {
-            background: #4CAF50;
+        .close-btn {
+            background: #007bff;
             color: white;
             border: none;
             padding: 12px 24px;
-            border-radius: 8px;
+            border-radius: 6px;
             font-size: 16px;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: background-color 0.2s;
         }
         
-        .close-button:hover {
-            background: #45a049;
-            transform: translateY(-2px);
+        .close-btn:hover {
+            background: #0056b3;
         }
         
-        .token-info {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 8px;
-            padding: 16px;
-            margin: 20px 0;
-            font-family: monospace;
-            font-size: 12px;
-            text-align: left;
-            max-height: 200px;
-            overflow-y: auto;
+        .error {
+            color: #ff6b6b;
         }
         
-        @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% {
-                transform: translateY(0);
-            }
-            40% {
-                transform: translateY(-10px);
-            }
-            60% {
-                transform: translateY(-5px);
-            }
-        }
-        
-        .loading {
-            display: none;
-            margin-top: 20px;
-        }
-        
-        .spinner {
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            border-top: 3px solid #4CAF50;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 16px;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .success {
+            color: #51cf66;
         }
     </style>
 </head>
 <body>
-    <div class="success-container">
-        <div class="success-icon">✅</div>
-        <h1 class="success-title">Authentication Successful!</h1>
-        <p class="success-message">
-            You have been successfully authenticated with Keycloak.<br>
-            You can now close this window and return to Neuron.
-        </p>
-        
-        <div class="countdown" id="countdown">
-            This window will close automatically in <span id="timer">5</span> seconds...
+    <div class="container">
+        <div class="success-icon">🔐</div>
+        <div class="title">Authentication Successful!</div>
+        <div class="message">
+                                    You have been successfully authenticated with Neuron Co-Pilot.<br>
+                        This window will close automatically and you can start chatting.
         </div>
         
-        <button class="close-button" onclick="closeWindow()">
-            Close Window Now
-        </button>
-        
-        <div class="loading" id="loading">
-            <div class="spinner"></div>
-            <p>Processing authentication...</p>
+        <div class="status" id="status">
+            Processing authentication...
         </div>
         
-        <div class="token-info" id="tokenInfo" style="display: none;">
-            <strong>Token Information:</strong><br>
-            <div id="tokenDetails"></div>
-        </div>
+        <button class="close-btn" onclick="closeWindow()">Close Window</button>
     </div>
 
     <script>
-        // Extract tokens from URL parameters
-        const urlParams = new URLSearchParams(window.location.search);
-        const accessToken = urlParams.get('access_token');
-        const refreshToken = urlParams.get('refresh_token');
-        const expiresIn = urlParams.get('expires_in');
-        const tokenType = urlParams.get('token_type');
-        
-        // Store tokens in localStorage for the widget to access
-        if (accessToken) {
-            localStorage.setItem('chat-token', accessToken);
-            if (refreshToken) {
-                localStorage.setItem('refresh-token', refreshToken);
-            }
-            if (expiresIn) {
-                const expiresAt = Date.now() + (parseInt(expiresIn) * 1000);
-                localStorage.setItem('token-expires-at', expiresAt);
-            }
-            if (tokenType) {
-                localStorage.setItem('token-type', tokenType);
-            }
+        // Parse URL parameters to extract tokens
+        function parseTokens() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const hashParams = new URLSearchParams(window.location.hash.substring(1));
             
-            console.log('✅ [AUTH SUCCESS] Tokens stored in localStorage');
-            console.log('✅ [AUTH SUCCESS] Access token length:', accessToken.length);
+            // Check both query parameters and hash for tokens
+            const accessToken = urlParams.get('access_token') || hashParams.get('access_token');
+            const refreshToken = urlParams.get('refresh_token') || hashParams.get('refresh_token');
+            const tokenType = urlParams.get('token_type') || hashParams.get('token_type');
+            const expiresIn = urlParams.get('expires_in') || hashParams.get('expires_in');
             
-            // Show token info in debug mode
-            if (window.location.search.includes('debug=true')) {
-                document.getElementById('tokenInfo').style.display = 'block';
-                document.getElementById('tokenDetails').innerHTML = `
-                    Access Token: ${accessToken.substring(0, 20)}...<br>
-                    Token Type: ${tokenType}<br>
-                    Expires In: ${expiresIn} seconds<br>
-                    Refresh Token: ${refreshToken ? 'Yes' : 'No'}
-                `;
-            }
-        } else {
-            console.error('❌ [AUTH SUCCESS] No access token found in URL');
+            return { accessToken, refreshToken, tokenType, expiresIn };
         }
         
-        // Auto-close countdown
-        let countdown = 5;
-        const timerElement = document.getElementById('timer');
-        const countdownElement = document.getElementById('countdown');
-        
-        const countdownInterval = setInterval(() => {
-            countdown--;
-            timerElement.textContent = countdown;
-            
-            if (countdown <= 0) {
-                clearInterval(countdownInterval);
-                closeWindow();
-            }
-        }, 1000);
-        
-        // Function to close the window
-        function closeWindow() {
-            // Try to close the window
-            if (window.opener) {
-                // If opened from another window, close this one
-                window.close();
-            } else {
-                // If not opened from another window, just close the window
-                // Don't go back in history as it might contain auth callback URLs
-                try {
-                    window.close();
-                } catch (e) {
-                    // If we can't close, redirect to a safe location
-                    // Redirect to the main Node-RED app without any auth parameters
-                    const baseUrl = window.location.origin;
-                    window.location.href = baseUrl;
-                }
-            }
-        }
-        
-        // Listen for messages from parent window
-        window.addEventListener('message', function(event) {
-            if (event.data === 'close-auth-window') {
-                closeWindow();
-            }
-        });
-        
-        // Notify parent window that authentication is complete
-        if (window.opener) {
+        // Store tokens in localStorage
+        function storeTokens(tokens) {
             try {
-                window.opener.postMessage('authentication-complete', '*');
-            } catch (e) {
-                console.log('Could not notify parent window:', e);
+                if (tokens.accessToken) {
+                    localStorage.setItem('chat-token', tokens.accessToken);
+                    console.log('✅ [AUTH] Access token stored');
+                }
+                
+                if (tokens.refreshToken) {
+                    localStorage.setItem('refresh-token', tokens.refreshToken);
+                    console.log('✅ [AUTH] Refresh token stored');
+                }
+                
+                if (tokens.tokenType) {
+                    localStorage.setItem('token-type', tokens.tokenType);
+                    console.log('✅ [AUTH] Token type stored');
+                }
+                
+                if (tokens.expiresIn) {
+                    const expiresAt = Date.now() + (parseInt(tokens.expiresIn) * 1000);
+                    localStorage.setItem('token-expires-at', expiresAt);
+                    console.log('✅ [AUTH] Token expiry stored:', new Date(expiresAt).toLocaleString());
+                }
+                
+                return true;
+            } catch (error) {
+                console.error('❌ [AUTH] Error storing tokens:', error);
+                return false;
             }
         }
         
-        // Show loading state briefly
-        document.getElementById('loading').style.display = 'block';
-        setTimeout(() => {
-            document.getElementById('loading').style.display = 'none';
-        }, 2000);
+        // Update status display
+        function updateStatus(message, type = 'info') {
+            const statusEl = document.getElementById('status');
+            if (statusEl) {
+                statusEl.textContent = message;
+                statusEl.className = `status ${type}`;
+            }
+        }
+        
+        // Close window and notify parent
+        function closeWindow() {
+            // Notify parent window that authentication is complete
+            if (window.opener) {
+                window.opener.postMessage('authentication-complete', '*');
+            }
+            
+            // Close this window
+            window.close();
+        }
+        
+        // Main authentication handling
+        async function handleAuthentication() {
+            try {
+                updateStatus('Extracting authentication tokens...', 'info');
+                
+                const tokens = parseTokens();
+                console.log('🔐 [AUTH] Parsed tokens:', {
+                    hasAccessToken: !!tokens.accessToken,
+                    hasRefreshToken: !!tokens.refreshToken,
+                    tokenType: tokens.tokenType,
+                    expiresIn: tokens.expiresIn
+                });
+                
+                if (!tokens.accessToken) {
+                    updateStatus('❌ No access token found in URL. Authentication may have failed.', 'error');
+                    return;
+                }
+                
+                updateStatus('Storing authentication tokens...', 'info');
+                
+                const storeSuccess = storeTokens(tokens);
+                if (!storeSuccess) {
+                    updateStatus('❌ Failed to store authentication tokens.', 'error');
+                    return;
+                }
+                
+                updateStatus('✅ Authentication tokens stored successfully!\n\nAccess Token: ' + 
+                           tokens.accessToken.substring(0, 20) + '...\n' +
+                           'Token Type: ' + (tokens.tokenType || 'Bearer') + '\n' +
+                           'Expires In: ' + (tokens.expiresIn || 'Unknown') + ' seconds', 'success');
+                
+                // Auto-close after 3 seconds
+                setTimeout(() => {
+                    updateStatus('Closing window automatically...', 'info');
+                    setTimeout(closeWindow, 1000);
+                }, 3000);
+                
+            } catch (error) {
+                console.error('❌ [AUTH] Authentication handling error:', error);
+                updateStatus('❌ Error during authentication: ' + error.message, 'error');
+            }
+        }
+        
+        // Start authentication handling when page loads
+        document.addEventListener('DOMContentLoaded', handleAuthentication);
+        
+        // Also try to handle if DOM is already loaded
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', handleAuthentication);
+        } else {
+            handleAuthentication();
+        }
     </script>
 </body>
 </html>

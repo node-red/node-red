@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NeuronGPT Chat</title>
+    <title>Neuron Co-Pilot Chat</title>
     <style>
         * {
             margin: 0;
@@ -24,34 +24,37 @@
             flex-direction: column;
             height: 100vh;
             background: #1D1D1D;
+            border: 1px solid #333;
+            border-radius: 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            overflow: hidden;
         }
         
         .chat-header {
             background: #1D1D1D;
             color: white;
-            padding: 16px 24px;
-            border-bottom: 1px solid #333;
+            padding: 4px 12px;
+            border-radius: 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
             font-weight: 600;
-            font-size: 18px;
+            font-size: 14px;
             flex-shrink: 0;
-        }
-        
-        .chat-header-title {
-            display: flex;
-            align-items: center;
-            font-size: 18px;
+            min-height: 32px;
+            position: relative;
+            border-bottom: 1px solid #333;
         }
         
         .chat-messages {
             flex: 1;
-            padding: 16px;
+            padding: 2px;
             overflow-y: auto;
             background: #1D1D1D;
+            max-height: none;
             scrollbar-width: thin;
             scrollbar-color: #c1c1c1 #1D1D1D;
+            margin-bottom: 60px;
         }
         
         .chat-messages::-webkit-scrollbar {
@@ -73,21 +76,29 @@
         }
         
         .chat-input-area {
-            padding: 16px 24px;
+            padding: 4px;
             border-top: 1px solid #333;
             background: #1D1D1D;
             display: flex;
-            gap: 12px;
+            gap: 8px;
             flex-shrink: 0;
+            min-height: 40px;
+            width: 100%;
+            box-sizing: border-box;
+            position: absolute;
+            bottom: 32px;
+            left: 0;
+            right: 0;
         }
         
         .chat-input {
             flex: 1;
-            padding: 12px 16px;
+            padding: 8px 12px;
             border: 1px solid #ddd;
-            border-radius: 6px;
-            font-size: 16px;
+            border-radius: 4px;
+            font-size: 14px;
             outline: none;
+            min-width: 0;
             background: #1D1D1D;
             color: white;
         }
@@ -97,64 +108,40 @@
         }
         
         .chat-send {
-            padding: 12px 24px;
+            padding: 8px 12px;
             background: #007bff;
             color: white;
             border: none;
-            border-radius: 6px;
-            font-size: 16px;
+            border-radius: 4px;
             cursor: pointer;
-            transition: background-color 0.3s ease;
+            font-size: 14px;
+            transition: background-color 0.2s;
+            flex-shrink: 0;
+            white-space: nowrap;
         }
         
         .chat-send:hover {
             background: #0056b3;
         }
         
-        .chat-message {
-            margin-bottom: 16px;
-            padding: 12px 16px;
-            border-radius: 8px;
-            max-width: 80%;
-            word-wrap: break-word;
-            font-size: 14px;
-            line-height: 1.5;
-        }
-        
-        .chat-user {
-            background: #007bff;
-            color: white;
-            margin-left: auto;
-            text-align: right;
-        }
-        
-        .chat-assistant {
-            background: #1D1D1D;
-            color: white;
-            border: 1px solid #4a5568;
-        }
-        
-        .chat-system {
-            background: #e8f5e8;
-            color: #2d5a2d;
-            border: 1px solid #c3e6c3;
-            text-align: center;
-            font-style: italic;
-            margin: 0 auto;
-        }
-        
-        .message-time {
-            font-size: 11px;
-            opacity: 0.7;
-            margin-top: 6px;
-        }
+
         
         .chat-status {
-            padding: 8px 24px;
+            text-align: center;
+            padding: 4px 3px;
+            border-top: 1px solid #333;
             background: #1D1D1D;
-            color: #a0aec0;
-            font-size: 12px;
-            border-top: 1px solid #4a5568;
+            flex-shrink: 0;
+            min-height: 16px;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+        }
+        
+        .chat-status small {
+            font-size: 11px;
+            color: #666;
         }
         
         /* Typing animation */
@@ -180,7 +167,7 @@
         em { font-style: italic; }
         
         pre {
-            background: #1D1D1D;
+            background: #2d3748;
             color: #e2e8f0;
             padding: 12px;
             border-radius: 6px;
@@ -191,7 +178,7 @@
         }
         
         code {
-            background: #1D1D1D;
+            background: #2d3748;
             color: #e2e8f0;
             padding: 2px 6px;
             border-radius: 4px;
@@ -220,12 +207,12 @@
 <body>
     <div class="chat-container">
         <div class="chat-header">
-            <div class="chat-header-title">
-                <svg width="24" height="24" viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg" style="margin-right: 10px;">
+            <span>
+                <svg width="20" height="20" viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg" style="margin-right: 8px; vertical-align: middle;">
                     <path d="M116.736 373.991C116.736 373.991 117.296 250.322 188.729 231.521C289.649 204.96 297.03 397.603 398.286 371.564C482.834 349.821 483.029 229 483.029 229" stroke="white" stroke-width="40.6992" stroke-linecap="square"/>
                 </svg>
-                <span>NeuronGPT Chat</span>
-            </div>
+                Neuron Co-Pilot
+            </span>
             <button onclick="window.close()" style="background: none; border: none; color: white; font-size: 18px; cursor: pointer; padding: 8px;">✕</button>
         </div>
         <div class="chat-messages" id="chat-messages">
@@ -236,48 +223,586 @@
             <button class="chat-send" id="chat-send">Send</button>
         </div>
         <div class="chat-status">
-            <small>Chat window - Original window will be restored when you close this</small>
+            <small id="status-text">Chat window - Original window will be restored when you close this</small>
         </div>
     </div>
     
     <script>
-        // Load chat data from localStorage
-        function loadChatData() {
+        // User context management functions
+        function getUserIdFromToken() {
             try {
-                const chatData = localStorage.getItem('neuron-chat-widget-data');
-                if (chatData) {
-                    const parsedData = JSON.parse(chatData);
-                    console.log('📱 [DEDICATED CHAT] Loaded chat data:', parsedData);
-                    
-                    // Load chat history if available (new format)
-                    if (parsedData.chatHistory && Array.isArray(parsedData.chatHistory)) {
-                        console.log('📱 [DEDICATED CHAT] Loading', parsedData.chatHistory.length, 'messages from history');
-                        const messagesContainer = document.getElementById('chat-messages');
-                        if (messagesContainer) {
-                            messagesContainer.innerHTML = '';
-                            parsedData.chatHistory.forEach(message => {
-                                addMessage(message.content, message.role);
-                            });
-                        }
-                    }
-                    // Fallback to old format
-                    else if (parsedData.messages && parsedData.messages.length > 0) {
-                        console.log('📱 [DEDICATED CHAT] Loading', parsedData.messages.length, 'messages from old format');
-                        const messagesContainer = document.getElementById('chat-messages');
-                        if (messagesContainer) {
-                            messagesContainer.innerHTML = '';
-                            parsedData.messages.forEach(msg => {
-                                addMessage(msg.text, msg.sender);
-                            });
-                        }
-                    }
+                const token = localStorage.getItem('chat-token');
+                if (!token) {
+                    console.log('[USER DATA] No token found, using default user');
+                    return 'default';
+                }
+                
+                // Parse JWT token to extract user ID
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                const userId = payload.sub || payload.user_id || payload.id;
+                
+                if (userId) {
+                    console.log('[USER DATA] Extracted user ID from token:', userId);
+                    return userId;
+                } else {
+                    console.log('[USER DATA] No user ID in token payload, using default');
+                    return 'default';
                 }
             } catch (error) {
-                console.error('�� [NEW WINDOW] Error loading chat data:', error);
+                console.error('[USER DATA] Error parsing token:', error);
+                return 'default';
             }
         }
         
-        // Enhanced markdown parser for AI responses with better spacing control
+        function getUserStorageKey(baseKey) {
+            const userId = getUserIdFromToken();
+            const userKey = `${baseKey}-${userId}`;
+            console.log('[USER DATA] Using storage key:', userKey, 'for user:', userId);
+            return userKey;
+        }
+        
+        function getUserData(dataType) {
+            const key = getUserStorageKey('neuron-chat-widget-data');
+            try {
+                const data = localStorage.getItem(key);
+                if (data) {
+                    const parsed = JSON.parse(data);
+                    console.log(`[USER DATA] Retrieved ${dataType} for user:`, getUserIdFromToken());
+                    console.log(`[USER DATA] Storage key used:`, key);
+                    console.log(`[USER DATA] Data size:`, data.length, 'characters');
+                    return parsed;
+                } else {
+                    console.log(`[USER DATA] No data found for key:`, key);
+                }
+            } catch (error) {
+                console.error('[USER DATA] Error reading user data:', error);
+            }
+            return null;
+        }
+        
+        function setUserData(dataType, data) {
+            const key = getUserStorageKey('neuron-chat-widget-data');
+            try {
+                localStorage.setItem(key, JSON.stringify(data));
+                console.log(`[USER DATA] Storing ${dataType} for user:`, getUserIdFromToken());
+            } catch (error) {
+                console.error('[USER DATA] Error saving user data:', error);
+            }
+        }
+        
+        // Error handling and UX functions
+        function checkServerHealth() {
+            return new Promise(async (resolve) => {
+                try {
+                    const response = await fetch(`${CONFIG.serverUrl}${CONFIG.healthEndpoint}`, {
+                        method: 'GET',
+                        timeout: 5000
+                    });
+                    const isHealthy = response.ok;
+                    console.log('[SERVER HEALTH] Server health check:', isHealthy ? '✅ Healthy' : '❌ Unhealthy');
+                    resolve(isHealthy);
+                } catch (error) {
+                    console.log('[SERVER HEALTH] Server health check failed:', error.message);
+                    resolve(false);
+                }
+            });
+        }
+        
+        function showReconnectingBanner() {
+            // Remove existing banner if present
+            hideReconnectingBanner();
+            
+            const banner = document.createElement('div');
+            banner.id = 'neuron-reconnecting-banner';
+            banner.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                background: #f39c12;
+                color: white;
+                text-align: center;
+                padding: 12px;
+                font-size: 14px;
+                font-weight: 600;
+                z-index: 10000;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            `;
+            banner.innerHTML = '🔄 Reconnecting to server...';
+            
+            document.body.appendChild(banner);
+            console.log('[RECONNECTION] Reconnecting banner displayed');
+        }
+        
+        function hideReconnectingBanner() {
+            const banner = document.getElementById('neuron-reconnecting-banner');
+            if (banner) {
+                banner.remove();
+                console.log('[RECONNECTION] Reconnecting banner hidden');
+            }
+        }
+        
+        function clearUserData(userId) {
+            try {
+                // Remove user-specific chat data
+                const chatKey = `neuron-chat-widget-data-${userId}`;
+                localStorage.removeItem(chatKey);
+                
+                // Remove other user-specific data if any
+                const keysToRemove = [];
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key && key.includes(`-${userId}`)) {
+                        keysToRemove.push(key);
+                    }
+                }
+                
+                keysToRemove.forEach(key => {
+                    localStorage.removeItem(key);
+                    console.log(`[USER DATA] Removed user data key: ${key}`);
+                });
+                
+                console.log(`[USER DATA] Cleared all data for user: ${userId}`);
+            } catch (error) {
+                console.error('[USER DATA] Error clearing user data:', error);
+            }
+        }
+        
+        function handleAuthenticationFailure() {
+            const userId = getUserIdFromToken();
+            console.log('[AUTH] Authentication failure detected, clearing user data for:', userId);
+            
+            // Clear user-specific data
+            clearUserData(userId);
+            
+            // Clear authentication tokens
+            localStorage.removeItem('chat-token');
+            localStorage.removeItem('refresh-token');
+            localStorage.removeItem('token-expires-at');
+            localStorage.removeItem('token-type');
+            
+            // Show authentication required message
+            const messagesContainer = document.getElementById('chat-messages');
+            if (messagesContainer) {
+                const authMessage = document.createElement('div');
+                authMessage.className = 'chat-message chat-system';
+                authMessage.innerHTML = `
+                    <div class="message-content">
+                        🔐 Authentication required. Please log in again to continue.
+                    </div>
+                    <div class="message-time">${new Date().toLocaleTimeString()}</div>
+                `;
+                messagesContainer.appendChild(authMessage);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+            
+            console.log('[AUTH] User forced back to login state');
+        }
+        
+        // Debug function to check localStorage data
+        function debugLocalStorage() {
+            console.log('🔍 [DEBUG] Checking localStorage data...');
+            const userId = getUserIdFromToken();
+            const key = getUserStorageKey('neuron-chat-widget-data');
+            
+            console.log('🔍 [DEBUG] User ID:', userId);
+            console.log('🔍 [DEBUG] Storage key:', key);
+            
+            // Check all localStorage keys
+            console.log('🔍 [DEBUG] All localStorage keys:');
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.includes('neuron-chat-widget-data')) {
+                    const data = localStorage.getItem(key);
+                    console.log(`🔍 [DEBUG] Key: ${key}, Size: ${data ? data.length : 0} chars`);
+                    if (data) {
+                        try {
+                            const parsed = JSON.parse(data);
+                            console.log(`🔍 [DEBUG] Data structure:`, {
+                                hasMessages: !!parsed.messages,
+                                messageCount: parsed.messages ? parsed.messages.length : 0,
+                                hasChatHistory: !!parsed.chatHistory,
+                                chatHistoryCount: parsed.chatHistory ? parsed.chatHistory.length : 0
+                            });
+                        } catch (e) {
+                            console.log(`🔍 [DEBUG] Data is not valid JSON`);
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Enhanced debugging function to compare data between windows
+        function debugCrossWindowSync() {
+            console.log('🔍 [CROSS-WINDOW DEBUG] Starting cross-window sync analysis...');
+            
+            const userId = getUserIdFromToken();
+            const storageKey = getUserStorageKey('neuron-chat-widget-data');
+            
+            console.log('🔍 [CROSS-WINDOW DEBUG] Current window user ID:', userId);
+            console.log('🔍 [CROSS-WINDOW DEBUG] Current window storage key:', storageKey);
+            
+            // Try to get data from parent window if available
+            if (window.opener && !window.opener.closed) {
+                try {
+                    console.log('🔍 [CROSS-WINDOW DEBUG] Parent window available, checking parent data...');
+                    
+                    // Try to get parent window's user ID and storage key
+                    if (window.opener.getUserIdFromToken && typeof window.opener.getUserIdFromToken === 'function') {
+                        const parentUserId = window.opener.getUserIdFromToken();
+                        console.log('🔍 [CROSS-WINDOW DEBUG] Parent window user ID:', parentUserId);
+                        
+                        if (parentUserId !== userId) {
+                            console.error('❌ [CROSS-WINDOW DEBUG] USER ID MISMATCH! Parent:', parentUserId, 'Current:', userId);
+                        } else {
+                            console.log('✅ [CROSS-WINDOW DEBUG] User IDs match between windows');
+                        }
+                    } else {
+                        console.log('🔍 [CROSS-WINDOW DEBUG] Parent window does not have getUserIdFromToken function');
+                    }
+                    
+                    // Try to get parent window's storage key
+                    if (window.opener.getUserStorageKey && typeof window.opener.getUserStorageKey === 'function') {
+                        const parentStorageKey = window.opener.getUserStorageKey('neuron-chat-widget-data');
+                        console.log('🔍 [CROSS-WINDOW DEBUG] Parent window storage key:', parentStorageKey);
+                        
+                        if (parentStorageKey !== storageKey) {
+                            console.error('❌ [CROSS-WINDOW DEBUG] STORAGE KEY MISMATCH! Parent:', parentStorageKey, 'Current:', storageKey);
+                        } else {
+                            console.log('✅ [CROSS-WINDOW DEBUG] Storage keys match between windows');
+                        }
+                    } else {
+                        console.log('🔍 [CROSS-WINDOW DEBUG] Parent window does not have getUserStorageKey function');
+                    }
+                    
+                    // Try to get parent window's chat data
+                    if (window.opener.getUserData && typeof window.opener.getUserData === 'function') {
+                        const parentChatData = window.opener.getUserData('chat');
+                        console.log('🔍 [CROSS-WINDOW DEBUG] Parent window chat data:', parentChatData);
+                        
+                        const currentChatData = getUserData('chat');
+                        console.log('🔍 [CROSS-WINDOW DEBUG] Current window chat data:', currentChatData);
+                        
+                        if (JSON.stringify(parentChatData) !== JSON.stringify(currentChatData)) {
+                            console.error('❌ [CROSS-WINDOW DEBUG] CHAT DATA MISMATCH between windows!');
+                            console.log('🔍 [CROSS-WINDOW DEBUG] Parent data keys:', parentChatData ? Object.keys(parentChatData) : 'null');
+                            console.log('🔍 [CROSS-WINDOW DEBUG] Current data keys:', currentChatData ? Object.keys(currentChatData) : 'null');
+                        } else {
+                            console.log('✅ [CROSS-WINDOW DEBUG] Chat data matches between windows');
+                        }
+                    } else {
+                        console.log('🔍 [CROSS-WINDOW DEBUG] Parent window does not have getUserData function');
+                    }
+                    
+                } catch (error) {
+                    console.error('🔍 [CROSS-WINDOW DEBUG] Error checking parent window:', error);
+                }
+            } else {
+                console.log('🔍 [CROSS-WINDOW DEBUG] No parent window available for comparison');
+            }
+            
+            // Check if we can access the parent window's localStorage directly
+            try {
+                if (window.opener && !window.opener.closed) {
+                    console.log('🔍 [CROSS-WINDOW DEBUG] Attempting to access parent localStorage directly...');
+                    
+                    // This will fail due to same-origin policy, but let's see what error we get
+                    const parentLocalStorage = window.opener.localStorage;
+                    console.log('🔍 [CROSS-WINDOW DEBUG] Parent localStorage accessible:', !!parentLocalStorage);
+                }
+            } catch (error) {
+                console.log('🔍 [CROSS-WINDOW DEBUG] Cannot access parent localStorage (expected due to same-origin policy):', error.message);
+            }
+        }
+        
+        // Test function to verify data persistence
+        function testDataPersistence() {
+            console.log('🧪 [TEST] Testing data persistence in dedicated window...');
+            
+            // Test 1: Check current data
+            const currentData = getUserData('chat');
+            console.log('🧪 [TEST] Current chat data:', currentData);
+            
+            // Test 2: Try to load chat data
+            console.log('🧪 [TEST] Attempting to load chat data...');
+            loadChatData();
+            
+            // Test 3: Check if messages were loaded
+            const messagesContainer = document.getElementById('chat-messages');
+            if (messagesContainer) {
+                const messageCount = messagesContainer.children.length;
+                console.log('🧪 [TEST] Messages container has', messageCount, 'children');
+                
+                if (messageCount > 0) {
+                    console.log('✅ [TEST] Chat persistence test PASSED - messages loaded');
+                    return true;
+                } else {
+                    console.log('❌ [TEST] Chat persistence test FAILED - no messages loaded');
+                    return false;
+                }
+            } else {
+                console.log('❌ [TEST] Chat persistence test FAILED - messages container not found');
+                return false;
+            }
+        }
+        
+        // Test function to verify user ID consistency
+        function testUserIdConsistency() {
+            console.log('🧪 [TEST] Testing user ID consistency...');
+            
+            const userId1 = getUserIdFromToken();
+            console.log('🧪 [TEST] First call to getUserIdFromToken():', userId1);
+            
+            // Wait a moment and call again
+            setTimeout(() => {
+                const userId2 = getUserIdFromToken();
+                console.log('🧪 [TEST] Second call to getUserIdFromToken():', userId2);
+                
+                if (userId1 === userId2) {
+                    console.log('✅ [TEST] User ID consistency test PASSED - IDs match');
+                } else {
+                    console.error('❌ [TEST] User ID consistency test FAILED - IDs differ:', userId1, 'vs', userId2);
+                }
+            }, 1000);
+            
+            return userId1;
+        }
+        
+        // Test function to verify storage key generation
+        function testStorageKeyGeneration() {
+            console.log('🧪 [TEST] Testing storage key generation...');
+            
+            const userId = getUserIdFromToken();
+            const storageKey1 = getUserStorageKey('neuron-chat-widget-data');
+            const storageKey2 = getUserStorageKey('neuron-chat-widget-data');
+            
+            console.log('🧪 [TEST] User ID:', userId);
+            console.log('🧪 [TEST] Storage key 1:', storageKey1);
+            console.log('🧪 [TEST] Storage key 2:', storageKey2);
+            
+            if (storageKey1 === storageKey2) {
+                console.log('✅ [TEST] Storage key generation test PASSED - keys consistent');
+                return true;
+            } else {
+                console.error('❌ [TEST] Storage key generation test FAILED - keys inconsistent');
+                return false;
+            }
+        }
+        
+        // Test function to verify data loading and saving cycle
+        function testDataLoadSaveCycle() {
+            console.log('🧪 [TEST] Testing data load/save cycle...');
+            
+            // Step 1: Get current data
+            const originalData = getUserData('chat');
+            console.log('🧪 [TEST] Original data:', originalData);
+            
+            // Step 2: Create test data
+            const testData = {
+                messages: [
+                    {
+                        text: '🧪 Test message from dedicated window',
+                        sender: 'user',
+                        time: new Date().toLocaleTimeString(),
+                        timestamp: Date.now()
+                    }
+                ],
+                flowContext: { test: true },
+                timestamp: Date.now()
+            };
+            
+            // Step 3: Save test data
+            console.log('🧪 [TEST] Saving test data...');
+            setUserData('chat', testData);
+            
+            // Step 4: Verify data was saved
+            const savedData = getUserData('chat');
+            console.log('🧪 [TEST] Saved data:', savedData);
+            
+            if (JSON.stringify(savedData) === JSON.stringify(testData)) {
+                console.log('✅ [TEST] Data load/save cycle test PASSED');
+                return true;
+            } else {
+                console.error('❌ [TEST] Data load/save cycle test FAILED');
+                return false;
+            }
+        }
+        
+        // Cleanup function to handle dual storage issues
+        function cleanupDualStorage() {
+            console.log('🧹 [CLEANUP] Starting dual storage cleanup...');
+            
+            // Find all storage keys related to chat data
+            const allKeys = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.includes('neuron-chat-widget-data')) {
+                    allKeys.push(key);
+                }
+            }
+            
+            console.log('🔍 [CLEANUP] Found storage keys:', allKeys);
+            
+            if (allKeys.length <= 1) {
+                console.log('✅ [CLEANUP] No dual storage detected');
+                return true;
+            }
+            
+            // Find the key with the most messages (likely the correct one)
+            let bestKey = null;
+            let bestMessageCount = 0;
+            
+            allKeys.forEach(key => {
+                const data = localStorage.getItem(key);
+                if (data) {
+                    try {
+                        const parsed = JSON.parse(data);
+                        const messageCount = parsed.messages ? parsed.messages.length : 0;
+                        if (messageCount > bestMessageCount) {
+                            bestMessageCount = messageCount;
+                            bestKey = key;
+                        }
+                    } catch (e) {
+                        console.log(`🔍 [CLEANUP] Key ${key} has invalid JSON`);
+                    }
+                }
+            });
+            
+            if (bestKey && bestMessageCount > 0) {
+                console.log('🔍 [CLEANUP] Best key found:', bestKey, 'with', bestMessageCount, 'messages');
+                
+                // Copy data to the correct user-specific key
+                const correctKey = getUserStorageKey('neuron-chat-widget-data');
+                if (bestKey !== correctKey) {
+                    const bestData = localStorage.getItem(bestKey);
+                    localStorage.setItem(correctKey, bestData);
+                    console.log('🔧 [CLEANUP] Copied data to correct key:', correctKey);
+                    
+                    // Remove old keys
+                    allKeys.forEach(key => {
+                        if (key !== correctKey) {
+                            localStorage.removeItem(key);
+                            console.log('🗑️ [CLEANUP] Removed old key:', key);
+                        }
+                    });
+                    
+                    console.log('✅ [CLEANUP] Dual storage cleanup completed');
+                    return true;
+                }
+            }
+            
+            console.log('❌ [CLEANUP] Could not determine best key for cleanup');
+            return false;
+        }
+        
+        // Initialize server health monitoring
+        function initializeServerHealthMonitoring() {
+            console.log('[SERVER HEALTH] Initializing server health monitoring...');
+            
+            // Initial health check
+            checkServerHealth().then(isHealthy => {
+                if (!isHealthy) {
+                    showReconnectingBanner();
+                }
+            });
+            
+            // Set up periodic health monitoring (every 30 seconds)
+            setInterval(async () => {
+                const isHealthy = await checkServerHealth();
+                if (isHealthy) {
+                    hideReconnectingBanner();
+                } else {
+                    showReconnectingBanner();
+                }
+            }, 30000);
+            
+            console.log('[SERVER HEALTH] Server health monitoring initialized');
+        }
+        
+        // Load chat data from user-specific localStorage
+        function loadChatData() {
+            try {
+                console.log('📱 [DEDICATED CHAT] Starting to load chat data...');
+                
+                // Run cleanup to ensure no dual storage issues
+                if (typeof cleanupDualStorage === 'function') {
+                    console.log('🧹 [DEDICATED CHAT] Running dual storage cleanup before loading chat data...');
+                    cleanupDualStorage();
+                }
+                
+                // First, check if the messages container exists
+                const messagesContainer = document.getElementById('chat-messages');
+                if (!messagesContainer) {
+                    console.error('📱 [DEDICATED CHAT] Messages container not found!');
+                    return;
+                }
+                
+                // Get chat data from localStorage
+                const chatData = getUserData('chat');
+                console.log('📱 [DEDICATED CHAT] Retrieved chat data:', chatData);
+                
+                if (!chatData) {
+                    console.warn('📱 [DEDICATED CHAT] No chat data found in localStorage');
+                    return;
+                }
+                
+                // Clear existing messages first
+                messagesContainer.innerHTML = '';
+                console.log('📱 [DEDICATED CHAT] Cleared existing messages');
+                
+                if (chatData.messages && Array.isArray(chatData.messages)) {
+                    console.log('📱 [DEDICATED CHAT] Loading', chatData.messages.length, 'messages from messages array');
+                    
+                    chatData.messages.forEach((msg, index) => {
+                        console.log(`📱 [DEDICATED CHAT] Loading message ${index + 1}:`, msg);
+                        // Load existing messages without saving to localStorage (prevents duplication)
+                        addMessage(msg.text, msg.sender, false);
+                    });
+                    
+                    console.log('📱 [DEDICATED CHAT] Successfully loaded', chatData.messages.length, 'messages');
+                    
+                } else if (chatData.chatHistory && Array.isArray(chatData.chatHistory)) {
+                    // Handle legacy format
+                        console.log('📱 [DEDICATED CHAT] Migrating old chatHistory format to new messages format');
+                    const migratedData = {
+                        ...chatData,
+                        messages: chatData.chatHistory.map(message => ({
+                            text: message.content,
+                            sender: message.role,
+                            time: message.timestamp || new Date().toLocaleTimeString()
+                        }))
+                    };
+                        // Remove old format
+                    delete migratedData.chatHistory;
+                    
+                    // Save migrated data back to user-specific localStorage
+                    setUserData('chat', migratedData);
+                        console.log('📱 [DEDICATED CHAT] Migration completed, saved back to localStorage');
+                    
+                    // Load the migrated messages
+                    migratedData.messages.forEach((msg, index) => {
+                        console.log(`📱 [DEDICATED CHAT] Loading migrated message ${index + 1}:`, msg);
+                                addMessage(msg.text, msg.sender, false);
+                            });
+                    
+                    console.log('📱 [DEDICATED CHAT] Successfully loaded', migratedData.messages.length, 'migrated messages');
+                    
+                    } else {
+                    console.warn('📱 [DEDICATED CHAT] No valid messages found in chat data. Data structure:', chatData);
+                    console.log('📱 [DEDICATED CHAT] Available keys:', Object.keys(chatData));
+                }
+                
+                // Final verification
+                const finalMessageCount = messagesContainer.children.length;
+                console.log('📱 [DEDICATED CHAT] Final message count in container:', finalMessageCount);
+                
+            } catch (error) {
+                console.error('📱 [DEDICATED CHAT] Error loading chat data:', error);
+                console.error('📱 [DEDICATED CHAT] Error stack:', error.stack);
+            }
+        }
+        
+        // Professional markdown parser with proper list formatting and spacing
         function parseMarkdown(text) {
             if (!text || typeof text !== 'string') {
                 return text;
@@ -285,51 +810,212 @@
             
             let formatted = text;
             
-            // Headings (## Heading)
-            formatted = formatted.replace(/^##\s+(.+)$/gm, '<h3>$1</h3>');
-            formatted = formatted.replace(/^###\s+(.+)$/gm, '<h4>$1</h4>');
+            // Step 1: Handle code blocks first (before line processing)
+            formatted = formatted.replace(/```(\w+)?\n([\s\S]*?)```/g, '<pre style="background: #2d3748; color: #e2e8f0; padding: 12px; border-radius: 6px; margin: 12px 0; overflow-x: auto; font-family: monospace; font-size: 12px;">$2</pre>');
             
-            // Bold text (**text**)
-            formatted = formatted.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+            // Step 2: Handle headings
+            formatted = formatted.replace(/^##\s+(.+)$/gm, '<h3 style="margin: 20px 0 12px 0; font-size: 16px; font-weight: bold; color: inherit; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px;">$1</h3>');
+            formatted = formatted.replace(/^###\s+(.+)$/gm, '<h4 style="margin: 16px 0 8px 0; font-size: 14px; font-weight: bold; color: inherit;">$1</h4>');
             
-            // Italic text (*text*)
-            formatted = formatted.replace(/\*(.+?)\*/g, '<em>$1</em>');
+            // Step 3: Handle inline formatting
+            formatted = formatted.replace(/\*\*(.+?)\*\*/g, '<strong style="font-weight: bold;">$1</strong>');
+            formatted = formatted.replace(/\*(.+?)\*/g, '<em style="font-style: italic;">$1</em>');
+            formatted = formatted.replace(/`([^`]+)`/g, '<code style="background: #2d3748; color: #e2e8f0; padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 12px;">$1</code>');
             
-            // Numbered lists (1. item, 2. item, etc.)
-            formatted = formatted.replace(/^(\d+)\.\s+(.+)$/gm, '<div class="list-item"><span class="number">$1.</span>$2</div>');
+            // Step 4: Process line by line to handle lists properly
+            const lines = formatted.split('\n');
+            const processedLines = [];
+            let inList = false;
+            let listType = null;
             
-            // Bullet points (- item)
-            formatted = formatted.replace(/^-\s+(.+)$/gm, '<div class="list-item"><span class="bullet">•</span>$2</div>');
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i].trim();
+                
+                if (!line) {
+                    // Empty line - end current list if we're in one
+                    if (inList) {
+                        processedLines.push('</div>');
+                        inList = false;
+                        listType = null;
+                    }
+                    processedLines.push('<br>');
+                    continue;
+                }
+                
+                // Check for numbered list (1. item: description)
+                const numberedMatch = line.match(/^(\d+)\.\s*(.+?):\s*(.+)$/);
+                if (numberedMatch) {
+                    if (!inList || listType !== 'numbered') {
+                        if (inList) processedLines.push('</div>');
+                        processedLines.push('<div style="margin: 8px 0;">');
+                        inList = true;
+                        listType = 'numbered';
+                    }
+                    processedLines.push(`<div style="margin: 6px 0; padding-left: 20px; position: relative;">
+                        <span style="position: absolute; left: 0; font-weight: bold; color: white;">${numberedMatch[1]}.</span>
+                        <span style="font-weight: normal; color: white;">${numberedMatch[2]}:</span> ${numberedMatch[3]}
+                    </div>`);
+                    continue;
+                }
+                
+                // Check for numbered list with just title (1. item:)
+                const numberedTitleMatch = line.match(/^(\d+)\.\s*(.+?):\s*$/);
+                if (numberedTitleMatch) {
+                    if (!inList || listType !== 'numbered') {
+                        if (inList) processedLines.push('</div>');
+                        processedLines.push('<div style="margin: 8px 0;">');
+                        inList = true;
+                        listType = 'numbered';
+                    }
+                    processedLines.push(`<div style="margin: 6px 0; padding-left: 20px; position: relative;">
+                        <span style="position: absolute; left: 0; font-weight: bold; color: white;">${numberedTitleMatch[1]}.</span>
+                        <span style="font-weight: normal; color: white;">${numberedTitleMatch[2]}:</span>
+                    </div>`);
+                    continue;
+                }
+                
+                // Check for bullet points (- item: description)
+                const bulletMatch = line.match(/^-\s*(.+?):\s*(.+)$/);
+                if (bulletMatch) {
+                    if (!inList || listType !== 'bullet') {
+                        if (inList) processedLines.push('</div>');
+                        processedLines.push('<div style="margin: 8px 0;">');
+                        inList = true;
+                        listType = 'bullet';
+                    }
+                    processedLines.push(`<div style="margin: 6px 0; padding-left: 20px; position: relative;">
+                        <span style="position: absolute; left: 0; color: #718096;">•</span>
+                        <span style="font-weight: normal; color: white;">${bulletMatch[1]}:</span> ${bulletMatch[2]}
+                    </div>`);
+                    continue;
+                }
+                
+                // Check for bullet points with just title (- item:)
+                const bulletTitleMatch = line.match(/^-\s*(.+?):\s*$/);
+                if (bulletTitleMatch) {
+                    if (!inList || listType !== 'bullet') {
+                        if (inList) processedLines.push('</div>');
+                        processedLines.push('<div style="margin: 8px 0;">');
+                        inList = true;
+                        listType = 'bullet';
+                    }
+                    processedLines.push(`<div style="margin: 6px 0; padding-left: 20px; position: relative;">
+                        <span style="position: absolute; left: 0; color: #718096;">•</span>
+                        <span style="font-weight: normal; color: white;">${bulletTitleMatch[1]}:</span>
+                    </div>`);
+                    continue;
+                }
+                
+                // Check for simple numbered list (1. item)
+                const simpleNumberedMatch = line.match(/^(\d+)\.\s+(.+)$/);
+                if (simpleNumberedMatch) {
+                    if (!inList || listType !== 'numbered') {
+                        if (inList) processedLines.push('</div>');
+                        processedLines.push('<div style="margin: 8px 0;">');
+                        inList = true;
+                        listType = 'numbered';
+                    }
+                    processedLines.push(`<div style="margin: 6px 0; padding-left: 20px; position: relative;">
+                        <span style="position: absolute; left: 0; font-weight: bold; color: white;">${simpleNumberedMatch[1]}.</span>
+                        ${simpleNumberedMatch[2]}
+                    </div>`);
+                    continue;
+                }
+                
+                // Check for simple bullet point (- item)
+                const simpleBulletMatch = line.match(/^-\s+(.+)$/);
+                if (simpleBulletMatch) {
+                    if (!inList || listType !== 'bullet') {
+                        if (inList) processedLines.push('</div>');
+                        processedLines.push('<div style="margin: 8px 0;">');
+                        inList = true;
+                        listType = 'bullet';
+                    }
+                    processedLines.push(`<div style="margin: 6px 0; padding-left: 20px; position: relative;">
+                        <span style="position: absolute; left: 0; color: #718096;">•</span>
+                        ${simpleBulletMatch[1]}
+                    </div>`);
+                    continue;
+                }
+                
+                // Regular text line - end list if we were in one
+                if (inList) {
+                    processedLines.push('</div>');
+                    inList = false;
+                    listType = null;
+                }
+                
+                // Add regular paragraph
+                processedLines.push(`<p style="margin: 8px 0; line-height: 1.5;">${line}</p>`);
+            }
             
-            // Code blocks (```json)
-            formatted = formatted.replace(/```(\w+)?\n([\s\S]*?)```/g, '<pre>$2</pre>');
+            // Close any open list
+            if (inList) {
+                processedLines.push('</div>');
+            }
             
-            // Inline code (`code`)
-            formatted = formatted.replace(/`([^`]+)`/g, '<code>$1</code>');
+            // Join lines and clean up
+            formatted = processedLines.join('');
             
-            // Handle spacing more intelligently
-            // First, normalize multiple consecutive newlines to exactly 2 newlines (for paragraph separation)
-            formatted = formatted.replace(/\n{3,}/g, '\n\n');
+            // Clean up consecutive <br> tags and <p> tags
+            formatted = formatted.replace(/(<br>){2,}/g, '<br>');
+            formatted = formatted.replace(/(<p[^>]*>.*?<\/p>){2,}/g, (match) => {
+                return match.replace(/<\/p>\s*<p[^>]*>/g, '</p><p style="margin: 8px 0; line-height: 1.5;">');
+            });
             
-            // Replace double newlines with single <br> for paragraph separation
-            formatted = formatted.replace(/\n\n/g, '<br>');
-            
-            // Replace single newlines with spaces (to keep list items and inline content together)
-            formatted = formatted.replace(/\n/g, ' ');
-            
-            // Clean up any double spaces that might have been created
-            formatted = formatted.replace(/\s{2,}/g, ' ');
+            // DEBUG: Log the final formatted HTML
+            console.log('🔍 [DEDICATED CHAT] Final formatted HTML:', formatted);
             
             return formatted;
         }
         
-        // Add message to chat with markdown parsing
-        function addMessage(text, sender) {
+        // Add message to chat with inline styling - matches main widget
+        function addMessage(text, sender, saveToStorage = true) {
             const messages = document.getElementById('chat-messages');
-            if (!messages) return;
+            if (!messages) {
+                return;
+            }
             
             const msgDiv = document.createElement('div');
-            msgDiv.className = 'chat-message chat-' + sender;
+            msgDiv.className = `chat-message chat-${sender}`;
+            
+            // Apply message styling inline - matches main widget exactly
+            msgDiv.style.cssText = `
+                margin-bottom: 12px;
+                padding: 8px 12px;
+                border-radius: 8px;
+                max-width: 80%;
+                word-wrap: break-word;
+                font-size: 13px;
+                line-height: 1.4;
+            `;
+            
+            // DEBUG: Log the message being processed
+            console.log('🔍 [DEDICATED CHAT] Processing message:', { text, sender });
+            
+            if (sender === 'user') {
+                msgDiv.style.cssText += `
+                    background: #007bff;
+                    color: white;
+                    margin-left: auto;
+                    text-align: right;
+                `;
+            } else if (sender === 'system') {
+                msgDiv.style.cssText += `
+                    background: #e8f5e8;
+                    color: #2d5a2d;
+                    border: 1px solid rgba(195, 230, 195, 0.3);
+                    text-align: center;
+                    font-style: italic;
+                    margin: 0 auto;
+                `;
+            } else {
+                msgDiv.style.cssText += `
+                    background: transparent;
+                    color: white;
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                `;
+            }
             
             // Parse markdown for AI responses (assistant/system messages)
             let formattedText = text;
@@ -337,45 +1023,88 @@
                 formattedText = parseMarkdown(text);
             }
             
-            msgDiv.innerHTML = '<div class="message-content">' + formattedText + '</div><div class="message-time">' + new Date().toLocaleTimeString() + '</div>';
+            msgDiv.innerHTML = `
+                <div class="message-content">${formattedText}</div>
+                <div class="message-time" style="font-size: 10px; opacity: 0.7; margin-top: 4px;">
+                    ${new Date().toLocaleTimeString()}
+                </div>
+            `;
+            
+            // DEBUG: Log the final message HTML
+            console.log('🔍 [DEDICATED CHAT] Final message HTML:', msgDiv.outerHTML);
             
             messages.appendChild(msgDiv);
             messages.scrollTop = messages.scrollHeight;
             
-            // Save message to localStorage for sync with main widget
+            // Save message to localStorage for sync with main widget (only if saveToStorage is true)
+            if (saveToStorage) {
             saveMessageToLocalStorage(text, sender);
+            }
         }
         
         // Save message to localStorage for synchronization
         function saveMessageToLocalStorage(text, sender) {
             try {
-                const chatData = localStorage.getItem('neuron-chat-widget-data') || '{}';
-                const parsedData = JSON.parse(chatData);
+                // Get existing data from the correct storage key
+                const key = getUserStorageKey('neuron-chat-widget-data');
+                let existingData = localStorage.getItem(key);
+                let parsedData = {};
                 
-                // Initialize chat history if it doesn't exist
-                if (!parsedData.chatHistory) {
-                    parsedData.chatHistory = [];
+                if (existingData) {
+                    try {
+                        parsedData = JSON.parse(existingData);
+                    } catch (e) {
+                        console.log('🧹 [DEDICATED CHAT] Error parsing existing data, starting fresh');
+                        parsedData = { messages: [], flowContext: {}, timestamp: Date.now() };
+                    }
+                } else {
+                    parsedData = { messages: [], flowContext: {}, timestamp: Date.now() };
                 }
                 
-                // Add new message
+                // Clean up data structure - ensure we only have the new format
+                if (parsedData.chatHistory) {
+                    console.log('🧹 [DEDICATED CHAT] Cleaning up old chatHistory format');
+                    delete parsedData.chatHistory;
+                }
+                
+                // CRITICAL: Save the formatted HTML content for proper display in both windows
+                // This ensures consistent formatting when syncing between windows
+                let formattedText = text;
+                
+                // For AI responses, format the text before saving
+                if (sender === 'assistant' || sender === 'system') {
+                    formattedText = parseMarkdown(text);
+                }
+                
+                console.log('🔍 [DEDICATED CHAT] Original text:', text);
+                console.log('🔍 [DEDICATED CHAT] Formatted text:', formattedText);
+                
+                // Add new message - use same format as main widget
                 const message = {
-                    role: sender === 'user' ? 'user' : 'assistant',
-                    content: text,
-                    timestamp: new Date().toISOString(),
-                    type: 'message'
+                    text: formattedText, // Save formatted HTML for consistent display
+                    sender: sender === 'user' ? 'user' : 'assistant',
+                    time: new Date().toLocaleTimeString(),
+                    timestamp: Date.now() // Add timestamp for proper sorting
                 };
                 
-                parsedData.chatHistory.push(message);
-                
-                // Keep only last 50 messages to prevent localStorage from getting too large
-                if (parsedData.chatHistory.length > 50) {
-                    parsedData.chatHistory = parsedData.chatHistory.slice(-50);
+                // Initialize messages array if it doesn't exist
+                if (!parsedData.messages) {
+                    parsedData.messages = [];
                 }
                 
-                // Save back to localStorage
-                localStorage.setItem('neuron-chat-widget-data', JSON.stringify(parsedData));
+                parsedData.messages.push(message);
                 
-                console.log('💾 [CHAT SYNC] Saved message to localStorage:', message);
+                // Keep only last 50 messages to prevent localStorage from getting too large
+                if (parsedData.messages.length > 50) {
+                    parsedData.messages = parsedData.messages.slice(-50);
+                }
+                
+                // Save back to the CORRECT storage key directly
+                localStorage.setItem(key, JSON.stringify(parsedData));
+                
+                console.log('💾 [CHAT SYNC] Saved formatted HTML to localStorage:', message);
+                console.log('💾 [CHAT SYNC] Storage key used:', key);
+                console.log('💾 [CHAT SYNC] Total messages now:', parsedData.messages.length);
             } catch (error) {
                 console.error('💾 [CHAT SYNC] Error saving message to localStorage:', error);
             }
@@ -407,59 +1136,160 @@
             }
         }
         
-                // Send message to external server
-        async function sendToExternalServer(message) {
-            // Check if user is authenticated
-            const token = localStorage.getItem('neuron-auth-token');
-            if (!token) {
-                throw new Error('Authentication required. Please log in through the main chat widget.');
+        // Server configuration - matches main widget
+        const CONFIG = {
+            serverUrl: 'http://localhost:3001',
+            apiEndpoint: '/api/chat',
+            healthEndpoint: '/health'
+        };
+        
+        // Check server connection status
+        let serverConnectionState = 'unknown';
+        
+        // Check if external server is available
+        async function checkServerConnection() {
+            try {
+                const response = await fetch(`${CONFIG.serverUrl}${CONFIG.healthEndpoint}`, {
+                    method: 'GET',
+                    timeout: 5000
+                });
+                
+                if (response.ok) {
+                    serverConnectionState = 'connected';
+                    updateStatus('Connected to external server', 'success');
+                    return true;
+                } else {
+                    throw new Error(`Server error: ${response.status}`);
+                }
+            } catch (error) {
+                console.error('🔍 [SERVER] Connection error:', error);
+                serverConnectionState = 'disconnected';
+                updateStatus('Server connection error', 'error');
+                return false;
             }
-
+        }
+        
+        // Send message to external server with authentication
+        async function sendToExternalServer(message) {
+            // Check server connection first
+            if (serverConnectionState !== 'connected') {
+                const isConnected = await checkServerConnection();
+                if (!isConnected) {
+                    throw new Error('Server not available');
+                }
+            }
+            
             const requestBody = {
                 message: message,
                 context: 'Neuron software context',
                 flowContext: null,  // Will be populated if available
                 rawFlowJson: null   // Will be populated if available
             };
-
+            
             // Try to get flow context from localStorage if available
             try {
-                const chatData = localStorage.getItem('neuron-chat-widget-data');
-                if (chatData) {
-                    const parsedData = JSON.parse(chatData);
-                    if (parsedData.flowContext) {
-                        requestBody.flowContext = parsedData.flowContext;
-                    }
-                    if (parsedData.rawFlowJson) {
-                        requestBody.rawFlowJson = parsedData.rawFlowJson;
-                    }
+                const chatData = getUserData('chat');
+                console.log('📱 [SERVER DEBUG] Retrieved chat data for flow context:', chatData);
+                
+                if (chatData && chatData.flowContext) {
+                    requestBody.flowContext = chatData.flowContext;
+                    console.log('📱 [SERVER DEBUG] Using flow context from localStorage:', chatData.flowContext.flowName);
+                }
+                
+                if (chatData && chatData.rawFlowJson) {
+                    requestBody.rawFlowJson = chatData.rawFlowJson;
+                    console.log('📱 [SERVER DEBUG] Using raw flow JSON from localStorage, nodes:', chatData.rawFlowJson.length);
+                }
+                
+                // If we don't have raw flow JSON, try to get it from the parent window
+                if (!requestBody.rawFlowJson && window.opener && !window.opener.closed) {
+                    try {
+                        console.log('📱 [SERVER DEBUG] Attempting to get raw flow JSON from parent window...');
+                        // Try to access the parent window's RED object
+                        if (window.opener.RED && window.opener.RED.nodes && typeof window.opener.RED.nodes.createCompleteNodeSet === 'function') {
+                            requestBody.rawFlowJson = window.opener.RED.nodes.createCompleteNodeSet();
+                            console.log('📱 [SERVER DEBUG] Successfully got raw flow JSON from parent window, nodes:', requestBody.rawFlowJson.length);
                 }
             } catch (error) {
-                console.warn('Could not get flow context from localStorage:', error);
+                        console.warn('📱 [SERVER DEBUG] Could not get raw flow JSON from parent window:', error);
+                    }
+                }
+                
+                console.log('📱 [SERVER DEBUG] Final request body flow context:', {
+                    hasFlowContext: !!requestBody.flowContext,
+                    hasRawFlowJson: !!requestBody.rawFlowJson,
+                    flowContextKeys: requestBody.flowContext ? Object.keys(requestBody.flowContext) : [],
+                    rawFlowJsonNodeCount: requestBody.rawFlowJson ? requestBody.rawFlowJson.length : 0
+                });
+                
+            } catch (error) {
+                console.warn('📱 [SERVER DEBUG] Could not get flow context from localStorage:', error);
             }
-
-            const response = await fetch('https://your-digitalocean-app.ondigitalocean.app/api/chat', {
+            
+            // Get authentication token if available
+            const authToken = localStorage.getItem('chat-token');
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+            
+            if (authToken) {
+                headers['Authorization'] = `Bearer ${authToken}`;
+            }
+            
+            console.log('📱 [SERVER DEBUG] Sending request to server...');
+            console.log('📱 [SERVER DEBUG] Server URL:', `${CONFIG.serverUrl}${CONFIG.apiEndpoint}`);
+            console.log('📱 [SERVER DEBUG] Request body size:', JSON.stringify(requestBody).length, 'characters');
+            console.log('📱 [SERVER DEBUG] Request body preview:', JSON.stringify(requestBody, null, 2).substring(0, 500) + '...');
+            
+            const response = await fetch(`${CONFIG.serverUrl}${CONFIG.apiEndpoint}`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
+                headers: headers,
                 body: JSON.stringify(requestBody)
             });
             
+            console.log('📱 [SERVER DEBUG] Response status:', response.status);
+            console.log('📱 [SERVER DEBUG] Response headers:', Object.fromEntries(response.headers.entries()));
+            
             if (!response.ok) {
+                if (response.status === 401) {
+                    // Token expired or invalid
+                    console.log('[AUTH] 401 Unauthorized response received');
+                    serverConnectionState = 'disconnected';
+                    updateStatus('Authentication required', 'error');
+                    handleAuthenticationFailure();
+                    throw new Error('Authentication required');
+                }
                 throw new Error('Server error: ' + response.status + ' ' + response.statusText);
             }
             
-            return await response.json();
+            const responseData = await response.json();
+            console.log('📱 [SERVER DEBUG] Response data received, size:', JSON.stringify(responseData).length, 'characters');
+            console.log('📱 [SERVER DEBUG] Response preview:', JSON.stringify(responseData, null, 2).substring(0, 300) + '...');
+            
+            return responseData;
         }
         
-        // Add typing indicator
+        // Add typing indicator with matching styling
         function addTypingIndicator() {
             const messages = document.getElementById('chat-messages');
             const typing = document.createElement('div');
             typing.className = 'chat-message chat-assistant';
             typing.id = 'typing-indicator';
+            
+            // Apply same styling as assistant messages - matches main widget exactly
+            typing.style.cssText = `
+                margin-bottom: 12px;
+                padding: 8px 12px;
+                border-radius: 8px;
+                max-width: 80%;
+                word-wrap: break-word;
+                font-size: 13px;
+                line-height: 1.4;
+                background: transparent;
+                color: white;
+                border: 1px solid rgba(255, 255, 255, 0.1);
+            `;
+            
             typing.innerHTML = '<div class="message-content"><span style="margin-right: 8px; font-style: italic;">Thinking</span><span class="typing-dots"><span style="animation: dot1 1.4s infinite;">.</span><span style="animation: dot2 1.4s infinite;">.</span><span style="animation: dot3 1.4s infinite;">.</span></span></div>';
             
             messages.appendChild(typing);
@@ -469,7 +1299,7 @@
         
         // Update status
         function updateStatus(message, type) {
-            const status = document.querySelector('.chat-status small');
+            const status = document.getElementById('status-text');
             if (status) {
                 status.textContent = message;
                 status.style.color = type === 'success' ? '#68d391' : type === 'error' ? '#fc8181' : '#a0aec0';
@@ -482,46 +1312,224 @@
             if (e.key === 'Enter') sendMessage();
         });
         
-        // Load chat data when page loads
-        window.addEventListener('load', function() {
-            // Check authentication first
-            const token = localStorage.getItem('neuron-auth-token');
-            if (!token) {
-                showLoginRequired();
-                return;
+        // Listen for messages from the main window
+        window.addEventListener('message', function(event) {
+            if (event.data && event.data.type === 'RELOAD_CHAT_DATA') {
+                console.log('📱 [DEDICATED CHAT] Received reload message from main window');
+                // Small delay to ensure localStorage is ready
+                setTimeout(() => {
+                    console.log('📱 [DEDICATED CHAT] Reloading chat data...');
+                    loadChatData();
+                }, 100);
             }
-            loadChatData();
         });
-
-        // Show login required message
-        function showLoginRequired() {
-            const messages = document.getElementById('chat-messages');
-            if (messages) {
-                messages.innerHTML = `
-                    <div style="text-align: center; padding: 40px 20px; color: #a0aec0;">
-                        <div style="margin-bottom: 20px;">
-                            <svg width="48" height="48" viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M116.736 373.991C116.736 373.991 117.296 250.322 188.729 231.521C289.649 204.96 297.03 397.603 398.286 371.564C482.834 349.821 483.029 229 483.029 229" stroke="#a0aec0" stroke-width="40.6992" stroke-linecap="square"/>
-                            </svg>
-                        </div>
-                        <h3 style="color: white; margin-bottom: 16px;">Authentication Required</h3>
-                        <p style="margin-bottom: 24px; line-height: 1.5;">
-                            Please log in through the main NeuronGPT chat widget first.
-                        </p>
-                        <button onclick="window.close()" style="
-                            background: #3182ce;
-                            color: white;
-                            border: none;
-                            padding: 12px 24px;
-                            border-radius: 6px;
-                            font-size: 14px;
-                            font-weight: 600;
-                            cursor: pointer;
-                        ">Close Window</button>
-                    </div>
-                `;
+        
+        // Notify parent window when this window is about to close
+        window.addEventListener('beforeunload', function(event) {
+            console.log('📱 [DEDICATED CHAT] Window about to close, notifying parent...');
+            
+            // Ensure all current data is saved before closing
+            try {
+                const currentData = getUserData('chat');
+                if (currentData && currentData.messages) {
+                    console.log('📱 [DEDICATED CHAT] Final data save before closing, messages:', currentData.messages.length);
+                    
+                    // Try to sync data to main window before closing
+                    if (window.opener && !window.opener.closed) {
+                        try {
+                            window.opener.postMessage({ 
+                                type: 'SYNC_CHAT_DATA', 
+                                data: currentData 
+                            }, '*');
+                            console.log('📱 [DEDICATED CHAT] Data sync sent before closing');
+                        } catch (e) {
+                            console.log('📱 [DEDICATED CHAT] Could not sync data before closing:', e.message);
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('📱 [DEDICATED CHAT] Error during final data save:', error);
             }
+            
+            if (window.opener && !window.opener.closed) {
+                try {
+                    window.opener.postMessage({ type: 'DEDICATED_WINDOW_CLOSING' }, '*');
+                    console.log('📱 [DEDICATED CHAT] Sent closing notification to parent window');
+                } catch (e) {
+                    console.log('📱 [DEDICATED CHAT] Could not send closing notification:', e.message);
+                }
+            }
+        });
+        
+        // Make debug functions available globally
+        window.debugChatData = debugLocalStorage;
+        window.forceLoadChatData = loadChatData;
+        window.reloadChatData = function() {
+            console.log('📱 [DEDICATED CHAT] Manual reload triggered');
+            loadChatData();
+        };
+        window.checkChatState = function() {
+            console.log('📱 [DEDICATED CHAT] Checking chat state...');
+            const messagesContainer = document.getElementById('chat-messages');
+            if (messagesContainer) {
+                console.log('📱 [DEDICATED CHAT] Messages container found with', messagesContainer.children.length, 'children');
+                console.log('📱 [DEDICATED CHAT] Container HTML:', messagesContainer.innerHTML.substring(0, 200) + '...');
+            } else {
+                console.log('📱 [DEDICATED CHAT] Messages container NOT found');
+            }
+            
+            const chatData = getUserData('chat');
+            console.log('📱 [DEDICATED CHAT] Current localStorage data:', chatData);
+        };
+        
+        window.forceDataSync = function() {
+            console.log('📱 [DEDICATED CHAT] Force data sync triggered...');
+            
+            // Clear current messages
+            const messagesContainer = document.getElementById('chat-messages');
+            if (messagesContainer) {
+                messagesContainer.innerHTML = '';
+                console.log('📱 [DEDICATED CHAT] Cleared current messages');
+            }
+            
+            // Wait a moment then reload
+            setTimeout(() => {
+                console.log('📱 [DEDICATED CHAT] Reloading data after clear...');
+                loadChatData();
+            }, 200);
+        };
+        
+        window.syncDataToMainWindow = function() {
+            console.log('📱 [DEDICATED CHAT] Syncing data to main window...');
+            
+            if (window.opener && !window.opener.closed) {
+                try {
+                    // Get current data
+                    const currentData = getUserData('chat');
+                    if (currentData) {
+                        console.log('📱 [DEDICATED CHAT] Sending data to main window:', currentData.messages ? currentData.messages.length : 0, 'messages');
+                        
+                        // Send data to main window
+                        window.opener.postMessage({ 
+                            type: 'SYNC_CHAT_DATA', 
+                            data: currentData 
+                        }, '*');
+                        
+                        console.log('📱 [DEDICATED CHAT] Data sync message sent to main window');
+                        return true;
+                    } else {
+                        console.warn('📱 [DEDICATED CHAT] No data to sync');
+                        return false;
+                    }
+                } catch (error) {
+                    console.error('📱 [DEDICATED CHAT] Error syncing data to main window:', error);
+                    return false;
+                }
+            } else {
+                console.warn('📱 [DEDICATED CHAT] Main window not available for sync');
+                return false;
+            }
+        };
+        
+        window.refreshFlowContext = function() {
+            console.log('📱 [DEDICATED CHAT] Refreshing flow context from parent window...');
+            
+            // Try to get fresh flow context from parent window
+            if (window.opener && !window.opener.closed) {
+                try {
+                    // Get flow context
+                    if (window.opener.getCurrentFlowContext && typeof window.opener.getCurrentFlowContext === 'function') {
+                        const freshFlowContext = window.opener.getCurrentFlowContext();
+                        console.log('📱 [DEDICATED CHAT] Fresh flow context:', freshFlowContext);
+                        
+                        // Get raw flow JSON
+                        let freshRawFlowJson = null;
+                        if (window.opener.RED && window.opener.RED.nodes && typeof window.opener.RED.nodes.createCompleteNodeSet === 'function') {
+                            freshRawFlowJson = window.opener.RED.nodes.createCompleteNodeSet();
+                            console.log('📱 [DEDICATED CHAT] Fresh raw flow JSON, nodes:', freshRawFlowJson.length);
+                        }
+                        
+                        // Update localStorage with fresh data
+                        const currentData = getUserData('chat');
+                        if (currentData) {
+                            const updatedData = {
+                                ...currentData,
+                                flowContext: freshFlowContext,
+                                rawFlowJson: freshRawFlowJson
+                            };
+                            setUserData('chat', updatedData);
+                            console.log('📱 [DEDICATED CHAT] Updated localStorage with fresh flow context');
+                        }
+                        
+                        return { flowContext: freshFlowContext, rawFlowJson: freshRawFlowJson };
+                    } else {
+                        console.warn('📱 [DEDICATED CHAT] Parent window does not have getCurrentFlowContext function');
+                        return null;
+                    }
+                } catch (error) {
+                    console.error('📱 [DEDICATED CHAT] Error refreshing flow context:', error);
+                    return null;
+                }
+            } else {
+                console.warn('📱 [DEDICATED CHAT] Parent window not available');
+                return null;
+            }
+        };
+        window.testChatPersistence = function() {
+            console.log('🧪 [TEST] Testing chat persistence in dedicated window...');
+            
+            // Test 1: Check current data
+            const currentData = getUserData('chat');
+            console.log('🧪 [TEST] Current chat data:', currentData);
+            
+            // Test 2: Try to load chat data
+            console.log('🧪 [TEST] Attempting to load chat data...');
+            loadChatData();
+            
+            // Test 3: Check if messages were loaded
+            const messagesContainer = document.getElementById('chat-messages');
+            if (messagesContainer) {
+                const messageCount = messagesContainer.children.length;
+                console.log('🧪 [TEST] Messages container has', messageCount, 'children');
+                
+                if (messageCount > 0) {
+                    console.log('✅ [TEST] Chat persistence test PASSED - messages loaded');
+                    return true;
+                } else {
+                    console.log('❌ [TEST] Chat persistence test FAILED - no messages loaded');
+                    return false;
+                }
+            } else {
+                console.log('❌ [TEST] Chat persistence test FAILED - messages container not found');
+                return false;
+            }
+        };
+        
+        // Initialize server connection monitoring
+        async function initializeServerConnection() {
+            console.log('🔍 [DEDICATED CHAT] Initializing server connection...');
+            
+            // Debug localStorage data
+            debugLocalStorage();
+            
+            await checkServerConnection();
+            
+            // Initialize server health monitoring
+            initializeServerHealthMonitoring();
+            
+            // Set up periodic connection monitoring
+            setInterval(async () => {
+                if (serverConnectionState !== 'connected') {
+                    await checkServerConnection();
+                }
+            }, 30000); // Check every 30 seconds
         }
+        
+        // Load chat data and initialize server connection when page loads
+        window.addEventListener('load', async () => {
+            loadChatData();
+            await initializeServerConnection();
+        });
         
         // Add window close event listener to ensure sync
         window.addEventListener('beforeunload', function() {
