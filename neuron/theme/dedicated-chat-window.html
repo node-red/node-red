@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Neuron Co-Pilot Chat</title>
+    <script src="/neuron/theme/chat-server-config.js"></script>
     <style>
         * {
             margin: 0;
@@ -883,7 +884,7 @@
         
         // Server configuration - matches main widget
         const CONFIG = {
-            serverUrl: 'http://localhost:3001',
+            serverUrl: window.NEURON_CHAT_SERVER_URL || 'http://localhost:3001',
             apiEndpoint: '/api/chat',
             healthEndpoint: '/health'
         };

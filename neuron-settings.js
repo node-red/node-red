@@ -580,11 +580,12 @@ module.exports = {
             css: [
                 require("path").resolve(__dirname, "neuron/theme/header-balance.css")
             ],
-                            scripts: [
-                    require("path").resolve(__dirname, "neuron/theme/balance-service.js"),
-                    require("path").resolve(__dirname, "neuron/theme/menu-customizer.js"),
-                    require("path").resolve(__dirname, "neuron/theme/neuron-chat-widget.js")
-                ]
+            scripts: [
+                require("path").resolve(__dirname, "neuron/theme/balance-service.js"),
+                require("path").resolve(__dirname, "neuron/theme/menu-customizer.js"),
+                require("path").resolve(__dirname, "neuron/theme/chat-server-config.js"),
+                require("path").resolve(__dirname, "neuron/theme/neuron-chat-widget.js")
+            ]
         },
      
         palette: {

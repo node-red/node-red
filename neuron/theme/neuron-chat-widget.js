@@ -25,7 +25,7 @@
     
     // Configuration for external server
     const CONFIG = {
-        serverUrl: 'http://localhost:3001', // Your external server URL
+        serverUrl: window.NEURON_CHAT_SERVER_URL || 'http://localhost:3001', // Configurable server URL
         apiEndpoint: '/api/chat',
         healthEndpoint: '/health'
     };
@@ -3137,7 +3137,7 @@
             '            } catch (error) {' +
             '                console.warn("Could not get flow context from localStorage:", error);' +
             '            }' +
-            '            const response = await fetch("http://localhost:3001/api/chat", {' +
+            '            const response = await fetch("' + CONFIG.serverUrl + '/api/chat", {' +
             '                method: "POST",' +
             '                headers: { "Content-Type": "application/json" },' +
             '                body: JSON.stringify(requestBody)' +
