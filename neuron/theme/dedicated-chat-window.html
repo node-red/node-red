@@ -432,269 +432,6 @@
             }
         }
         
-        // Enhanced debugging function to compare data between windows
-        function debugCrossWindowSync() {
-            console.log('🔍 [CROSS-WINDOW DEBUG] Starting cross-window sync analysis...');
-            
-            const userId = getUserIdFromToken();
-            const storageKey = getUserStorageKey('neuron-chat-widget-data');
-            
-            console.log('🔍 [CROSS-WINDOW DEBUG] Current window user ID:', userId);
-            console.log('🔍 [CROSS-WINDOW DEBUG] Current window storage key:', storageKey);
-            
-            // Try to get data from parent window if available
-            if (window.opener && !window.opener.closed) {
-                try {
-                    console.log('🔍 [CROSS-WINDOW DEBUG] Parent window available, checking parent data...');
-                    
-                    // Try to get parent window's user ID and storage key
-                    if (window.opener.getUserIdFromToken && typeof window.opener.getUserIdFromToken === 'function') {
-                        const parentUserId = window.opener.getUserIdFromToken();
-                        console.log('🔍 [CROSS-WINDOW DEBUG] Parent window user ID:', parentUserId);
-                        
-                        if (parentUserId !== userId) {
-                            console.error('❌ [CROSS-WINDOW DEBUG] USER ID MISMATCH! Parent:', parentUserId, 'Current:', userId);
-                        } else {
-                            console.log('✅ [CROSS-WINDOW DEBUG] User IDs match between windows');
-                        }
-                    } else {
-                        console.log('🔍 [CROSS-WINDOW DEBUG] Parent window does not have getUserIdFromToken function');
-                    }
-                    
-                    // Try to get parent window's storage key
-                    if (window.opener.getUserStorageKey && typeof window.opener.getUserStorageKey === 'function') {
-                        const parentStorageKey = window.opener.getUserStorageKey('neuron-chat-widget-data');
-                        console.log('🔍 [CROSS-WINDOW DEBUG] Parent window storage key:', parentStorageKey);
-                        
-                        if (parentStorageKey !== storageKey) {
-                            console.error('❌ [CROSS-WINDOW DEBUG] STORAGE KEY MISMATCH! Parent:', parentStorageKey, 'Current:', storageKey);
-                        } else {
-                            console.log('✅ [CROSS-WINDOW DEBUG] Storage keys match between windows');
-                        }
-                    } else {
-                        console.log('🔍 [CROSS-WINDOW DEBUG] Parent window does not have getUserStorageKey function');
-                    }
-                    
-                    // Try to get parent window's chat data
-                    if (window.opener.getUserData && typeof window.opener.getUserData === 'function') {
-                        const parentChatData = window.opener.getUserData('chat');
-                        console.log('🔍 [CROSS-WINDOW DEBUG] Parent window chat data:', parentChatData);
-                        
-                        const currentChatData = getUserData('chat');
-                        console.log('🔍 [CROSS-WINDOW DEBUG] Current window chat data:', currentChatData);
-                        
-                        if (JSON.stringify(parentChatData) !== JSON.stringify(currentChatData)) {
-                            console.error('❌ [CROSS-WINDOW DEBUG] CHAT DATA MISMATCH between windows!');
-                            console.log('🔍 [CROSS-WINDOW DEBUG] Parent data keys:', parentChatData ? Object.keys(parentChatData) : 'null');
-                            console.log('🔍 [CROSS-WINDOW DEBUG] Current data keys:', currentChatData ? Object.keys(currentChatData) : 'null');
-                        } else {
-                            console.log('✅ [CROSS-WINDOW DEBUG] Chat data matches between windows');
-                        }
-                    } else {
-                        console.log('🔍 [CROSS-WINDOW DEBUG] Parent window does not have getUserData function');
-                    }
-                    
-                } catch (error) {
-                    console.error('🔍 [CROSS-WINDOW DEBUG] Error checking parent window:', error);
-                }
-            } else {
-                console.log('🔍 [CROSS-WINDOW DEBUG] No parent window available for comparison');
-            }
-            
-            // Check if we can access the parent window's localStorage directly
-            try {
-                if (window.opener && !window.opener.closed) {
-                    console.log('🔍 [CROSS-WINDOW DEBUG] Attempting to access parent localStorage directly...');
-                    
-                    // This will fail due to same-origin policy, but let's see what error we get
-                    const parentLocalStorage = window.opener.localStorage;
-                    console.log('🔍 [CROSS-WINDOW DEBUG] Parent localStorage accessible:', !!parentLocalStorage);
-                }
-            } catch (error) {
-                console.log('🔍 [CROSS-WINDOW DEBUG] Cannot access parent localStorage (expected due to same-origin policy):', error.message);
-            }
-        }
-        
-        // Test function to verify data persistence
-        function testDataPersistence() {
-            console.log('🧪 [TEST] Testing data persistence in dedicated window...');
-            
-            // Test 1: Check current data
-            const currentData = getUserData('chat');
-            console.log('🧪 [TEST] Current chat data:', currentData);
-            
-            // Test 2: Try to load chat data
-            console.log('🧪 [TEST] Attempting to load chat data...');
-            loadChatData();
-            
-            // Test 3: Check if messages were loaded
-            const messagesContainer = document.getElementById('chat-messages');
-            if (messagesContainer) {
-                const messageCount = messagesContainer.children.length;
-                console.log('🧪 [TEST] Messages container has', messageCount, 'children');
-                
-                if (messageCount > 0) {
-                    console.log('✅ [TEST] Chat persistence test PASSED - messages loaded');
-                    return true;
-                } else {
-                    console.log('❌ [TEST] Chat persistence test FAILED - no messages loaded');
-                    return false;
-                }
-            } else {
-                console.log('❌ [TEST] Chat persistence test FAILED - messages container not found');
-                return false;
-            }
-        }
-        
-        // Test function to verify user ID consistency
-        function testUserIdConsistency() {
-            console.log('🧪 [TEST] Testing user ID consistency...');
-            
-            const userId1 = getUserIdFromToken();
-            console.log('🧪 [TEST] First call to getUserIdFromToken():', userId1);
-            
-            // Wait a moment and call again
-            setTimeout(() => {
-                const userId2 = getUserIdFromToken();
-                console.log('🧪 [TEST] Second call to getUserIdFromToken():', userId2);
-                
-                if (userId1 === userId2) {
-                    console.log('✅ [TEST] User ID consistency test PASSED - IDs match');
-                } else {
-                    console.error('❌ [TEST] User ID consistency test FAILED - IDs differ:', userId1, 'vs', userId2);
-                }
-            }, 1000);
-            
-            return userId1;
-        }
-        
-        // Test function to verify storage key generation
-        function testStorageKeyGeneration() {
-            console.log('🧪 [TEST] Testing storage key generation...');
-            
-            const userId = getUserIdFromToken();
-            const storageKey1 = getUserStorageKey('neuron-chat-widget-data');
-            const storageKey2 = getUserStorageKey('neuron-chat-widget-data');
-            
-            console.log('🧪 [TEST] User ID:', userId);
-            console.log('🧪 [TEST] Storage key 1:', storageKey1);
-            console.log('🧪 [TEST] Storage key 2:', storageKey2);
-            
-            if (storageKey1 === storageKey2) {
-                console.log('✅ [TEST] Storage key generation test PASSED - keys consistent');
-                return true;
-            } else {
-                console.error('❌ [TEST] Storage key generation test FAILED - keys inconsistent');
-                return false;
-            }
-        }
-        
-        // Test function to verify data loading and saving cycle
-        function testDataLoadSaveCycle() {
-            console.log('🧪 [TEST] Testing data load/save cycle...');
-            
-            // Step 1: Get current data
-            const originalData = getUserData('chat');
-            console.log('🧪 [TEST] Original data:', originalData);
-            
-            // Step 2: Create test data
-            const testData = {
-                messages: [
-                    {
-                        text: '🧪 Test message from dedicated window',
-                        sender: 'user',
-                        time: new Date().toLocaleTimeString(),
-                        timestamp: Date.now()
-                    }
-                ],
-                flowContext: { test: true },
-                timestamp: Date.now()
-            };
-            
-            // Step 3: Save test data
-            console.log('🧪 [TEST] Saving test data...');
-            setUserData('chat', testData);
-            
-            // Step 4: Verify data was saved
-            const savedData = getUserData('chat');
-            console.log('🧪 [TEST] Saved data:', savedData);
-            
-            if (JSON.stringify(savedData) === JSON.stringify(testData)) {
-                console.log('✅ [TEST] Data load/save cycle test PASSED');
-                return true;
-            } else {
-                console.error('❌ [TEST] Data load/save cycle test FAILED');
-                return false;
-            }
-        }
-        
-        // Cleanup function to handle dual storage issues
-        function cleanupDualStorage() {
-            console.log('🧹 [CLEANUP] Starting dual storage cleanup...');
-            
-            // Find all storage keys related to chat data
-            const allKeys = [];
-            for (let i = 0; i < localStorage.length; i++) {
-                const key = localStorage.key(i);
-                if (key && key.includes('neuron-chat-widget-data')) {
-                    allKeys.push(key);
-                }
-            }
-            
-            console.log('🔍 [CLEANUP] Found storage keys:', allKeys);
-            
-            if (allKeys.length <= 1) {
-                console.log('✅ [CLEANUP] No dual storage detected');
-                return true;
-            }
-            
-            // Find the key with the most messages (likely the correct one)
-            let bestKey = null;
-            let bestMessageCount = 0;
-            
-            allKeys.forEach(key => {
-                const data = localStorage.getItem(key);
-                if (data) {
-                    try {
-                        const parsed = JSON.parse(data);
-                        const messageCount = parsed.messages ? parsed.messages.length : 0;
-                        if (messageCount > bestMessageCount) {
-                            bestMessageCount = messageCount;
-                            bestKey = key;
-                        }
-                    } catch (e) {
-                        console.log(`🔍 [CLEANUP] Key ${key} has invalid JSON`);
-                    }
-                }
-            });
-            
-            if (bestKey && bestMessageCount > 0) {
-                console.log('🔍 [CLEANUP] Best key found:', bestKey, 'with', bestMessageCount, 'messages');
-                
-                // Copy data to the correct user-specific key
-                const correctKey = getUserStorageKey('neuron-chat-widget-data');
-                if (bestKey !== correctKey) {
-                    const bestData = localStorage.getItem(bestKey);
-                    localStorage.setItem(correctKey, bestData);
-                    console.log('🔧 [CLEANUP] Copied data to correct key:', correctKey);
-                    
-                    // Remove old keys
-                    allKeys.forEach(key => {
-                        if (key !== correctKey) {
-                            localStorage.removeItem(key);
-                            console.log('🗑️ [CLEANUP] Removed old key:', key);
-                        }
-                    });
-                    
-                    console.log('✅ [CLEANUP] Dual storage cleanup completed');
-                    return true;
-                }
-            }
-            
-            console.log('❌ [CLEANUP] Could not determine best key for cleanup');
-            return false;
-        }
-        
         // Initialize server health monitoring
         function initializeServerHealthMonitoring() {
             console.log('[SERVER HEALTH] Initializing server health monitoring...');
@@ -724,12 +461,6 @@
             try {
                 console.log('📱 [DEDICATED CHAT] Starting to load chat data...');
                 
-                // Run cleanup to ensure no dual storage issues
-                if (typeof cleanupDualStorage === 'function') {
-                    console.log('🧹 [DEDICATED CHAT] Running dual storage cleanup before loading chat data...');
-                    cleanupDualStorage();
-                }
-                
                 // First, check if the messages container exists
                 const messagesContainer = document.getElementById('chat-messages');
                 if (!messagesContainer) {
@@ -753,10 +484,22 @@
                 if (chatData.messages && Array.isArray(chatData.messages)) {
                     console.log('📱 [DEDICATED CHAT] Loading', chatData.messages.length, 'messages from messages array');
                     
+                    // Track loaded message IDs to prevent duplicates
+                    const loadedMessageIds = new Set();
+                    
                     chatData.messages.forEach((msg, index) => {
+                        // Check for duplicate by ID or content+timestamp
+                        const messageId = msg.id || `${msg.timestamp}-${msg.text.substring(0, 20)}`;
+                        
+                        if (loadedMessageIds.has(messageId)) {
+                            console.log(`📱 [DEDICATED CHAT] Skipping duplicate message ${index + 1}:`, msg);
+                            return;
+                        }
+                        
+                        loadedMessageIds.add(messageId);
                         console.log(`📱 [DEDICATED CHAT] Loading message ${index + 1}:`, msg);
                         // Load existing messages without saving to localStorage (prevents duplication)
-                        addMessage(msg.text, msg.sender, false);
+                        addMessage(msg.text, msg.sender, false, msg.time, msg.timestamp);
                     });
                     
                     console.log('📱 [DEDICATED CHAT] Successfully loaded', chatData.messages.length, 'messages');
@@ -970,7 +713,7 @@
         }
         
         // Add message to chat with inline styling - matches main widget
-        function addMessage(text, sender, saveToStorage = true) {
+        function addMessage(text, sender, saveToStorage = true, providedTime = null, providedTimestamp = null) {
             const messages = document.getElementById('chat-messages');
             if (!messages) {
                 return;
@@ -1023,10 +766,11 @@
                 formattedText = parseMarkdown(text);
             }
             
+            const displayTime = providedTime || (providedTimestamp ? new Date(providedTimestamp).toLocaleTimeString() : new Date().toLocaleTimeString());
             msgDiv.innerHTML = `
                 <div class="message-content">${formattedText}</div>
                 <div class="message-time" style="font-size: 10px; opacity: 0.7; margin-top: 4px;">
-                    ${new Date().toLocaleTimeString()}
+                    ${displayTime}
                 </div>
             `;
             
@@ -1084,7 +828,8 @@
                     text: formattedText, // Save formatted HTML for consistent display
                     sender: sender === 'user' ? 'user' : 'assistant',
                     time: new Date().toLocaleTimeString(),
-                    timestamp: Date.now() // Add timestamp for proper sorting
+                    timestamp: Date.now(), // Add timestamp for proper sorting
+                    id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}` // Unique ID to prevent duplicates
                 };
                 
                 // Initialize messages array if it doesn't exist
