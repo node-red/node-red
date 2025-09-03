@@ -192,6 +192,12 @@ module.exports = {
      * headers. It can be a single function or an array of middleware functions.
      */
     httpAdminMiddleware: function(req, res, next) {
+        // Add templates API
+        if (req.url.startsWith('/api/templates')) {
+            const TemplateService = require('./neuron/services/TemplateService');
+            return TemplateService(req, res, next);
+        }
+        
         // Check if credentials are missing and redirect to setup if needed
         // Read .env file directly to avoid process.env caching issues
         const envPath = require('./neuron/services/NeuronEnvironment').getPath();
@@ -578,13 +584,17 @@ module.exports = {
         page: {
             title: "Neuron Dashboard",
             css: [
-                require("path").resolve(__dirname, "neuron/theme/header-balance.css")
+                require("path").resolve(__dirname, "neuron/theme/header-balance.css"),
+                require("path").resolve(__dirname, "neuron/theme/template-browser.css")
             ],
             scripts: [
                 require("path").resolve(__dirname, "neuron/theme/balance-service.js"),
                 require("path").resolve(__dirname, "neuron/theme/menu-customizer.js"),
                 require("path").resolve(__dirname, "neuron/theme/chat-server-config.js"),
-                require("path").resolve(__dirname, "neuron/theme/neuron-chat-widget.js")
+                require("path").resolve(__dirname, "neuron/theme/neuron-chat-widget.js"),
+                require("path").resolve(__dirname, "neuron/theme/template-browser-service.js"),
+                require("path").resolve(__dirname, "neuron/theme/template-browser-dialog.js"),
+                require("path").resolve(__dirname, "neuron/theme/template-browser-button-simple.js")
             ]
         },
      
