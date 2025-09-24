@@ -106,6 +106,22 @@ describe('range Node', function() {
         genericRangeTest("clamp", 0, 10, 0, 1000, false, -1, 0, done);
     });
 
+    it('clamps numbers within a range - above max fp', function(done) {
+        genericRangeTest("clamp", 0, 9.5, 0.5, 100.5, true, 13.1, 100, done);
+    });
+
+    it('clamps numbers within a range - below min fp', function(done) {
+        genericRangeTest("clamp", 0, 9.5, 0.3, 100.5, true, -13.1, 1, done);
+    });
+
+    it('handles input range where max < min', function(done) {
+        genericRangeTest("scale", 100, 0, 0, -100, false, 40, -60, done);
+    });
+
+    it('handles input range where max < min', function(done) {
+        genericRangeTest("scale", 100, 0, -100, 0, false, 10, -10, done);
+    });
+
     it('drops msg if in drop mode and input outside range', function(done) {
         var flow = [{"id":"rangeNode1","type":"range","minin":2,"maxin":8,"minout":20,"maxout":80,"action":"drop","round":true,"name":"rangeNode","wires":[["helperNode1"]]},
                     {id:"helperNode1", type:"helper", wires:[]}];
