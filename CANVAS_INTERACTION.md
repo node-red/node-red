@@ -11,6 +11,49 @@ Improve canvas interaction to work consistently and intuitively across:
 
 ## What Has Been Implemented
 
+### Zoom Button & Hotkey Enhancements (Session 2)
+
+#### Zoom-to-Fit Feature (commits: 6f164a8, 788d0a3, ed71cf9, 732c828)
+- ✅ New zoom-to-fit button in footer toolbar
+- ✅ Shows all nodes with padding, properly centered in viewport
+- ✅ Keyboard shortcut: Ctrl+1 / Cmd+1 for zoom-to-fit
+- ✅ Respects maximum zoom level (won't zoom in beyond 1.0)
+- ✅ Works immediately on page load (refreshes active nodes first)
+- ✅ Smooth animated pan when zoom doesn't need to change
+- ✅ Pan animation duration matches zoom animation (200-350ms)
+
+#### Smooth Zoom Button Animation (commits: 935ff62, f07907e)
+- ✅ Smooth 200-350ms zoom transitions for button/hotkey zoom
+- ✅ Performance optimized: only updates transforms during animation
+- ✅ No viewport jumping or drift
+- ✅ Focal point locking for sequential zooms (1 second timeout)
+- ✅ Maintains viewport center across multiple rapid button presses
+
+#### Dynamic Zoom Animation Duration (commit: 594c0d6)
+- ✅ Animation duration scales with zoom distance (logarithmic)
+- ✅ Consistent perceived velocity across all zoom levels
+- ✅ Range: 200-350ms (faster for small changes, slower for large)
+- ✅ Pan-only animations also scale with distance traveled
+- ✅ Reference: doubling/halving zoom takes ~250ms
+
+#### Visual Feedback Enhancements (commits: 6261213, ce5a031, 0247a91)
+- ✅ Grab cursor (open hand) when spacebar pressed
+- ✅ Grabbing cursor (closed hand) during active pan
+- ✅ Works for spacebar+click and middle-click pan modes
+- ✅ Minimap auto-shows during zoom button/hotkey operations
+- ✅ Minimap auto-shows during zoom-to-fit and zoom reset
+
+#### Zoom Limits (commit: 45c2a79)
+- ✅ Maximum zoom level set to 1.0 (100%, no zooming in beyond 1:1)
+- ✅ All zoom methods respect this limit
+- ✅ Zoom-to-fit properly clamps to max zoom
+
+#### Bug Fixes (commits: be1da36, 7fdff0c, 6e49e96, e3de29d)
+- ✅ Fixed grey padding at canvas bottom (SVG margin reset)
+- ✅ Fixed zoom button direction (were reversed)
+- ✅ Fixed viewport drift without focal point
+- ✅ Fixed zoom center calculation consistency
+
 ### Zoom Functionality
 
 #### Smooth Zoom Animation (commits: bdfa06b, a12b65b)
@@ -216,25 +259,37 @@ When verifying canvas interaction improvements:
    - [ ] Space+scroll zoom (keyboard modifier)
    - [ ] Trackpad pinch gesture (spread = zoom in, pinch = zoom out, generates Ctrl+wheel)
    - [ ] Touch screen pinch gesture (direct touch events)
-   - [ ] UI zoom buttons (zoom in, zoom out, reset)
-   - [ ] Zoom-to-fit button (shows all nodes with padding, respects min zoom)
-   - [ ] Zoom focal point stays on cursor position
-   - [ ] Dynamic zoom limits prevent empty space
+   - [x] UI zoom buttons (zoom in, zoom out, reset) - smooth animated, focal point locking
+   - [x] Zoom-to-fit button (shows all nodes with padding, respects max zoom of 1.0)
+   - [x] Zoom-to-fit hotkey (Ctrl+1 / Cmd+1)
+   - [x] Zoom hotkeys (Ctrl+Plus, Ctrl+Minus, Ctrl+0)
+   - [x] Zoom focal point stays on viewport center for button/hotkey zooms
+   - [x] Dynamic zoom limits prevent empty space
+   - [x] Maximum zoom capped at 1.0 (100%)
+   - [x] Animation duration scales with zoom distance (200-350ms)
+   - [x] Sequential zooms maintain same focal point (1 second timeout)
+   - [x] Zoom-to-fit works immediately after page load
+   - [x] Pan animation when zoom-to-fit doesn't need zoom change
 
 2. **Pan Testing**
    - [x] Two-finger pan on trackpad/touch
    - [x] Diagonal panning works (not axis-locked)
    - [x] Spacebar+click pan on desktop
+   - [x] Middle-click pan on desktop
    - [x] Momentum scrolling with edge bounce
    - [x] No lag when switching between pan and zoom
 
 3. **UI/UX Testing**
    - [x] Minimap auto-shows during panning and zooming
+   - [x] Minimap auto-shows during zoom button/hotkey/zoom-to-fit
    - [x] Minimap does not show on selection changes
    - [x] Minimap fades after 2 seconds
    - [x] No scrollbars visible on canvas
    - [x] No pinch-zoom on UI elements
    - [x] Gesture state cleanup on cursor exit
+   - [x] Grab cursor (open hand) shows when spacebar held
+   - [x] Grabbing cursor (closed hand) shows during active pan (spacebar or middle-click)
+   - [x] No grey padding visible at canvas bottom
 
 4. **Browser Zoom Testing**
    - [ ] Test at 100% browser zoom
@@ -257,8 +312,9 @@ Key files involved in canvas interaction improvements:
 
 ## Commit History
 
-Interaction improvements span commits from e7a028b to present (13 commits total):
+Interaction improvements (20 commits total on claude/issue-44-20250925-0754):
 
+### Session 1: Previous commits (commits 1-13)
 1. `e7a028b` - feat: Add enhanced zoom and scroll features
 2. `bdfa06b` - Implement smooth zoom functionality with pinch-to-zoom support
 3. `37f9786` - Fix trackpad zoom direction - spreading fingers now zooms in
@@ -271,4 +327,26 @@ Interaction improvements span commits from e7a028b to present (13 commits total)
 10. `f13ed66` - Add dynamic minimum zoom recalculation on viewport resize
 11. `53dce6a` - Hide scrollbars and add auto-show/hide minimap on navigation
 12. `875db2c` - Enable diagonal trackpad panning by preventing axis-locked scroll
-13. (current) - Improve minimap auto-show behavior to only trigger during actual navigation
+13. (previous) - Improve minimap auto-show behavior to only trigger during actual navigation
+
+### Session 2: Zoom button/hotkey improvements (commits 14-20)
+14. `ad00ca23e` - Add scroll spacer to fix scrollable area at minimum zoom
+15. `48f0f3be` - Fix minimap viewport position at non-1.0 zoom levels
+16. `be1da360` - Fix grey padding at canvas bottom by resetting SVG margins
+17. `6f164a8a` - Add zoom-to-fit button to show all nodes at once
+18. `7fdff0ca` - Fix zoom button handlers - zoom in/out were reversed
+19. `e46cfc94` - Move zoom-to-fit button between reset and zoom-in
+20. `95304e26` - Revert "Move zoom-to-fit button between reset and zoom-in"
+21. `788d0a38` - Add Ctrl+1/Cmd+1 keyboard shortcut for zoom-to-fit
+22. `5c090786` - Remove animation from zoom buttons for instant, smooth zooming
+23. `6e49e962` - Fix viewport drift when using zoom buttons without focal point
+24. `e3de29d8` - Fix zoom center calculation to use oldScaleFactor consistently
+25. `935ff622` - Fix zoom button animation and improve performance
+26. `f07907e1` - Add focal point locking for sequential button/hotkey zooms
+27. `0247a910` - Add minimap auto-show for zoom button/hotkey interactions
+28. `62612139` - Add grab/grabbing cursor for spacebar pan mode
+29. `ce5a0313` - Add grabbing cursor for middle-click pan mode
+30. `594c0d66` - Make zoom animation duration relative to maintain consistent velocity
+31. `45c2a798` - Set maximum zoom level to 1.0
+32. `ed71cf91` - Fix zoom-to-fit to properly center nodes in viewport
+33. `732c8283` - Refresh active nodes before zoom-to-fit to work immediately (includes pan animation matching zoom duration, 200-350ms range)
