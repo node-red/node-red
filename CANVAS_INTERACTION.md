@@ -119,7 +119,21 @@ Improve canvas interaction to work consistently and intuitively across:
 
 ## Recent Fixes
 
-### Minimap Auto-Show Behavior (Latest)
+### Spacebar Hold Scrolling Bug (Latest)
+**Issue**: When holding spacebar down, the canvas would move down unexpectedly, making the space+scroll interaction buggy.
+
+**Root Cause**: The `preventDefault()` was only called on the first spacebar keydown event. When spacebar is held, browsers fire repeated keydown events. After the first keydown set `spacebarPressed = true`, subsequent keydown events weren't prevented because the condition `e.type === "keydown" && !spacebarPressed` failed, allowing browser's default space-scroll behavior.
+
+**Solution**:
+- Moved `preventDefault()` and `stopPropagation()` outside the conditional checks
+- Now blocks ALL spacebar events (both keydown repeats and keyup), not just the first keydown
+
+**Files Changed**:
+- `view.js:611-619` - Restructured spacebar event handler to always prevent default
+
+**Result**: Holding spacebar no longer causes unwanted canvas scrolling.
+
+### Minimap Auto-Show Behavior
 **Issue**: Minimap was showing on selection changes and when entering pan mode (before actual panning), causing unnecessary flashing.
 
 **Solution**:
