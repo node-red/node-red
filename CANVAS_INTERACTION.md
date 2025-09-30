@@ -119,7 +119,23 @@ Improve canvas interaction to work consistently and intuitively across:
 
 ## Recent Fixes
 
-### Diagonal Trackpad Panning (Latest)
+### Minimap Auto-Show Behavior (Latest)
+**Issue**: Minimap was showing on selection changes and when entering pan mode (before actual panning), causing unnecessary flashing.
+
+**Solution**:
+- Removed `view:selection-changed` event listener - minimap no longer shows when selecting nodes
+- Removed `view:navigate` emissions from pan mode entry points (touch long-press, spacebar+click, middle-click)
+- Added `view:navigate` emission to regular touchpad scroll handler for consistent behavior
+- Kept emissions only during actual panning movement and zooming
+
+**Files Changed**:
+- `view-navigator.js:195-198` - Removed selection-changed listener
+- `view.js:483, 1529, 1539` - Removed navigate events from pan mode entry
+- `view.js:876` - Added navigate event to touchpad scroll handler
+
+**Result**: Minimap now appears only during actual panning (touchpad or mouse) and zooming, not on selection or pan mode entry.
+
+### Diagonal Trackpad Panning
 **Issue**: Trackpad scrolling was restricted to horizontal OR vertical movement, not both simultaneously.
 
 **Root Cause**: Browser's native scroll behavior on `overflow: auto` containers locks into one axis at a time, even before JavaScript wheel events fire.
@@ -178,11 +194,12 @@ When verifying canvas interaction improvements:
    - [x] No lag when switching between pan and zoom
 
 3. **UI/UX Testing**
-   - [ ] Minimap auto-shows on navigation
-   - [ ] Minimap fades after 2 seconds
-   - [ ] No scrollbars visible on canvas
-   - [ ] No pinch-zoom on UI elements
-   - [ ] Gesture state cleanup on cursor exit
+   - [x] Minimap auto-shows during panning and zooming
+   - [x] Minimap does not show on selection changes
+   - [x] Minimap fades after 2 seconds
+   - [x] No scrollbars visible on canvas
+   - [x] No pinch-zoom on UI elements
+   - [x] Gesture state cleanup on cursor exit
 
 4. **Browser Zoom Testing**
    - [ ] Test at 100% browser zoom
@@ -205,7 +222,7 @@ Key files involved in canvas interaction improvements:
 
 ## Commit History
 
-Interaction improvements span commits from e7a028b to present (12 commits total):
+Interaction improvements span commits from e7a028b to present (13 commits total):
 
 1. `e7a028b` - feat: Add enhanced zoom and scroll features
 2. `bdfa06b` - Implement smooth zoom functionality with pinch-to-zoom support
@@ -218,4 +235,5 @@ Interaction improvements span commits from e7a028b to present (12 commits total)
 9. `7918693` - Implement dynamic zoom limits to match canvas boundaries
 10. `f13ed66` - Add dynamic minimum zoom recalculation on viewport resize
 11. `53dce6a` - Hide scrollbars and add auto-show/hide minimap on navigation
-12. (current) - Enable diagonal trackpad panning by preventing axis-locked scroll
+12. `875db2c` - Enable diagonal trackpad panning by preventing axis-locked scroll
+13. (current) - Improve minimap auto-show behavior to only trigger during actual navigation
