@@ -23,10 +23,14 @@ Improve canvas interaction to work consistently and intuitively across:
 
 #### Zoom Input Methods (commits: e7a028b, bdfa06b)
 - ✅ Mouse wheel zoom
-- ✅ Space+scroll zoom mode (alternative to Alt+scroll)
-- ✅ Trackpad pinch-to-zoom (Ctrl+wheel)
-- ✅ Touch screen pinch-to-zoom with proper center tracking
+- ✅ Alt+scroll zoom mode (keyboard modifier alternative)
+- ✅ Space+scroll zoom mode (keyboard modifier alternative)
+- ✅ Trackpad pinch-to-zoom (browsers translate to Ctrl+wheel events)
+- ✅ Touch screen pinch-to-zoom with proper center tracking (direct touch events)
 - ✅ UI zoom buttons (corrected zoom in/out direction)
+- ✅ Zoom-to-fit button (zooms out to show all nodes with padding, respects minimum zoom)
+
+**Note**: Ctrl+wheel is used for trackpad pinch gestures on desktop. Browsers automatically translate two-finger pinch gestures on trackpads into Ctrl+wheel events. This is separate from touchscreen pinch-to-zoom, which uses direct touch events (touchstart/touchmove/touchend).
 
 #### Zoom Focal Point (commits: e42b09de, feec7ec, e7a028b)
 - ✅ Cursor-centered zoom (focuses on cursor position)
@@ -119,7 +123,22 @@ Improve canvas interaction to work consistently and intuitively across:
 
 ## Recent Fixes
 
-### Spacebar Hold Scrolling Bug (Latest)
+### Grey Padding at Canvas Bottom (Latest)
+**Issue**: When scrolled to the bottom of the canvas, 5 pixels of grey space appeared below the grid, allowing users to scroll slightly beyond the canvas boundary.
+
+**Root Cause**: Default browser margins on SVG elements caused the viewport's `scrollHeight` to be 8005px instead of 8000px, creating extra scrollable area beyond the canvas.
+
+**Solution**:
+- Added explicit `padding: 0` and `margin: 0` to `#red-ui-workspace-chart` container
+- Added `display: block`, `margin: 0`, and `padding: 0` to SVG element via `#red-ui-workspace-chart > svg` selector
+- The `display: block` prevents inline element spacing issues
+
+**Files Changed**:
+- `workspace.scss:41-42, 52-57` - Added margin/padding resets for container and SVG
+
+**Result**: Canvas now has exact 8000px scrollable area with no grey padding visible at bottom.
+
+### Spacebar Hold Scrolling Bug
 **Issue**: When holding spacebar down, the canvas would move down unexpectedly, making the space+scroll interaction buggy.
 
 **Root Cause**: The `preventDefault()` was only called on the first spacebar keydown event. When spacebar is held, browsers fire repeated keydown events. After the first keydown set `spacebarPressed = true`, subsequent keydown events weren't prevented because the condition `e.type === "keydown" && !spacebarPressed` failed, allowing browser's default space-scroll behavior.
@@ -193,10 +212,12 @@ When verifying canvas interaction improvements:
 
 1. **Zoom Testing**
    - [ ] Mouse wheel zoom in/out
-   - [ ] Space+scroll zoom
-   - [ ] Trackpad pinch gesture (spread = zoom in, pinch = zoom out)
-   - [ ] Touch screen pinch gesture
-   - [ ] UI zoom buttons
+   - [ ] Alt+scroll zoom (keyboard modifier)
+   - [ ] Space+scroll zoom (keyboard modifier)
+   - [ ] Trackpad pinch gesture (spread = zoom in, pinch = zoom out, generates Ctrl+wheel)
+   - [ ] Touch screen pinch gesture (direct touch events)
+   - [ ] UI zoom buttons (zoom in, zoom out, reset)
+   - [ ] Zoom-to-fit button (shows all nodes with padding, respects min zoom)
    - [ ] Zoom focal point stays on cursor position
    - [ ] Dynamic zoom limits prevent empty space
 
