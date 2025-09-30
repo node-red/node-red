@@ -124,12 +124,14 @@ Improve canvas interaction to work consistently and intuitively across:
 - ✅ JavaScript prevention for trackpad pinch on non-canvas areas
 - ✅ Block Ctrl+wheel events outside the workspace chart
 
-#### Minimap Navigation (commit: 53dce6a)
+#### Minimap Navigation (commits: 53dce6a, 5e056a4)
 - ✅ Auto-show minimap on zoom and pan operations
+- ✅ Auto-show minimap on flow startup and workspace changes
 - ✅ Minimap appears for 2 seconds during navigation then fades out
 - ✅ Smooth fade in/out animations for minimap visibility
 - ✅ Minimap stays visible if manually toggled with button
 - ✅ Emit `view:navigate` events for all zoom and pan operations
+- ✅ Check for active nodes before showing on workspace change
 
 #### Visual Polish (commit: 53dce6a)
 - ✅ Hide scrollbars on canvas while keeping it scrollable
@@ -280,6 +282,7 @@ When verifying canvas interaction improvements:
    - [x] No lag when switching between pan and zoom
 
 3. **UI/UX Testing**
+   - [x] Minimap auto-shows on flow startup and workspace changes
    - [x] Minimap auto-shows during panning and zooming
    - [x] Minimap auto-shows during zoom button/hotkey/zoom-to-fit
    - [x] Minimap does not show on selection changes
@@ -350,3 +353,4 @@ Interaction improvements (20 commits total on claude/issue-44-20250925-0754):
 31. `45c2a798` - Set maximum zoom level to 1.0
 32. `ed71cf91` - Fix zoom-to-fit to properly center nodes in viewport
 33. `732c8283` - Refresh active nodes before zoom-to-fit to work immediately (includes pan animation matching zoom duration, 200-350ms range)
+34. `5e056a4d` - Add minimap auto-show on flow startup and workspace changes
