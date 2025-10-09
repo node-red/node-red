@@ -887,6 +887,145 @@ describe("@node-red/util/util", function() {
             resultJson.should.have.property("length",2)
         });
 
+        describe('encode typed arrays', function() {
+            it('encodes Int8Array', function () {
+                const arr = new Int8Array([1, 2, 3]);
+                const msg = { msg: arr };
+                const result = util.encodeObject(msg);
+                result.format.should.eql("Int8Array[3]");
+                const resultJson = JSON.parse(result.msg);
+                resultJson.should.have.property("__enc__", true);
+                resultJson.should.have.property("type", "array");
+                resultJson.should.have.property("data").which.eql([1, 2, 3]);
+                resultJson.should.have.property("length", 3);
+            });
+            it('encodes Uint8Array', function () {
+                const arr = new Uint8Array([4, 5, 6]);
+                const msg = { msg: arr };
+                const result = util.encodeObject(msg);
+                result.format.should.eql("Uint8Array[3]");
+                const resultJson = JSON.parse(result.msg);
+                resultJson.should.have.property("__enc__", true);
+                resultJson.should.have.property("type", "array");
+                resultJson.should.have.property("data").which.eql([4, 5, 6]);
+                resultJson.should.have.property("length", 3);
+            });
+            it('encodes Uint8ClampedArray', function () {
+                const arr = new Uint8ClampedArray([7, 8, 9]);
+                const msg = { msg: arr };
+                const result = util.encodeObject(msg);
+                result.format.should.eql("Uint8ClampedArray[3]");
+                const resultJson = JSON.parse(result.msg);
+                resultJson.should.have.property("__enc__", true);
+                resultJson.should.have.property("type", "array");
+                resultJson.should.have.property("data").which.eql([7, 8, 9]);
+                resultJson.should.have.property("length", 3);
+            });
+            it('encodes Int16Array', function () {
+                const arr = new Int16Array([10, 11, 12]);
+                const msg = { msg: arr };
+                const result = util.encodeObject(msg);
+                result.format.should.eql("Int16Array[3]");
+                const resultJson = JSON.parse(result.msg);
+                resultJson.should.have.property("__enc__", true);
+                resultJson.should.have.property("type", "array");
+                resultJson.should.have.property("data").which.eql([10, 11, 12]);
+                resultJson.should.have.property("length", 3);
+            });
+            it('encodes Uint16Array', function () {
+                const arr = new Uint16Array([13, 14, 15]);
+                const msg = { msg: arr };
+                const result = util.encodeObject(msg);
+                result.format.should.eql("Uint16Array[3]");
+                const resultJson = JSON.parse(result.msg);
+                resultJson.should.have.property("__enc__", true);
+                resultJson.should.have.property("type", "array");
+                resultJson.should.have.property("data").which.eql([13, 14, 15]);
+                resultJson.should.have.property("length", 3);
+            });
+            it('encodes Int32Array', function () {
+                const arr = new Int32Array([16, 17, 18]);
+                const msg = { msg: arr };
+                const result = util.encodeObject(msg);
+                result.format.should.eql("Int32Array[3]");
+                const resultJson = JSON.parse(result.msg);
+                resultJson.should.have.property("__enc__", true);
+                resultJson.should.have.property("type", "array");
+                resultJson.should.have.property("data").which.eql([16, 17, 18]);
+                resultJson.should.have.property("length", 3);
+            });
+            it('encodes Uint32Array', function () {
+                const arr = new Uint32Array([19, 20, 21]);
+                const msg = { msg: arr };
+                const result = util.encodeObject(msg);
+                result.format.should.eql("Uint32Array[3]");
+                const resultJson = JSON.parse(result.msg);
+                resultJson.should.have.property("__enc__", true);
+                resultJson.should.have.property("type", "array");
+                resultJson.should.have.property("data").which.eql([19, 20, 21]);
+                resultJson.should.have.property("length", 3);
+            });
+            it('encodes Float32Array', function () {
+                const arr = new Float32Array([22.1, 23.2, 24.3]);
+                const msg = { msg: arr };
+                const result = util.encodeObject(msg);
+                result.format.should.eql("Float32Array[3]");
+                const resultJson = JSON.parse(result.msg);
+                resultJson.should.have.property("__enc__", true);
+                resultJson.should.have.property("type", "array");
+                resultJson.should.have.property("data").which.be.an.Array();
+                resultJson.data[0].should.be.approximately(22.1, 0.00001);
+                resultJson.data[1].should.be.approximately(23.2, 0.00001);
+                resultJson.data[2].should.be.approximately(24.3, 0.00001);
+                resultJson.should.have.property("length", 3);
+            });
+            it('encodes Float64Array', function () {
+                const arr = new Float64Array([25.4, 26.5, 27.6]);
+                const msg = { msg: arr };
+                const result = util.encodeObject(msg);
+                result.format.should.eql("Float64Array[3]");
+                const resultJson = JSON.parse(result.msg);
+                resultJson.should.have.property("__enc__", true);
+                resultJson.should.have.property("type", "array");
+                resultJson.should.have.property("data").which.be.an.Array();
+                resultJson.data[0].should.be.approximately(25.4, 0.00001);
+                resultJson.data[1].should.be.approximately(26.5, 0.00001);
+                resultJson.data[2].should.be.approximately(27.6, 0.00001);
+                resultJson.should.have.property("length", 3);
+            });
+            it('encodes BigInt64Array', function () {
+                const arr = new BigInt64Array([BigInt(28), BigInt(29), BigInt(30)]);
+                const msg = { msg: arr };
+                const result = util.encodeObject(msg);
+                result.format.should.eql("BigInt64Array[3]");
+                const resultJson = JSON.parse(result.msg);
+                resultJson.should.have.property("__enc__", true);
+                resultJson.should.have.property("type", "array");
+                // BigInt arrays are stringified in JSON
+                resultJson.should.have.property("data").which.eql([
+                    { "__enc__": true, "data": "28", "type": "bigint" },
+                    { "__enc__": true, "data": "29", "type": "bigint" },
+                    { "__enc__": true, "data": "30", "type": "bigint" }
+                ]);
+                resultJson.should.have.property("length", 3);
+            });
+            it('encodes BigUint64Array', function () {
+                const arr = new BigUint64Array([BigInt(31), BigInt(32), BigInt(33)]);
+                const msg = { msg: arr };
+                const result = util.encodeObject(msg);
+                result.format.should.eql("BigUint64Array[3]");
+                const resultJson = JSON.parse(result.msg);
+                resultJson.should.have.property("__enc__", true);
+                resultJson.should.have.property("type", "array");
+                // BigInt arrays are stringified in JSON
+                resultJson.should.have.property("data").which.eql([
+                    { "__enc__": true, "data": "31", "type": "bigint" },
+                    { "__enc__": true, "data": "32", "type": "bigint" },
+                    { "__enc__": true, "data": "33", "type": "bigint" }
+                ]);
+                resultJson.should.have.property("length", 3);
+            });
+        });
 
         describe('encode object', function() {
             it('object', function() {
@@ -965,6 +1104,34 @@ describe("@node-red/util/util", function() {
                 resultJson.aSet.should.have.property("type","set");
                 resultJson.aSet.should.have.property("data",["a","b"]);
                 resultJson.aSet.should.have.property("length",2)
+            });
+            it('object with typed array property (Int8Array)', function() {
+                const arr = new Int8Array([1, 2, 3]);
+                const msg = { msg: { anArray: arr } };
+                const result = util.encodeObject(msg);
+                result.format.should.eql("Object");
+                const resultJson = JSON.parse(result.msg);
+                resultJson.should.have.property("anArray");
+                resultJson.anArray.should.have.property("__enc__", true);
+                resultJson.anArray.should.have.property("type", "array");
+                resultJson.anArray.should.have.property("data", [1, 2, 3]);
+                resultJson.anArray.should.have.property("length", 3);
+            });
+            it('object with typed array property (BigInt64Array)', function() {
+                const arr = new BigInt64Array([10n, 20n, 30n]);
+                const msg = { msg: { anArray: arr } };
+                const result = util.encodeObject(msg);
+                result.format.should.eql("Object");
+                const resultJson = JSON.parse(result.msg);
+                resultJson.should.have.property("anArray");
+                resultJson.anArray.should.have.property("__enc__", true);
+                resultJson.anArray.should.have.property("type", "array");
+                resultJson.anArray.should.have.property("data", [
+                    { __enc__: true, data: "10", type: "bigint" },
+                    { __enc__: true, data: "20", type: "bigint" },
+                    { __enc__: true, data: "30", type: "bigint" }
+                ]);
+                resultJson.anArray.should.have.property("length", 3);
             });
             it('constructor of IncomingMessage', function() {
                 function IncomingMessage(){};
