@@ -1,3 +1,43 @@
+#### 4.1.1: Maintenance Release
+
+Editor
+
+ - Filter suggestions to ensure only enabled set are shown (#5307) @GogoVega
+ - Show all catalog items if small enough and no search time provided (#5309) @knolleary
+ - Force a redraw after clearing suggested flow on mouse down (#5306) @knolleary
+ - i18n(NodeRed) update ES translation files to latest code base (#5299) @joebordes
+ - Filter suggestions to ensure only known types are shown (#5301) @knolleary
+ - Use the action label if provided (#5302) @GogoVega
+ - Handle subflow virtual port nodes when generating quick-add context (#5296) @knolleary
+ - Prevents label from taking up all the space for env autocomplete (#5293) @GogoVega
+ - Fix env autocomplete result if searchKey starts with `${` (#5292) @GogoVega
+ - Fix UI lock-up when typed arrays are expanded in debug window (#5290) @Steve-Mcl
+ - Notify installed plugins from the Palette Manager (#5277) @GogoVega
+ - Fix uncaught Monaco error (#5266) @Steve-Mcl
+ - Add 'url' module to default server-side types in Monaco editor (#5265) @Steve-Mcl
+ - Catch errors from RED.comms.subscribe callback (#5263) @hardillb
+ - Fix node documentation icon for long catalog loading (#5237) @GogoVega
+ - Add tooltip for event log view (#5239) @kazuhitoyokoi
+ - Fix undo node output changes inside a Subflow (#5278) @GogoVega
+
+Runtime
+
+ - Ensure flow property is set on sf instance nodes so NR_SUBFLOW_PATH c… (#5297) @knolleary
+ - Ignore disabled nodes when checking for dependency modules (#5295) @knolleary
+ - Update node-red-admin version (#5294) @knolleary
+ - Fix config node resolution in packaged subflow within subflow (#5281) @olivierpelet
+ - Remove empty if block (#5273) @bonanitech
+ - docs: add security escalation policy (#5269) @UlisesGascon
+ - Simplify error logging when issue in settings file (#5310) @knolleary
+
+Nodes
+
+ - Inject: Fix jsonata error reporting in Inject node (#5298) @knolleary
+ - Range: Fix rounding errors for range node when using float inputs and intege… (#5257) @dceejay
+ - HTTP Request: Show requesting status correctly in http request node when multiple processes are working (#5241) @kazuhitoyokoi
+ - Split: Speed up split node (#5252) @hardillb
+ - HTTP: Do not assume rawBody middleware is last in stack when moving it (#5300) @knolleary
+
 #### 4.1.0: Milestone Release
 
  - Fix: multipart form data upload issue (#5228) @debadutta98
