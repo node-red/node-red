@@ -69,8 +69,7 @@ describe('function node', function() {
     });
 
     it('should do something with the catch node', function(done) {
-        // TODO: global flow should not contain these nodes
-        var flow = [{"id":"flow","type":"tab"},{"id":"funcNode","type":"function","wires":[["goodNode"]],"func":"node.error('This is an error', msg);","z":"flow"},{"id":"goodNode","type":"helper","z":"flow"},{"id":"badNode","type":"helper","z":"flow"},{"id":"catchNode","type":"catch","scope":null,"uncaught":false,"wires":[["badNode"]],"anyError":true,"includeConfig":true,"z":"flow"}];
+        var flow = [{"id":"flow","type":"tab"},{"id":"funcNode","type":"function","wires":[["goodNode"]],"func":"node.error('This is an error', msg);","x":0,"y":0,"z":"flow"},{"id":"goodNode","type":"helper","z":"flow"},{"id":"badNode","type":"helper","z":"flow"},{"id":"catchNode","type":"catch","scope":null,"uncaught":false,"wires":[["badNode"]],"z":"flow"}];
         var catchNodeModule = require("nr-test-utils").require("@node-red/nodes/core/common/25-catch.js")
         helper.load([catchNodeModule, functionNode], flow, function() {
             var funcNode = helper.getNode("funcNode");
