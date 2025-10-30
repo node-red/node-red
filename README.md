@@ -20,10 +20,11 @@
 
 <p align="center">
 <img src="https://nodered.org/about/resources/media/node-red-icon-2.svg" width="200" title="Node-RED Logo">
+</p>
 <br/>
 <h3 align="center">Low-code programming for event-driven applications</h3>
 <br/>
-<br/>
+<p align="center">
 <a href="https://flows.nodered.org/search?type=node">
   <img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fflows.nodered.org%2Fthings%3Fformat%3Djson%26per_page%3D1%26type%3Dnode&query=$.meta.results.count&label=Nodes&style=for-the-badge&labelColor=ececec&color=8f0000" alt="Node-RED Library Nodes"/>
 </a>
