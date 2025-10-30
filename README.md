@@ -21,7 +21,6 @@
 <p align="center">
 <img src="https://nodered.org/about/resources/media/node-red-icon-2.svg" width="200" title="Node-RED Logo">
 </p>
-<br/>
 <h3 align="center">Low-code programming for event-driven applications</h3>
 <br/>
 <p align="center">
