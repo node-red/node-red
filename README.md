@@ -7,10 +7,26 @@
   <br/>
   <a href="https://opensource.org/license/apache-2-0"><img src="https://img.shields.io/badge/License-Apache_2.0-blue.svg?color=3F51B5&style=for-the-badge&label=License&logoColor=000000&labelColor=ececec" alt="License: Apache 2.0"></a>
   <a href="https://discourse.nodered.org">
-    <img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fdiscourse.nodered.org%2Fabout.json&query=%24.about.stats.users_count&suffix=%20users&label=Forum&logo=discourse&style=for-the-badge&color=8f0000&logoColor=8f0000&labelColor=ececec" alt="Node-RED Forum on Discourse"/>
+    <img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fdiscourse.nodered.org%2Fabout.json&query=%24.about.stats.users_count&suffix=%20members&label=Forum&logo=discourse&style=for-the-badge&color=8f0000&logoColor=8f0000&labelColor=ececec" alt="Node-RED Forum on Discourse"/>
+  </a>
+  <a href="https://github.com/node-red">
+    <img src="https://img.shields.io/badge/dynamic/json?url=https://api.github.com/orgs/node-red&query=$.followers&suffix=%20followers&label=GitHub%20org&style=for-the-badge&logo=github&logoColor=white&labelColor=24292e&color=8f0000" alt="Node-RED GitHub Organisation Followers"/>
   </a>
   <a href="node-red.slack.com">
       <img src="https://img.shields.io/badge/Slack-Join%20Us-4A154B.svg?logo=slack&style=for-the-badge&logoColor=4A154B&labelColor=ececec" alt="Slack"/>
+  </a>
+  <br/>
+  <br/>
+  Node-RED Library
+  <br/>
+  <a href="https://flows.nodered.org/search?type=node">
+    <img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fflows.nodered.org%2Fthings%3Fformat%3Djson%26per_page%3D1%26type%3Dnode&query=$.meta.results.count&suffix=%20nodes&label=%20&style=for-the-badge&logo=node-red&logoColor=8f0000&labelColor=ececec&color=8f0000" alt="Node-RED Library Nodes"/>
+  </a>
+  <a href="https://flows.nodered.org/search?type=flow">
+    <img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fflows.nodered.org%2Fthings%3Fformat%3Djson%26per_page%3D1%26type%3Dflow&query=$.meta.results.count&suffix=%20flows&label=%20&style=for-the-badge&logo=node-red&logoColor=8f0000&labelColor=ececec&color=8f0000" alt="Node-RED Library Flows"/>
+  </a>
+  <a href="https://flows.nodered.org/search?type=collection">
+    <img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fflows.nodered.org%2Fthings%3Fformat%3Djson%26per_page%3D1%26type%3Dcollection&query=$.meta.results.count&suffix=%20collections&label=%20&style=for-the-badge&logo=node-red&logoColor=8f0000&labelColor=ececec&color=8f0000" alt="Node-RED Library Collections"/>
   </a>
   <br/>
   <br/>
