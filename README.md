@@ -4,6 +4,7 @@
     <img src="https://img.shields.io/github/actions/workflow/status/node-red/node-red/tests.yml?branch=master&label=Build%20Status&style=for-the-badge" alt="Build Status"/>
   </a>
   <br/>
+  <br/>
   <a href="https://opensource.org/license/apache-2-0"><img src="https://img.shields.io/badge/License-Apache_2.0-blue.svg?color=3F51B5&style=for-the-badge&label=License&logoColor=000000&labelColor=ececec" alt="License: Apache 2.0"></a>
   <a href="https://discourse.nodered.org">
     <img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fdiscourse.nodered.org%2Fabout.json&query=%24.about.stats.users_count&suffix=%20users&label=Forum&logo=discourse&style=for-the-badge&color=8f0000&logoColor=8f0000&labelColor=ececec" alt="Node-RED Forum on Discourse"/>
@@ -33,6 +34,8 @@ started.
 1. `sudo npm install -g --unsafe-perm node-red`
 2. `node-red`
 3. Open <http://localhost:1880>
+
+<br/>
 
 > [!NOTE]
 > More documentation can be found [here](https://nodered.org/docs). For further help, or general discussion, please join the [Node-RED Forum](https://discourse.nodered.org) or [Node-RED Slack](https://nodered.org/slack).
@@ -110,6 +113,8 @@ It is maintained by:
 
 Node-RED is a project of the [OpenJS Foundation](http://openjsf.org).
 
-![OpenJS Foundation](https://nodered.org/images/openjs_foundation-logo.svg)
+<a href="http://openjsf.org">
+<img src="https://nodered.org/images/openjs_foundation-logo.svg" width="400" title="OpenJS Foundation Logo">
+</a>
 
 Copyright OpenJS Foundation and other contributors, https://openjsf.org under [the Apache 2.0 license](LICENSE).
