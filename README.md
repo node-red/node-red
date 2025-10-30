@@ -123,13 +123,11 @@ It is maintained by:
   <img src="https://contrib.rocks/image?repo=node-red/node-red" width="100%"/>
 </a>
 
-## Copyright and license
+## Copyright and License
+
+Node-RED is a project of the [OpenJS Foundation](http://openjsf.org). Copyright OpenJS Foundation and other contributors, https://openjsf.org under [the Apache 2.0 license](LICENSE).
 
 <br/>
 <a href="http://openjsf.org">
 <img src="https://raw.githubusercontent.com/node-red/community-survey/refs/heads/main/public/openjs-foundation-logo.svg" width="240" title="OpenJS Foundation Logo">
 </a>
-<br/>
-<br/>
-
-Node-RED is a project of the [OpenJS Foundation](http://openjsf.org). Copyright OpenJS Foundation and other contributors, https://openjsf.org under [the Apache 2.0 license](LICENSE).
