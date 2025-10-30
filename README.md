@@ -1,11 +1,11 @@
 <p align="center"> 
   
+  <a href="https://opensource.org/license/apache-2-0"><img src="https://img.shields.io/badge/License-Apache_2.0-blue.svg?color=3F51B5&style=for-the-badge&label=License&logoColor=000000&labelColor=ececec" alt="License: Apache 2.0"></a>
   <a href="https://github.com/node-red/node-red/actions?query=branch%3Amaster">
     <img src="https://img.shields.io/github/actions/workflow/status/node-red/node-red/tests.yml?branch=master&label=Build%20Status&style=for-the-badge" alt="Build Status"/>
   </a>
   <br/>
   <br/>
-  <a href="https://opensource.org/license/apache-2-0"><img src="https://img.shields.io/badge/License-Apache_2.0-blue.svg?color=3F51B5&style=for-the-badge&label=License&logoColor=000000&labelColor=ececec" alt="License: Apache 2.0"></a>
   <a href="https://discourse.nodered.org">
     <img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fdiscourse.nodered.org%2Fabout.json&query=%24.about.stats.users_count&suffix=%20members&label=Forum&logo=discourse&style=for-the-badge&color=8f0000&logoColor=8f0000&labelColor=ececec" alt="Node-RED Forum on Discourse"/>
   </a>
