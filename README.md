@@ -1,12 +1,30 @@
 # Node-RED
 
-https://nodered.org
+<p align="center"> 
+  <br/>
+  <a href="https://opensource.org/license/apache-2-0"><img src="https://img.shields.io/badge/License-Apache_2.0-blue.svg?color=3F51B5&style=for-the-badge&label=License&logoColor=000000&labelColor=ececec" alt="License: Apache 2.0"></a>
+  <a href="https://github.com/node-red/node-red/actions?query=branch%3Amaster">
+    <img src="https://img.shields.io/github/actions/workflow/status/node-red/node-red/tests.yml?branch=master&label=Build%20Status&style=for-the-badge" alt="Build Status"/>
+  </a>
+  <a href="https://discourse.nodered.org">
+    <img src="https://img.shields.io/badge/Forum-Discourse-8f0000.svg?logo=discourse&style=for-the-badge&logoColor=8f0000&labelColor=ececec" alt="Node-RED Forum on Discourse"/>
+  </a>
+  <a href="node-red.slack.com">
+      <img src="https://img.shields.io/badge/Slack-Join%20Us-4A154B.svg?logo=slack&style=for-the-badge&logoColor=4A154B&labelColor=ececec" alt="Slack"/>
+  </a>
+  <br/>
+  <br/>
+</p>
 
-[![Build Status](https://github.com/node-red/node-red/actions/workflows/tests.yml/badge.svg?branch=master)](https://github.com/node-red/node-red/actions?query=branch%3Amaster)
-
-Low-code programming for event-driven applications.
-
-![Node-RED: Low-code programming for event-driven applications](https://nodered.org/images/node-red-screenshot.png)
+<p align="center">
+<img src="https://nodered.org/about/resources/media/node-red-icon-2.svg" width="300" title="Node-RED Logo">
+</p>
+<h3 align="center">Low-code programming for event-driven applications</h3>
+<br/>
+<a href="https://nodered.org/">
+<img src="https://nodered.org/images/node-red-screenshot.png" title="Node-RED: Low-code programming for event-driven applications">
+</a>
+<br/>
 
 ## Quick Start
 
@@ -17,13 +35,30 @@ started.
 2. `node-red`
 3. Open <http://localhost:1880>
 
-## Getting Help
+> [!NOTE]
+> More documentation can be found [here](https://nodered.org/docs). For further help, or general discussion, please join the [Node-RED Forum](https://discourse.nodered.org) or [Node-RED Slack](https://nodered.org/slack).
 
-More documentation can be found [here](https://nodered.org/docs).
+## Links
 
-For further help, or general discussion, please use the [Node-RED Forum](https://discourse.nodered.org) or [slack team](https://nodered.org/slack).
+- [Documentation ↗](https://nodered.org/docs/)
+- [About ↗](https://nodered.org/about/)
+- [Installation ↗](https://nodered.org/#get-started)
+- Roadmap (Coming soon)
+- Experiments (Coming soon)
+- Demo (Coming soon)
+- Usecases (Coming soon)
+- Features (Coming soon)
+- [Node-RED Library ↗](https://flows.nodered.org/)
+  - [Custom Nodes & Integrations ↗](https://flows.nodered.org/search?type=node)
+  - [Shared Flows ↗](https://flows.nodered.org/search?type=flow)
+  - [Node Collections ↗](https://flows.nodered.org/search?type=collection)
+- Accessibility (Coming soon)
+- Translations (Coming soon)
+- [Development](#development)
+- [Contributing](#contributing)
+- [Copyright and license](#copyright-and-license)
 
-## Developers
+## Development
 
 If you want to run the latest code from git, here's how to get started:
 
@@ -46,24 +81,36 @@ If you want to run the latest code from git, here's how to get started:
 
 ## Contributing
 
-Before raising a pull-request, please read our
-[contributing guide](https://github.com/node-red/node-red/blob/master/CONTRIBUTING.md).
+Before raising a pull-request, please read our [contributing guide](https://github.com/node-red/node-red/blob/master/CONTRIBUTING.md).
 
-This project adheres to the [Contributor Covenant 1.4](http://contributor-covenant.org/version/1/4/).
- By participating, you are expected to uphold this code. Please report unacceptable
- behavior to any of the project's core team at team@nodered.org.
+This project adheres to the [Contributor Covenant 1.4](http://contributor-covenant.org/version/1/4/). By participating, you are expected to uphold this code. Please report unacceptable behavior to any of the project's core team at team@nodered.org.
 
-## Authors
+### Star history
 
-Node-RED is a project of the [OpenJS Foundation](http://openjsf.org).
+<a href="https://star-history.com/#node-red/node-red&Date">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=node-red/node-red&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=node-red/node-red&type=Date" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=node-red/node-red&type=Date" width="100%" />
+ </picture>
+</a>
+
+### Contributors
 
 It is maintained by:
 
  * Nick O'Leary [@knolleary](http://twitter.com/knolleary)
  * Dave Conway-Jones [@ceejay](http://twitter.com/ceejay)
- * And many others...
+ * And many others:
 
+<a href="https://github.com/node-red/node-red/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=node-red/node-red" width="100%"/>
+</a>
 
 ## Copyright and license
+
+Node-RED is a project of the [OpenJS Foundation](http://openjsf.org).
+
+![OpenJS Foundation](https://nodered.org/images/openjs_foundation-logo.svg)
 
 Copyright OpenJS Foundation and other contributors, https://openjsf.org under [the Apache 2.0 license](LICENSE).
