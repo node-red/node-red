@@ -1,13 +1,12 @@
-# Node-RED
-
 <p align="center"> 
-  <br/>
-  <a href="https://opensource.org/license/apache-2-0"><img src="https://img.shields.io/badge/License-Apache_2.0-blue.svg?color=3F51B5&style=for-the-badge&label=License&logoColor=000000&labelColor=ececec" alt="License: Apache 2.0"></a>
+  
   <a href="https://github.com/node-red/node-red/actions?query=branch%3Amaster">
     <img src="https://img.shields.io/github/actions/workflow/status/node-red/node-red/tests.yml?branch=master&label=Build%20Status&style=for-the-badge" alt="Build Status"/>
   </a>
+  <br/>
+  <a href="https://opensource.org/license/apache-2-0"><img src="https://img.shields.io/badge/License-Apache_2.0-blue.svg?color=3F51B5&style=for-the-badge&label=License&logoColor=000000&labelColor=ececec" alt="License: Apache 2.0"></a>
   <a href="https://discourse.nodered.org">
-    <img src="https://img.shields.io/badge/Forum-Discourse-8f0000.svg?logo=discourse&style=for-the-badge&logoColor=8f0000&labelColor=ececec" alt="Node-RED Forum on Discourse"/>
+    <img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fdiscourse.nodered.org%2Fabout.json&query=%24.about.stats.users_count&suffix=%20users&label=Forum&logo=discourse&style=for-the-badge&color=8f0000&logoColor=8f0000&labelColor=ececec" alt="Node-RED Forum on Discourse"/>
   </a>
   <a href="node-red.slack.com">
       <img src="https://img.shields.io/badge/Slack-Join%20Us-4A154B.svg?logo=slack&style=for-the-badge&logoColor=4A154B&labelColor=ececec" alt="Slack"/>
@@ -17,7 +16,7 @@
 </p>
 
 <p align="center">
-<img src="https://nodered.org/about/resources/media/node-red-icon-2.svg" width="300" title="Node-RED Logo">
+<img src="https://nodered.org/about/resources/media/node-red-icon-2.svg" width="200" title="Node-RED Logo">
 </p>
 <h3 align="center">Low-code programming for event-driven applications</h3>
 <br/>
