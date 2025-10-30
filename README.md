@@ -16,21 +16,21 @@
   </a>
   <br/>
   <br/>
-  <a href="https://flows.nodered.org/search?type=node">
-    <img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fflows.nodered.org%2Fthings%3Fformat%3Djson%26per_page%3D1%26type%3Dnode&query=$.meta.results.count&suffix=%20nodes&label=%20&style=for-the-badge&logo=node-red&logoColor=8f0000&labelColor=ececec&color=8f0000" alt="Node-RED Library Nodes"/>
-  </a>
-  <a href="https://flows.nodered.org/search?type=flow">
-    <img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fflows.nodered.org%2Fthings%3Fformat%3Djson%26per_page%3D1%26type%3Dflow&query=$.meta.results.count&suffix=%20flows&label=%20&style=for-the-badge&logo=node-red&logoColor=8f0000&labelColor=ececec&color=8f0000" alt="Node-RED Library Flows"/>
-  </a>
-  <a href="https://flows.nodered.org/search?type=collection">
-    <img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fflows.nodered.org%2Fthings%3Fformat%3Djson%26per_page%3D1%26type%3Dcollection&query=$.meta.results.count&suffix=%20collections&label=%20&style=for-the-badge&logo=node-red&logoColor=8f0000&labelColor=ececec&color=8f0000" alt="Node-RED Library Collections"/>
-  </a>
-  <br/>
-  <br/>
 </p>
 
 <p align="center">
 <img src="https://nodered.org/about/resources/media/node-red-icon-2.svg" width="200" title="Node-RED Logo">
+<br/>
+<br/>
+<a href="https://flows.nodered.org/search?type=node">
+  <img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fflows.nodered.org%2Fthings%3Fformat%3Djson%26per_page%3D1%26type%3Dnode&query=$.meta.results.count&suffix=%20nodes&label=%20&style=for-the-badge&logo=node-red&logoColor=8f0000&labelColor=ececec&color=8f0000" alt="Node-RED Library Nodes"/>
+</a>
+<a href="https://flows.nodered.org/search?type=flow">
+  <img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fflows.nodered.org%2Fthings%3Fformat%3Djson%26per_page%3D1%26type%3Dflow&query=$.meta.results.count&suffix=%20flows&label=%20&style=for-the-badge&logo=node-red&logoColor=8f0000&labelColor=ececec&color=8f0000" alt="Node-RED Library Flows"/>
+</a>
+<a href="https://flows.nodered.org/search?type=collection">
+  <img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fflows.nodered.org%2Fthings%3Fformat%3Djson%26per_page%3D1%26type%3Dcollection&query=$.meta.results.count&suffix=%20collections&label=%20&style=for-the-badge&logo=node-red&logoColor=8f0000&labelColor=ececec&color=8f0000" alt="Node-RED Library Collections"/>
+</a>
 </p>
 <h3 align="center">Low-code programming for event-driven applications</h3>
 <br/>
