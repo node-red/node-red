@@ -7,7 +7,7 @@
   <br/>
   <br/>
   <a href="https://discourse.nodered.org">
-    <img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fdiscourse.nodered.org%2Fabout.json&query=%24.about.stats.users_count&suffix=%20members&label=Forum&logo=discourse&style=for-the-badge&color=8f0000&logoColor=8f0000&labelColor=ececec" alt="Node-RED Forum on Discourse"/>
+    <img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fdiscourse.nodered.org%2Fabout.json&query=%24.about.stats.users_count&suffix=%20members&label=Forum&logo=discourse&style=for-the-badge&color=17B4E6&logoColor=17B4E6&labelColor=ececec" alt="Node-RED Forum on Discourse"/>
   </a>
   <a href="https://github.com/node-red">
     <img src="https://img.shields.io/badge/dynamic/json?url=https://api.github.com/orgs/node-red&query=$.followers&suffix=%20followers&label=GitHub%20org&style=for-the-badge&logo=github&logoColor=24292F&labelColor=ececec&color=24292F" alt="Node-RED GitHub Organisation Followers"/>
