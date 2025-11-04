@@ -11,7 +11,7 @@
   <a href="https://github.com/node-red">
     <img src="https://img.shields.io/badge/dynamic/json?url=https://api.github.com/orgs/node-red&query=$.followers&suffix=%20followers&label=GitHub%20org&style=for-the-badge&logo=github&logoColor=24292F&labelColor=ececec&color=24292F" alt="Node-RED GitHub Organisation Followers"/>
   </a>
-  <a href="node-red.slack.com">
+  <a href="https://nodered.org/slack">
       <img src="https://img.shields.io/badge/Slack-Join%20Us-4A154B.svg?logo=slack&style=for-the-badge&logoColor=4A154B&labelColor=ececec" alt="Slack"/>
   </a>
   <br/>
