@@ -1,18 +1,7 @@
-<p align="center"> 
+<p align="center">
   <a href="https://opensource.org/license/apache-2-0"><img src="https://img.shields.io/badge/License-Apache_2.0-blue.svg?color=3F51B5&style=for-the-badge&label=License&logoColor=000000&labelColor=ececec" alt="License: Apache 2.0"></a>
   <a href="https://github.com/node-red/node-red/actions?query=branch%3Amaster">
     <img src="https://img.shields.io/github/actions/workflow/status/node-red/node-red/tests.yml?branch=master&label=Build%20Status&style=for-the-badge" alt="Build Status"/>
-  </a>
-  <br/>
-  <br/>
-  <a href="https://discourse.nodered.org">
-    <img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fdiscourse.nodered.org%2Fabout.json&query=%24.about.stats.users_count&suffix=%20members&label=Forum&logo=discourse&style=for-the-badge&color=0e76b2&logoColor=0e76b2&labelColor=ececec" alt="Node-RED Forum on Discourse"/>
-  </a>
-  <a href="https://github.com/node-red">
-    <img src="https://img.shields.io/badge/dynamic/json?url=https://api.github.com/orgs/node-red&query=$.followers&suffix=%20followers&label=GitHub%20org&style=for-the-badge&logo=github&logoColor=24292F&labelColor=ececec&color=24292F" alt="Node-RED GitHub Organisation Followers"/>
-  </a>
-  <a href="https://nodered.org/slack">
-      <img src="https://img.shields.io/badge/Slack-Join%20Us-4A154B.svg?logo=slack&style=for-the-badge&logoColor=4A154B&labelColor=ececec" alt="Slack"/>
   </a>
   <br/>
   <br/>
@@ -39,6 +28,42 @@
 <img src="https://nodered.org/images/node-red-screenshot.png" title="Node-RED: Low-code programming for event-driven applications">
 </a>
 <br/>
+
+<h3 align="center">Contribute with us</h3>
+<p align="center">
+  <a href="https://discourse.nodered.org">
+    <img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fdiscourse.nodered.org%2Fabout.json&query=%24.about.stats.users_count&suffix=%20members&label=Forum&logo=discourse&style=for-the-badge&color=0e76b2&logoColor=0e76b2&labelColor=ececec" alt="Node-RED Forum on Discourse"/>
+  </a>
+  <a href="https://github.com/node-red">
+    <img src="https://img.shields.io/badge/dynamic/json?url=https://api.github.com/orgs/node-red&query=$.followers&suffix=%20followers&label=GitHub%20org&style=for-the-badge&logo=github&logoColor=24292F&labelColor=ececec&color=24292F" alt="Node-RED GitHub Organisation Followers"/>
+  </a>
+</p>
+<h3 align="center">or follow along</h3>
+<p align="center">
+  <a href="https://www.youtube.com/@Node-RED">
+    <img src="https://img.shields.io/badge/YouTube-FF0000?logo=youtube&style=for-the-badge&logoColor=white&labelColor=FF0000" alt="YouTube"/>
+  </a>
+  <a href="https://www.reddit.com/r/nodered/">
+    <img src="https://img.shields.io/badge/Reddit-FF4500?logo=reddit&style=for-the-badge&logoColor=white&labelColor=FF4500" alt="Reddit"/>
+  </a>
+  <br/>
+  <a href="https://www.facebook.com/groups/1770647003193737">
+    <img src="https://img.shields.io/badge/Facebook-0866FF?logo=facebook&style=for-the-badge&logoColor=white&labelColor=0866FF" alt="Facebook"/>
+  </a>
+  <a href="https://discord.gg/2RrvW8dkrF">
+    <img src="https://img.shields.io/badge/Discord-5865F2?logo=discord&style=for-the-badge&logoColor=white&labelColor=5865F2" alt="Discord"/>
+  </a>
+  <a href="https://nodered.org/slack">
+    <img src="https://img.shields.io/badge/Slack-4A154B?logo=slack&style=for-the-badge&logoColor=white&labelColor=4A154B" alt="Slack"/>
+  </a>
+  <br/>
+  <a href="https://bsky.app/profile/nodered.org">
+    <img src="https://img.shields.io/badge/Bluesky-0285FF?logo=bluesky&style=for-the-badge&logoColor=white&labelColor=0285FF" alt="Bluesky"/>
+  </a>
+  <a href="https://mastodon.social/@nodered@social.nodered.org">
+    <img src="https://img.shields.io/badge/Mastodon-6364FF?logo=mastodon&style=for-the-badge&logoColor=white&labelColor=6364FF" alt="Mastodon"/>
+  </a>
+</p>
 
 ## Quick Start
 
