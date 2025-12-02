@@ -357,7 +357,8 @@ describe("api/admin/index", function() {
                 permissionChecks.should.have.property('context.read',1);
                 lastRequest.params.should.have.property('scope','global');
                 lastRequest.params.should.have.property(0,'key');
-                lastRequest.query.should.have.property('store','memory');
+                const query = { ...lastRequest.query };
+                query.should.have.property('store','memory');
                 done();
             });
         });
@@ -383,7 +384,8 @@ describe("api/admin/index", function() {
                 lastRequest.params.should.have.property('scope','flow');
                 lastRequest.params.should.have.property('id','1234');
                 lastRequest.params.should.have.property(0,'key');
-                lastRequest.query.should.have.property('store','memory');
+                const query = { ...lastRequest.query };
+                query.should.have.property('store','memory');
                 done();
             });
         });
@@ -409,7 +411,8 @@ describe("api/admin/index", function() {
                 lastRequest.params.should.have.property('scope','node');
                 lastRequest.params.should.have.property('id','5678');
                 lastRequest.params.should.have.property(0,'foo');
-                lastRequest.query.should.have.property('store','memory');
+                const query = { ...lastRequest.query };
+                query.should.have.property('store','memory');
                 done();
             });
         });
@@ -422,7 +425,8 @@ describe("api/admin/index", function() {
                 permissionChecks.should.have.property('context.write',1);
                 lastRequest.params.should.have.property('scope','global');
                 lastRequest.params.should.have.property(0,'key');
-                lastRequest.query.should.have.property('store','memory');
+                const query = { ...lastRequest.query };
+                query.should.have.property('store','memory');
                 done();
             });
         });
@@ -436,7 +440,8 @@ describe("api/admin/index", function() {
                 lastRequest.params.should.have.property('scope','flow');
                 lastRequest.params.should.have.property('id','1234');
                 lastRequest.params.should.have.property(0,'key');
-                lastRequest.query.should.have.property('store','memory');
+                const query = { ...lastRequest.query };
+                query.should.have.property('store','memory');
                 done();
             });
         });
@@ -450,7 +455,8 @@ describe("api/admin/index", function() {
                 lastRequest.params.should.have.property('scope','node');
                 lastRequest.params.should.have.property('id','5678');
                 lastRequest.params.should.have.property(0,'foo');
-                lastRequest.query.should.have.property('store','memory');
+                const query = { ...lastRequest.query };
+                query.should.have.property('store','memory');
                 done();
             });
         });
