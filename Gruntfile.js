@@ -173,6 +173,8 @@ module.exports = function(grunt) {
                     "packages/node_modules/@node-red/editor-client/src/js/ui/workspaces.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/statusBar.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/view.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/ui/view-zoom-constants.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/ui/view-zoom-animator.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/view-annotations.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/view-navigator.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/view-tools.js",
