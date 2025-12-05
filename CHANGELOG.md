@@ -1,3 +1,21 @@
+#### 5.0.0-beta.0: Beta Release
+
+Editor
+
+ - Update Sidebar UX (#5318) @knolleary
+ - Workspace pan/zoom updates (#5312) @knolleary
+ - Fix panning workspace on touchscreens (#5371) @knolleary
+ - Update tour for 5-beta (#5370) @knolleary
+
+Runtime
+
+ - Prep dev branch for beta releases (#5367) @knolleary
+
+Nodes
+
+ - Add ability to use pfx or p12 file for TLS connection settings option (#4907) @dceejay
+
+
 #### 4.1.2: Maintenance Release
 
 
