@@ -221,7 +221,7 @@ describe('link Node', function() {
             const flow = [
                 { id: "tab-flow-1", type: "tab", label: "Flow 1" },
                 { id: "link-in-1", z: "tab-flow-1", type: "link in", name: "double payload", wires: [["func"]] },
-                { id: "func", z: "tab-flow-1", type: "helper", wires: [["link-out-1"]] },
+                { id: "func", z: "tab-flow-1", type: "helper", wires: [["link-out-1"]], x: 1, y: 1 },
                 { id: "link-out-1", z: "tab-flow-1", type: "link out", mode: "" }, //not return mode, cause link-call timeout
                 { id: "link-call", z: "tab-flow-1", type: "link call", linkType: "static", "timeout": "0.5", links: ["link-in-1"], wires: [["n4"]] },
                 { id: "catch-all", z: "tab-flow-1", type: "catch", scope: ["link-call"], uncaught: true, wires: [["n4"]] },

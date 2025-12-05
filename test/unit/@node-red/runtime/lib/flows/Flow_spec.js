@@ -204,8 +204,8 @@ describe('Flow', function() {
         it("instantiates an initial configuration and stops it", async function() {
             var config = flowUtils.parseConfig([
                 {id:"t1",type:"tab"},
-                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["2"]},
-                {id:"2",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["3"]},
+                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[["2"]]},
+                {id:"2",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[["3"]]},
                 {id:"3",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[]},
                 {id:"4",z:"t1",type:"test",foo:"a"}
             ]);
@@ -256,8 +256,8 @@ describe('Flow', function() {
         it("instantiates config nodes in the right order",async function() {
             var config = flowUtils.parseConfig([
                 {id:"t1",type:"tab"},
-                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["2"]},
-                {id:"2",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["3"]},
+                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[["2"]]},
+                {id:"2",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[["3"]]},
                 {id:"3",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[]},
                 {id:"4",z:"t1",type:"test",foo:"5"}, // This node depends on #5
                 {id:"5",z:"t1",type:"test"}
@@ -308,8 +308,8 @@ describe('Flow', function() {
         it("rewires nodes specified by diff", async function() {
             var config = flowUtils.parseConfig([
                 {id:"t1",type:"tab"},
-                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["2"]},
-                {id:"2",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["3"]},
+                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[["2"]]},
+                {id:"2",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[["3"]]},
                 {id:"3",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[]}
             ]);
 
@@ -318,7 +318,7 @@ describe('Flow', function() {
             await flow.start();
             //TODO: use update to pass in new wiring and verify the change
             createCount.should.equal(3);
-            flow.start({rewired:["2"]});
+            flow.start({rewired:[["2"]]});
             createCount.should.equal(3);
             rewiredNodes.should.have.a.property("2");
         });
@@ -355,8 +355,8 @@ describe('Flow', function() {
         it("ignores disabled nodes", async function() {
             var config = flowUtils.parseConfig([
                 {id:"t1",type:"tab"},
-                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["2"]},
-                {id:"2",x:10,y:10,z:"t1",d:true,type:"test",foo:"a",wires:["3"]},
+                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[["2"]]},
+                {id:"2",x:10,y:10,z:"t1",d:true,type:"test",foo:"a",wires:[["3"]]},
                 {id:"3",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[]},
                 {id:"4",z:"t1",type:"test",foo:"a"},
                 {id:"5",z:"t1",type:"test",d:true,foo:"a"}
@@ -406,8 +406,8 @@ describe('Flow', function() {
         it("stops all nodes", async function() {
             var config = flowUtils.parseConfig([
                 {id:"t1",type:"tab"},
-                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["2"]},
-                {id:"2",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["3"]},
+                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[["2"]]},
+                {id:"2",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[["3"]]},
                 {id:"3",x:10,y:10,z:"t1",type:"asyncTest",foo:"a",wires:[]}
             ]);
             var flow = Flow.create({},config,config.flows["t1"]);
@@ -428,8 +428,8 @@ describe('Flow', function() {
         it("stops specified nodes", async function() {
             var config = flowUtils.parseConfig([
                 {id:"t1",type:"tab"},
-                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["2"]},
-                {id:"2",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["3"]},
+                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[["2"]]},
+                {id:"2",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[["3"]]},
                 {id:"3",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[]}
             ]);
             var flow = Flow.create({},config,config.flows["t1"]);
@@ -450,9 +450,9 @@ describe('Flow', function() {
         it("stops config nodes last", async function() {
             var config = flowUtils.parseConfig([
                 {id:"t1",type:"tab"},
-                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["2"]},
+                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[["2"]]},
                 {id:"c1",z:"t1",type:"test"},
-                {id:"2",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["3"]},
+                {id:"2",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[["3"]]},
                 {id:"c2",z:"t1",type:"test"},
                 {id:"3",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[]},
                 {id:"c3",z:"t1",type:"test"}
@@ -485,8 +485,8 @@ describe('Flow', function() {
             }});
             var config = flowUtils.parseConfig([
                 {id:"t1",type:"tab"},
-                {id:"1",x:10,y:10,z:"t1",type:"testAsync",closeDelay: 80, foo:"a",wires:["2"]},
-                {id:"2",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["3"]},
+                {id:"1",x:10,y:10,z:"t1",type:"testAsync",closeDelay: 80, foo:"a",wires:[["2"]]},
+                {id:"2",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[["3"]]},
                 {id:"3",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[]}
             ]);
             var flow = Flow.create({},config,config.flows["t1"]);
@@ -514,8 +514,8 @@ describe('Flow', function() {
         it("gets a node known to the flow", async function() {
             var config = flowUtils.parseConfig([
                 {id:"t1",type:"tab"},
-                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["2"]},
-                {id:"2",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["3"]},
+                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[["2"]]},
+                {id:"2",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[["3"]]},
                 {id:"3",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[]},
                 {id:"4",z:"t1",type:"test",foo:"a"}
             ]);
@@ -529,8 +529,8 @@ describe('Flow', function() {
         it("passes to parent if node not known locally", async function() {
             var config = flowUtils.parseConfig([
                 {id:"t1",type:"tab"},
-                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["2"]},
-                {id:"2",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["3"]},
+                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[["2"]]},
+                {id:"2",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[["3"]]},
                 {id:"3",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[]},
                 {id:"4",z:"t1",type:"test",foo:"a"}
             ]);
@@ -547,8 +547,8 @@ describe('Flow', function() {
         it("does not pass to parent if cancelBubble set", async function() {
             var config = flowUtils.parseConfig([
                 {id:"t1",type:"tab"},
-                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["2"]},
-                {id:"2",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["3"]},
+                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[["2"]]},
+                {id:"2",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[["3"]]},
                 {id:"3",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[]},
                 {id:"4",z:"t1",type:"test",foo:"a"}
             ]);
@@ -567,8 +567,8 @@ describe('Flow', function() {
         it("passes a status event to the adjacent status node", async function() {
             var config = flowUtils.parseConfig([
                 {id:"t1",type:"tab"},
-                {id:"1",x:10,y:10,z:"t1",type:"test",name:"a",wires:["2"]},
-                {id:"2",x:10,y:10,z:"t1",type:"test",wires:["3"]},
+                {id:"1",x:10,y:10,z:"t1",type:"test",name:"a",wires:[["2"]]},
+                {id:"2",x:10,y:10,z:"t1",type:"test",wires:[["3"]]},
                 {id:"3",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[]},
                 {id:"sn",x:10,y:10,z:"t1",type:"status",foo:"a",wires:[]},
                 {id:"sn2",x:10,y:10,z:"t1",type:"status",foo:"a",wires:[]}
@@ -605,10 +605,10 @@ describe('Flow', function() {
         it("passes a status event to the adjacent scoped status node ", async function() {
             var config = flowUtils.parseConfig([
                 {id:"t1",type:"tab"},
-                {id:"1",x:10,y:10,z:"t1",type:"test",name:"a",wires:["2"]},
-                {id:"2",x:10,y:10,z:"t1",type:"test",wires:["3"]},
+                {id:"1",x:10,y:10,z:"t1",type:"test",name:"a",wires:[["2"]]},
+                {id:"2",x:10,y:10,z:"t1",type:"test",wires:[["3"]]},
                 {id:"3",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[]},
-                {id:"sn",x:10,y:10,z:"t1",type:"status",scope:["2"],foo:"a",wires:[]},
+                {id:"sn",x:10,y:10,z:"t1",type:"status",scope:[["2"]],foo:"a",wires:[]},
                 {id:"sn2",x:10,y:10,z:"t1",type:"status",scope:["1"],foo:"a",wires:[]}
             ]);
             var flow = Flow.create({},config,config.flows["t1"]);
@@ -639,7 +639,7 @@ describe('Flow', function() {
                 {id: "g1", type: "group", g: "g3", z:"t1" },
                 {id: "g2", type: "group", z:"t1" },
                 {id: "g3", type: "group", z:"t1" },
-                {id:"1",x:10,y:10,z:"t1",g:"g1", type:"test",name:"a",wires:["2"]},
+                {id:"1",x:10,y:10,z:"t1",g:"g1", type:"test",name:"a",wires:[["2"]]},
                 // sn - in the same group as source node
                 {id:"sn",x:10,y:10,z:"t1",g:"g1", type:"status",scope:"group",wires:[]},
                 // sn2 - in a different group hierarchy to the source node
@@ -669,8 +669,8 @@ describe('Flow', function() {
         it("passes an error event to the adjacent catch node", async function() {
             var config = flowUtils.parseConfig([
                 {id:"t1",type:"tab"},
-                {id:"1",x:10,y:10,z:"t1",type:"test",name:"a",wires:["2"]},
-                {id:"2",x:10,y:10,z:"t1",type:"test",wires:["3"]},
+                {id:"1",x:10,y:10,z:"t1",type:"test",name:"a",wires:[["2"]]},
+                {id:"2",x:10,y:10,z:"t1",type:"test",wires:[["3"]]},
                 {id:"3",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[]},
                 {id:"sn",x:10,y:10,z:"t1",type:"catch",foo:"a",wires:[]},
                 {id:"sn2",x:10,y:10,z:"t1",type:"catch",foo:"a",wires:[]},
@@ -712,10 +712,10 @@ describe('Flow', function() {
         it("passes an error event to the adjacent scoped catch node ", async function() {
             var config = flowUtils.parseConfig([
                 {id:"t1",type:"tab"},
-                {id:"1",x:10,y:10,z:"t1",type:"test",name:"a",wires:["2"]},
-                {id:"2",x:10,y:10,z:"t1",type:"test",wires:["3"]},
+                {id:"1",x:10,y:10,z:"t1",type:"test",name:"a",wires:[["2"]]},
+                {id:"2",x:10,y:10,z:"t1",type:"test",wires:[["3"]]},
                 {id:"3",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[]},
-                {id:"sn",x:10,y:10,z:"t1",type:"catch",scope:["2"],foo:"a",wires:[]},
+                {id:"sn",x:10,y:10,z:"t1",type:"catch",scope:[["2"]],foo:"a",wires:[]},
                 {id:"sn2",x:10,y:10,z:"t1",type:"catch",scope:["1"],foo:"a",wires:[]},
                 {id:"sn3",x:10,y:10,z:"t1",type:"catch",uncaught:true,wires:[]},
                 {id:"sn4",x:10,y:10,z:"t1",type:"catch",uncaught:true,wires:[]}
@@ -766,7 +766,7 @@ describe('Flow', function() {
                 {id: "g1", type: "group", g: "g3", z:"t1" },
                 {id: "g2", type: "group", z:"t1" },
                 {id: "g3", type: "group", z:"t1" },
-                {id:"1",x:10,y:10,z:"t1",g:"g1", type:"test",name:"a",wires:["2"]},
+                {id:"1",x:10,y:10,z:"t1",g:"g1", type:"test",name:"a",wires:[["2"]]},
                 // sn - in the same group as source node
                 {id:"sn",x:10,y:10,z:"t1",g:"g1", type:"catch",scope:"group",wires:[]},
                 // sn2 - in a different group hierarchy to the source node
@@ -795,8 +795,8 @@ describe('Flow', function() {
         it("moves any existing error object sideways", async function() {
             var config = flowUtils.parseConfig([
                 {id:"t1",type:"tab"},
-                {id:"1",x:10,y:10,z:"t1",type:"test",name:"a",wires:["2"]},
-                {id:"2",x:10,y:10,z:"t1",type:"test",wires:["3"]},
+                {id:"1",x:10,y:10,z:"t1",type:"test",name:"a",wires:[["2"]]},
+                {id:"2",x:10,y:10,z:"t1",type:"test",wires:[["3"]]},
                 {id:"3",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[]},
                 {id:"sn",x:10,y:10,z:"t1",type:"catch",foo:"a",wires:[]}
             ]);
@@ -828,8 +828,8 @@ describe('Flow', function() {
         it("passes a complete event to the adjacent Complete node",async function() {
             var config = flowUtils.parseConfig([
                 {id:"t1",type:"tab"},
-                {id:"1",x:10,y:10,z:"t1",type:"testDone",name:"a",wires:["2"]},
-                {id:"2",x:10,y:10,z:"t1",type:"test",wires:["3"]},
+                {id:"1",x:10,y:10,z:"t1",type:"testDone",name:"a",wires:[["2"]]},
+                {id:"2",x:10,y:10,z:"t1",type:"test",wires:[["3"]]},
                 {id:"3",x:10,y:10,z:"t1",type:"testDone",foo:"a",wires:[]},
                 {id:"cn",x:10,y:10,z:"t1",type:"complete",scope:["1","3"],foo:"a",wires:[]}
             ]);
@@ -856,8 +856,8 @@ describe('Flow', function() {
         it("sends a message - no cloning", async function() {
             var config = flowUtils.parseConfig([
                 {id:"t1",type:"tab"},
-                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["2"]},
-                {id:"2",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["3"]}
+                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[["2"]]},
+                {id:"2",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[["3"]]}
             ]);
             var flow = Flow.create({},config,config.flows["t1"]);
             await flow.start();
@@ -875,7 +875,7 @@ describe('Flow', function() {
                     if (err) { reject(err) }
                     else { resolve() }
                 }
-                n2.receive = function(msg) {
+                n2._receive = function(msg) {
                     messageReceived = true;
                     try {
                         msg.should.be.exactly(message);
@@ -898,8 +898,8 @@ describe('Flow', function() {
         it("sends a message - cloning", async function() {
             var config = flowUtils.parseConfig([
                 {id:"t1",type:"tab"},
-                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["2"]},
-                {id:"2",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["3"]}
+                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[["2"]]},
+                {id:"2",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[["3"]]}
             ]);
             var flow = Flow.create({},config,config.flows["t1"]);
             await flow.start();
@@ -916,7 +916,7 @@ describe('Flow', function() {
                     if (err) { reject(err) }
                     else { resolve() }
                 }
-                n2.receive = function(msg) {
+                n2._receive = function(msg) {
                     try {
                         // Message should be cloned
                         msg.should.be.eql(message);
@@ -939,8 +939,8 @@ describe('Flow', function() {
         it("sends multiple messages", async function() {
             var config = flowUtils.parseConfig([
                 {id:"t1",type:"tab"},
-                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["2"]},
-                {id:"2",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["3"]}
+                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[["2"]]},
+                {id:"2",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[["3"]]}
             ]);
             var flow = Flow.create({},config,config.flows["t1"]);
             await flow.start();
@@ -957,7 +957,7 @@ describe('Flow', function() {
                     else { resolve() }
                 }
                 var messageCount = 0;
-                n2.receive = function(msg) {
+                n2._receive = function(msg) {
                     try {
                         msg.should.be.exactly(messages[messageCount++]);
                         if (messageCount === 2) {
@@ -1032,8 +1032,8 @@ describe('Flow', function() {
             })
             var config = flowUtils.parseConfig([
                 {id:"t1",type:"tab"},
-                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["2"]},
-                {id:"2",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["3"]}
+                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[["2"]]},
+                {id:"2",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[["3"]]}
             ]);
             var flow = Flow.create({},config,config.flows["t1"]);
             await flow.start();
@@ -1049,7 +1049,7 @@ describe('Flow', function() {
                     if (err) { reject(err) }
                     else { resolve() }
                 }
-                n2.receive = function(msg) {
+                n2._receive = function(msg) {
                     messageReceived = true;
                     try {
                         msg.should.be.eql(message);
@@ -1103,14 +1103,14 @@ describe('Flow', function() {
                 })
                 var config = flowUtils.parseConfig([
                     {id:"t1",type:"tab"},
-                    {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["2"]},
-                    {id:"2",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["3"]}
+                    {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[["2"]]},
+                    {id:"2",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[["3"]]}
                 ]);
                 flow = Flow.create({},config,config.flows["t1"]);
                 await flow.start();
                 n1 = flow.getNode('1');
                 n2 = flow.getNode('2');
-                n2.receive = function(msg) {
+                n2._receive = function(msg) {
                     messageReceived = true;
                 }
                 n1.error = function(err) {
@@ -1180,14 +1180,14 @@ describe('Flow', function() {
                 })
                 var config = flowUtils.parseConfig([
                     {id:"t1",type:"tab"},
-                    {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["2"]},
-                    {id:"2",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["3"]}
+                    {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[["2"]]},
+                    {id:"2",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[["3"]]}
                 ]);
                 flow = Flow.create({},config,config.flows["t1"]);
                 await flow.start();
                 n1 = flow.getNode('1');
                 n2 = flow.getNode('2');
-                n2.receive = function(msg) {
+                n2._receive = function(msg) {
                     messageReceived = true;
                 }
                 n1.error = function(err) {
