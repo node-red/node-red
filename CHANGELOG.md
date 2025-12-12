@@ -1,3 +1,9 @@
+#### 5.0.0-beta.1: Beta Release
+
+Editor
+
+ - Allow sidebar to be split into two panels (#5378) @knolleary
+
 #### 5.0.0-beta.0: Beta Release
 
 Editor
