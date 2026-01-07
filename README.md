@@ -1,19 +1,19 @@
 <div align="center">
 
+<img src="https://nodered.org/about/resources/media/node-red-icon-2.svg" width="160" title="Node-RED Logo">
+
 [![License][badge-license]][link-license] [![Build Status][badge-build]][link-build]
 <br/><br/>
 [![Forum][badge-forum]][link-forum] [![GitHub][badge-github]][link-github] [![Slack][badge-slack]][link-slack]
 <br/><br/>
 
-<img src="https://nodered.org/about/resources/media/node-red-icon-2.svg" width="200" title="Node-RED Logo">
+<img src="https://nodered.org/images/node-red-screenshot.png" width="600" alt="Node-RED Screenshot">
 
 ### Low-code programming for event-driven applications
 
 <br/>
 
 [![Nodes][badge-nodes]][link-nodes] [![Flows][badge-flows]][link-flows] [![Collections][badge-collections]][link-collections]
-
-[![Node-RED Screenshot][screenshot]][link-nodered]
 
 </div>
 
@@ -111,7 +111,6 @@ Node-RED is a project of the [OpenJS Foundation](http://openjsf.org). Copyright 
 [badge-nodes]: https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fflows.nodered.org%2Fthings%3Fformat%3Djson%26per_page%3D1%26type%3Dnode&query=$.meta.results.count&label=Nodes&style=for-the-badge&labelColor=ececec&color=8f0000
 [badge-flows]: https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fflows.nodered.org%2Fthings%3Fformat%3Djson%26per_page%3D1%26type%3Dflow&query=$.meta.results.count&label=Flows&style=for-the-badge&labelColor=ececec&color=8f0000
 [badge-collections]: https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fflows.nodered.org%2Fthings%3Fformat%3Djson%26per_page%3D1%26type%3Dcollection&query=$.meta.results.count&label=Collections&style=for-the-badge&labelColor=ececec&color=8f0000
-[screenshot]: https://nodered.org/images/node-red-screenshot.png
 
 <!-- Badge links -->
 [link-license]: https://opensource.org/license/apache-2-0
