@@ -52,7 +52,7 @@ If you want to run the latest code from git, here's how to get started:
 
 2. Install the node-red dependencies
 
-        npm install
+        npm ci
 
 3. Build the code
 
