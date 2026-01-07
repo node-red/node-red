@@ -5,6 +5,8 @@
 
 <img src="https://nodered.org/about/resources/media/node-red-icon-2.svg" width="150" title="Node-RED Logo"><br/>
 
+[![Nodes][badge-nodes]][link-nodes] [![Flows][badge-flows]][link-flows] [![Collections][badge-collections]][link-collections]
+
 ### Low-code programming for event-driven applications
 
 <br/>
@@ -14,8 +16,6 @@
 <br/><br/>
 
 <img src="https://nodered.org/images/node-red-screenshot.png" width="600" alt="Node-RED Screenshot"><br/>
-
-[![Nodes][badge-nodes]][link-nodes] [![Flows][badge-flows]][link-flows] [![Collections][badge-collections]][link-collections]
 
 </div>
 
