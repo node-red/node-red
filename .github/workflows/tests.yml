@@ -2,10 +2,9 @@ name: Run tests
 
 on:
   push:
-    branches: [ master, dev, 'fix/**' ]
+    branches: [ master, dev ]
   pull_request:
     branches: [ master, dev ]
-  workflow_dispatch:
 
 permissions:
   contents: read
