@@ -2,7 +2,7 @@
 
 [![License][badge-license]][link-license] [![Build Status][badge-build]][link-build]
 
-<br/><br/><img src="https://nodered.org/about/resources/media/node-red-icon-2.svg" width="150" title="Node-RED Logo"><br/>
+<br/><img src="https://nodered.org/about/resources/media/node-red-icon-2.svg" width="150" title="Node-RED Logo"><br/>
 
 [![Nodes][badge-nodes]][link-nodes] [![Flows][badge-flows]][link-flows] [![Collections][badge-collections]][link-collections]
 
