@@ -3,7 +3,7 @@
 [![License][badge-license]][link-license] [![Build Status][badge-build]][link-build]
 <br/><br/>
 
-<img src="https://nodered.org/about/resources/media/node-red-icon-2.svg" width="120" title="Node-RED Logo"><br/>
+<img src="https://nodered.org/about/resources/media/node-red-icon-2.svg" width="150" title="Node-RED Logo"><br/>
 
 ### Low-code programming for event-driven applications
 
