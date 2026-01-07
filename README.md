@@ -1,30 +1,19 @@
-<p align="center">
+<div align="center">
 
-[![License][badge-license]][link-license]
-[![Build Status][badge-build]][link-build]
+[![License][badge-license]][link-license] [![Build Status][badge-build]][link-build]
 <br/><br/>
-[![Forum][badge-forum]][link-forum]
-[![GitHub][badge-github]][link-github]
-[![Slack][badge-slack]][link-slack]
+[![Forum][badge-forum]][link-forum] [![GitHub][badge-github]][link-github] [![Slack][badge-slack]][link-slack]
 <br/><br/>
 
-</p>
+<img src="https://nodered.org/about/resources/media/node-red-icon-2.svg" width="200" title="Node-RED Logo">
 
-<p align="center">
-  <img src="https://nodered.org/about/resources/media/node-red-icon-2.svg" width="200" title="Node-RED Logo">
-</p>
+### Low-code programming for event-driven applications
 
-<h3 align="center">Low-code programming for event-driven applications</h3>
-
-<p align="center">
-
-[![Nodes][badge-nodes]][link-nodes]
-[![Flows][badge-flows]][link-flows]
-[![Collections][badge-collections]][link-collections]
-
-</p>
+[![Nodes][badge-nodes]][link-nodes] [![Flows][badge-flows]][link-flows] [![Collections][badge-collections]][link-collections]
 
 [![Node-RED Screenshot][screenshot]][link-nodered]
+
+</div>
 
 ## Quick Start
 
