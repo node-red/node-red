@@ -133,7 +133,6 @@ module.exports = function(grunt) {
                 src: [
                     // Ensure editor source files are concatenated in
                     // the right order
-                    "packages/node_modules/@node-red/editor-client/src/js/polyfills.js",
                     "packages/node_modules/@node-red/editor-client/src/js/jquery-addons.js",
                     "packages/node_modules/@node-red/editor-client/src/js/red.js",
                     "packages/node_modules/@node-red/editor-client/src/js/events.js",
@@ -174,6 +173,8 @@ module.exports = function(grunt) {
                     "packages/node_modules/@node-red/editor-client/src/js/ui/workspaces.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/statusBar.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/view.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/ui/view-zoom-constants.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/ui/view-zoom-animator.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/view-annotations.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/view-navigator.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/view-tools.js",
@@ -215,9 +216,9 @@ module.exports = function(grunt) {
                 files: [
                     {
                         src: [
-                            "packages/node_modules/@node-red/editor-client/src/vendor/jquery/js/jquery-3.5.1.min.js",
-                            "packages/node_modules/@node-red/editor-client/src/vendor/jquery/js/jquery-migrate-3.3.0.min.js",
-                            "packages/node_modules/@node-red/editor-client/src/vendor/jquery/js/jquery-ui.min.js",
+                            "packages/node_modules/@node-red/editor-client/src/vendor/jquery/js/jquery-3.7.1.min.js",
+                            "packages/node_modules/@node-red/editor-client/src/vendor/jquery/js/jquery-migrate-3.5.2.min.js",
+                            "packages/node_modules/@node-red/editor-client/src/vendor/jquery/js/jquery-ui-1.14.1.min.js",
                             "packages/node_modules/@node-red/editor-client/src/vendor/jquery/js/jquery.ui.touch-punch.min.js",
                             "node_modules/marked/marked.min.js",
                             "node_modules/dompurify/dist/purify.min.js",

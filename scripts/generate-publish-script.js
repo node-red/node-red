@@ -4,7 +4,7 @@ const path = require("path");
 const fs = require("fs-extra");
 const should = require("should");
 
-const LATEST = "4";
+const LATEST = "5";
 
 function generateScript() {
     return new Promise((resolve, reject) => {
@@ -36,10 +36,12 @@ function generateScript() {
         packages.forEach(name => {
             const tarName = name.replace(/@/,"").replace(/\//,"-")
             lines.push(`npm publish ${tarName}-${version}.tgz ${tagArg}\n`);
-            if (updateNextToLatest) {
-                lines.push(`npm dist-tag add ${name}@${version} next\n`);
-            }
         })
+        if (updateNextToLatest) {
+            packages.forEach(name => {
+                lines.push(`npm dist-tag add ${name}@${version} next\n`);
+            })
+        }
         resolve(lines.join(""))
     });
 }
