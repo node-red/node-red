@@ -47,7 +47,7 @@ describe("api/editor/theme", function () {
         context.page.tabicon.should.have.a.property("colour", "#8f0000");
         context.should.have.a.property("header");
         context.header.should.have.a.property("title", "Node-RED");
-        context.header.should.have.a.property("image", "red/images/node-red.svg");
+        context.header.should.have.a.property("image", "red/images/node-red-icon.svg");
         context.should.have.a.property("asset");
         context.asset.should.have.a.property("red", "red/red.min.js");
         context.asset.should.have.a.property("main", "red/main.min.js");
