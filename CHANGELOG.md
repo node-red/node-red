@@ -22,8 +22,41 @@ Nodes
  - Add ability to use pfx or p12 file for TLS connection settings option (#4907) @dceejay
 
 
-#### 4.1.2: Maintenance Release
+#### 4.1.3: Maintenance Release
 
+Editor
+
+ - 5343/Editor/Bug: Node help tab resets focus when arrow keys are used to switch between nodes (#5406) @piotrbogun
+ - Ensure quick-add filter is applied properly when retriggering add (#5427) @knolleary
+ - TreeList: Fix widget treeList keyboard navigation scroll behavior (#5421) @piotrbogun
+ - Editor: Flow & subflow names are changed to all lowercase in search dialog #5348 (#5401) @n-lark
+ - Allow actions show-next-tab and previous to loop (#5355) @GogoVega
+ - 5404/Editor/Bug: Junction error in Quick Add dialog (#5407) @piotrbogun
+ - Add tooltip to delete button in node property UI (#5410) @kazuhitoyokoi
+ - Fix invalid node size in quick add dialog (#5403) @kazuhitoyokoi
+ - Expand folder to avoid error in library (#5399) @kazuhitoyokoi
+ - Stricter validator for flow file name in project feature (#5398) @kazuhitoyokoi
+ - Fix size and scrolling in Git config UI (#5396) @kazuhitoyokoi
+ - Reveal node in search results via mouseover (#5368) @gorenje
+
+Runtime
+
+ - Add package-lock.json for reproducible dependency chains (#5426) @dimitrieh
+ - Readme markdown refactor for legibility in IDE's (#5423) @dimitrieh
+ - Update body-parser (#5418) @knolleary
+
+Nodes
+
+ - fix(http-request): prevent uncaught exceptions in async hooks (#5392) @Dennis-SEG
+ - Fix flushing when in variable delay mode (#5382) @dceejay
+ - File node TypedInput width fix (#5425) @knolleary
+ - Use TextDecoder() to decode UTF-8 characters (#5416) @kazuhitoyokoi
+ - Support source information in complete node (#5414) @kazuhitoyokoi
+ - Fix status node to retrieve status from all nodes (#5412) @kazuhitoyokoi
+ - Decrement count of http requests after error (#5409) @kazuhitoyokoi
+ - Fix debug tab to copy displayed value (#5400) @kazuhitoyokoi
+
+#### 4.1.2: Maintenance Release
 
 Editor
 
