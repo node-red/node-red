@@ -1,3 +1,15 @@
+#### 5.0.0-beta.2: Beta Release
+
+Editor
+
+ - UX updates for next beta (#5444) @knolleary
+
+Nodes
+
+ - Add pause button to debug sidebar (#5390) @dceejay
+ - Add burst mode to delay node (#5391) @dceejay
+ - Add TLS certs/keys from Env Vars (#5376) @hardillb
+
 #### 5.0.0-beta.1: Beta Release
 
 Editor
