@@ -344,6 +344,36 @@ describe("externalModules api", function() {
             should.exist(result);
             should.exist(result.existsSync);
         })
+        it("imports external modules using export aliasing", async function() {
+            const externalModulesDir = path.join(homeDir,"externalModules");
+            await fs.ensureDir(externalModulesDir);
+            externalModules.init({userDir: externalModulesDir, get:()=>{}, set:()=>{}});
+
+            await fs.writeFile(path.join(externalModulesDir,"package.json"),`{
+"name": "Node-RED-External-Modules",
+"description": "These modules are automatically installed by Node-RED to use in Function nodes.",
+"version": "1.0.0",
+"private": true,
+"dependencies": {"fake-pkg":"1.0.0"}
+}`)
+
+            const packageDir = path.join(externalModulesDir,"node_modules","fake-pkg");
+            await fs.ensureDir(path.join(packageDir,"dist"));
+            await fs.writeFile(path.join(packageDir,"package.json"),`{
+"name": "fake-pkg",
+"version": "1.0.0",
+"exports": {
+    "./M.js": "./dist/M.js"
+}
+}`)
+            await fs.writeFile(path.join(packageDir,"dist","M.js"),"module.exports = 42;\n");
+
+            await externalModules.checkFlowDependencies([]);
+
+            const importedValue = await externalModules.import("fake-pkg/M.js")
+            const normalizedValue = importedValue && importedValue.default !== undefined ? importedValue.default : importedValue;
+            normalizedValue.should.equal(42);
+        })
         it("rejects unknown modules", async function() {
             externalModules.init({userDir: homeDir, get:()=>{}, set:()=>{}});
             try {
