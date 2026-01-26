@@ -1,3 +1,13 @@
+#### 4.1.4: Maintenance Releas
+
+ - Update tar dependency @knolleary
+ - Revert overflow fix in editableList (#5467) @knolleary
+ - registry: fix importModule base dir for exports subpaths (#5465) @yuan-cloud
+ - fix: prevent race condition in localfilesystem context store during shutdown (#5462) @Dennis-SEG
+ - fix: prevent double resolve in node close callback (#5461) @Dennis-SEG
+ - fix: prevent incorrect array modification in delay node (#5457) @Dennis-SEG
+ - fix: prevent uncaught exceptions in core node event handlers (#5438) @Dennis-SEG
+
 #### 4.1.3: Maintenance Release
 
 Editor
