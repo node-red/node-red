@@ -1,0 +1,724 @@
+name: Deploy Branch Preview
+
+on:
+  push:
+    branches:
+      - '**'  # Trigger on all branches
+
+jobs:
+  deploy-preview:
+    runs-on: ubuntu-latest
+    environment:
+      name: preview
+      url: ${{ steps.deploy.outputs.deploy_url }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Create preview directory
+        run: mkdir -p preview
+
+      - name: Generate WebContainer snapshot
+        run: |
+          # Install snapshot tool in a temp directory to avoid creating
+          # node_modules (with symlinks) in the project root
+          SNAPSHOT_TOOL_DIR=$(mktemp -d)
+          cd "$SNAPSHOT_TOOL_DIR" && npm init -y --silent && npm install --silent @webcontainer/snapshot
+          cd "$GITHUB_WORKSPACE"
+
+          node -e "
+            const { snapshot } = require('$SNAPSHOT_TOOL_DIR/node_modules/@webcontainer/snapshot');
+            const fs = require('fs');
+            snapshot('.').then(buf => {
+              fs.writeFileSync('preview/snapshot', buf);
+              console.log('✓ Snapshot generated (' + (buf.length / 1024 / 1024).toFixed(2) + ' MB)');
+            });
+          "
+
+      - name: Generate preview HTML
+        run: |
+          cat > preview/index.html << 'EOF'
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Node-RED Preview</title>
+            <style>
+              * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+              }
+
+              body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background: #1e1e1e;
+                color: #d4d4d4;
+                overflow: hidden;
+                height: 100vh;
+                display: flex;
+                flex-direction: column;
+              }
+
+              #loader {
+                position: fixed;
+                inset: 0;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                padding: 2rem;
+                background: #1e1e1e;
+                z-index: 100;
+                transition: opacity 0.3s ease-out;
+              }
+
+              #loader.hidden {
+                opacity: 0;
+                pointer-events: none;
+                display: none;
+              }
+
+              .header {
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+                margin-bottom: 3rem;
+                width: 100%;
+                max-width: 330px;
+              }
+
+              .logo {
+                width: 48px;
+                height: 48px;
+              }
+
+              .header h1 {
+                font-size: 2rem;
+                font-weight: 400;
+                color: #c12120;
+              }
+
+              .progress-container {
+                width: 100%;
+                max-width: 330px;
+              }
+
+              .step {
+                display: flex;
+                gap: 1rem;
+                margin-bottom: 2rem;
+                position: relative;
+              }
+
+              .step:not(:last-child)::before {
+                content: '';
+                position: absolute;
+                left: 23px;
+                top: 32px;
+                bottom: -32px;
+                width: 2px;
+                background: #888;
+                transition: background 0.3s ease;
+              }
+
+              .step.completed::before {
+                background: #4ec9b0;
+              }
+
+              .step.active::before {
+                background: linear-gradient(to bottom, #c12120 0%, #888 100%);
+              }
+
+              .step-icon {
+                width: 32px;
+                height: 32px;
+                border-radius: 50%;
+                background: #2d2d2d;
+                border: 2px solid #888;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+                margin: 0 8px;
+                transition: all 0.3s ease;
+                position: relative;
+                z-index: 1;
+              }
+
+              .step.active .step-icon {
+                border-color: #c12120;
+                background: #1e1e1e;
+              }
+
+              .step.completed .step-icon {
+                border-color: #4ec9b0;
+                background: #4ec9b0;
+              }
+
+              .step-icon-dot {
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+                background: #888;
+              }
+
+              .step.active .step-icon-dot {
+                display: none;
+              }
+
+              .step.completed .step-icon-dot {
+                display: none;
+              }
+
+              .spinner {
+                display: none;
+                width: 16px;
+                height: 16px;
+                border: 2px solid #c12120;
+                border-top-color: transparent;
+                border-radius: 50%;
+                animation: spin 0.8s linear infinite;
+              }
+
+              .step.active .spinner {
+                display: block;
+              }
+
+              .checkmark {
+                display: none;
+                width: 16px;
+                height: 16px;
+                color: #1e1e1e;
+              }
+
+              .step.completed .checkmark {
+                display: block;
+              }
+
+              @keyframes spin {
+                to { transform: rotate(360deg); }
+              }
+
+              .step-content {
+                flex: 1;
+                padding-top: 4px;
+              }
+
+              .step-label {
+                font-size: 1rem;
+                font-weight: 500;
+                margin-bottom: 0.25rem;
+                color: #888;
+                transition: color 0.3s ease;
+              }
+
+              .step.active .step-label {
+                color: #c12120;
+              }
+
+              .step.completed .step-label {
+                color: #4ec9b0;
+              }
+
+              .step-detail {
+                font-size: 0.875rem;
+                color: #6a6a6a;
+                font-family: 'Consolas', 'Monaco', monospace;
+              }
+
+              .error-box {
+                width: 100%;
+                max-width: 330px;
+                margin-top: 2rem;
+                padding: 1rem;
+                background: #3d1f1f;
+                border: 1px solid #c12120;
+                border-radius: 4px;
+                display: none;
+              }
+
+              .error-box.visible {
+                display: block;
+              }
+
+              .error-title {
+                color: #f48771;
+                font-weight: 600;
+                margin-bottom: 0.5rem;
+              }
+
+              .error-message {
+                font-family: 'Consolas', 'Monaco', monospace;
+                font-size: 0.875rem;
+                white-space: pre-wrap;
+                word-break: break-word;
+              }
+
+              #terminal-toggle {
+                position: fixed;
+                bottom: 1rem;
+                right: 1rem;
+                background: #2d2d2d;
+                border: 1px solid #3d3d3d;
+                color: #d4d4d4;
+                padding: 0.5rem 1rem;
+                border-radius: 4px;
+                cursor: pointer;
+                font-family: 'Consolas', 'Monaco', monospace;
+                font-size: 0.875rem;
+                display: none;
+                transition: background 0.2s ease;
+              }
+
+              #terminal-toggle:hover {
+                background: #3d3d3d;
+              }
+
+              #terminal-toggle.visible {
+                display: block;
+              }
+
+              #terminal-drawer {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                height: 40vh;
+                background: #1e1e1e;
+                border-top: 1px solid #3d3d3d;
+                transform: translateY(100%);
+                transition: transform 0.3s ease;
+                display: flex;
+                flex-direction: column;
+                z-index: 1000;
+              }
+
+              #terminal-drawer.open {
+                transform: translateY(0);
+              }
+
+              .terminal-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 0.5rem 1rem;
+                background: #2d2d2d;
+                border-bottom: 1px solid #3d3d3d;
+              }
+
+              .terminal-header h3 {
+                font-size: 0.875rem;
+                font-weight: 500;
+                color: #d4d4d4;
+              }
+
+              .terminal-close {
+                background: none;
+                border: none;
+                color: #888;
+                cursor: pointer;
+                font-size: 1.25rem;
+                padding: 0;
+                width: 24px;
+                height: 24px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: color 0.2s ease;
+              }
+
+              .terminal-close:hover {
+                color: #d4d4d4;
+              }
+
+              #terminal-output {
+                flex: 1;
+                overflow-y: auto;
+                padding: 1rem;
+                font-family: 'Consolas', 'Monaco', monospace;
+                font-size: 0.75rem;
+                line-height: 1.5;
+              }
+
+              .log-line {
+                margin-bottom: 0.25rem;
+              }
+
+              .log-line.error {
+                color: #f48771;
+              }
+
+              .log-line.warn {
+                color: #dcdcaa;
+              }
+
+              .log-line.info {
+                color: #d4d4d4;
+              }
+
+              #editor-frame {
+                display: none;
+                width: 100%;
+                height: 100vh;
+                border: none;
+                position: fixed;
+                inset: 0;
+              }
+
+              #editor-frame.visible {
+                display: block;
+              }
+            </style>
+          </head>
+          <body>
+            <div id="loader">
+              <div class="header">
+                <svg class="logo" viewBox="0 0 480 480" xmlns="http://www.w3.org/2000/svg">
+                  <g transform="translate(0 -572.36)">
+                    <rect ry="56" height="448" width="448" y="588.36" x="16" fill="#8f0000"/>
+                    <g transform="matrix(8.545 0 0 8.545 -786.19 -1949.8)">
+                      <path d="m104.41 321.21c0.0138-2.3846-1.905-4.2806-4.2896-4.2806h-6.243v2.9257h6.243c0.80513 0 1.4808 0.58383 1.4808 1.389v4.2422c0 0.80513-0.67566 1.5075-1.4808 1.5075h-6.243v2.8086h6.243c2.3846 0 4.2895-1.9315 4.2895-4.3162l-0.00005-1.9812c9.8659 0.14125 12.737 2.7065 15.877 5.4519 3.0241 2.6446 6.4153 5.4869 15.252 5.557l0.00046 0.97238c0.001 2.3846 1.9543 4.3803 4.3389 4.3803h6.4273v-3.0427h-6.4273c-0.80514 0-1.4135-0.53255-1.4135-1.3377v-4.2422c0-0.80513 0.60835-1.4418 1.4135-1.4418h6.4273v-2.8086h-6.4273c-2.3846 0-4.3379 1.8658-4.3389 4.2504l-0.00045 1.005c-8.351-0.0276-10.723-2.3434-13.76-4.9992-2.5914-2.2662-5.6368-4.7578-12.346-5.6642 0.0583-0.0501 0.11211-0.0987 0.16838-0.15027 1.2918-1.1846 1.9884-2.6158 2.6699-3.8516 0.68148-1.2357 1.3227-2.267 2.373-2.9879 0.85207-0.58483 2.0639-1.0208 3.926-1.1017l0.00018 0.99192c0.00043 2.3846 1.9236 4.4325 4.3083 4.4325h17.242c2.3846 0 4.3127-2.0479 4.3127-4.4325v-4.2422c0-2.3846-1.9281-4.3153-4.3127-4.3153h-17.242c-2.3846 0-4.3095 1.9306-4.3083 4.3153l0.00051 0.98395c-2.2474 0.0903-3.9508 0.6357-5.2079 1.4985-1.5245 1.0464-2.3662 2.4764-3.0762 3.7637-0.70992 1.2873-1.3108 2.4408-2.2188 3.2734-0.79034 0.72475-1.8834 1.2844-3.658 1.493zm18.468-12.356h17.242c0.80514 0 1.387 0.58455 1.387 1.3897v4.2422c0 0.80514-0.5819 1.3898-1.387 1.3898h-17.242c-0.80514 0-1.4994-0.58462-1.4994-1.3898v-4.2422c0-0.80513 0.69431-1.3897 1.4994-1.3897z" fill="#fff"/>
+                    </g>
+                  </g>
+                </svg>
+                <h1>Node-RED Preview</h1>
+              </div>
+
+              <div class="progress-container">
+                <div class="step" data-step="1">
+                  <div class="step-icon">
+                    <div class="step-icon-dot"></div>
+                    <div class="spinner"></div>
+                    <svg class="checkmark" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                    </svg>
+                  </div>
+                  <div class="step-content">
+                    <div class="step-label">Boot environment</div>
+                    <div class="step-detail" data-detail="1">Initializing WebContainer...</div>
+                  </div>
+                </div>
+
+                <div class="step" data-step="2">
+                  <div class="step-icon">
+                    <div class="step-icon-dot"></div>
+                    <div class="spinner"></div>
+                    <svg class="checkmark" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                    </svg>
+                  </div>
+                  <div class="step-content">
+                    <div class="step-label">Install dependencies</div>
+                    <div class="step-detail" data-detail="2">Waiting...</div>
+                  </div>
+                </div>
+
+                <div class="step" data-step="3">
+                  <div class="step-icon">
+                    <div class="step-icon-dot"></div>
+                    <div class="spinner"></div>
+                    <svg class="checkmark" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                    </svg>
+                  </div>
+                  <div class="step-content">
+                    <div class="step-label">Build Node-RED</div>
+                    <div class="step-detail" data-detail="3">Waiting...</div>
+                  </div>
+                </div>
+
+                <div class="step" data-step="4">
+                  <div class="step-icon">
+                    <div class="step-icon-dot"></div>
+                    <div class="spinner"></div>
+                    <svg class="checkmark" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                    </svg>
+                  </div>
+                  <div class="step-content">
+                    <div class="step-label">Start Node-RED</div>
+                    <div class="step-detail" data-detail="4">Waiting...</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="error-box">
+                <div class="error-title">Error</div>
+                <div class="error-message" id="error-message"></div>
+              </div>
+            </div>
+
+            <button id="terminal-toggle">View Terminal</button>
+
+            <div id="terminal-drawer">
+              <div class="terminal-header">
+                <h3>Build Terminal</h3>
+                <button class="terminal-close" aria-label="Close terminal">&times;</button>
+              </div>
+              <div id="terminal-output"></div>
+            </div>
+
+            <iframe id="editor-frame"></iframe>
+
+            <script type="module">
+              import { WebContainer } from 'https://unpkg.com/@webcontainer/api@1.6.1?module';
+
+              // State management
+              let currentStep = 0;
+              const terminalLogs = [];
+              let webcontainer;
+              let serverUrl;
+
+              // DOM elements
+              const loader = document.getElementById('loader');
+              const terminalToggle = document.getElementById('terminal-toggle');
+              const terminalDrawer = document.getElementById('terminal-drawer');
+              const terminalOutput = document.getElementById('terminal-output');
+              const editorFrame = document.getElementById('editor-frame');
+              const errorBox = document.querySelector('.error-box');
+              const errorMessage = document.getElementById('error-message');
+
+              // Terminal controls
+              terminalToggle.addEventListener('click', () => {
+                terminalDrawer.classList.add('open');
+              });
+
+              document.querySelector('.terminal-close').addEventListener('click', () => {
+                terminalDrawer.classList.remove('open');
+              });
+
+              // Logging functions
+              function log(message, level = 'info') {
+                const timestamp = new Date().toLocaleTimeString();
+                const logLine = `[${timestamp}] ${message}`;
+                terminalLogs.push({ text: logLine, level });
+
+                const line = document.createElement('div');
+                line.className = `log-line ${level}`;
+                line.textContent = logLine;
+                terminalOutput.appendChild(line);
+                terminalOutput.scrollTop = terminalOutput.scrollHeight;
+
+                // Show terminal toggle once we have logs
+                terminalToggle.classList.add('visible');
+              }
+
+              function updateStep(step, status, detail) {
+                const stepEl = document.querySelector(`[data-step="${step}"]`);
+                const detailEl = document.querySelector(`[data-detail="${step}"]`);
+
+                if (status === 'active') {
+                  currentStep = step;
+                  // Mark previous steps as completed
+                  for (let i = 1; i < step; i++) {
+                    document.querySelector(`[data-step="${i}"]`)?.classList.add('completed');
+                    document.querySelector(`[data-step="${i}"]`)?.classList.remove('active');
+                  }
+                  stepEl?.classList.add('active');
+                  stepEl?.classList.remove('completed');
+                } else if (status === 'completed') {
+                  stepEl?.classList.add('completed');
+                  stepEl?.classList.remove('active');
+                }
+
+                if (detail) {
+                  detailEl.textContent = detail;
+                }
+              }
+
+              function showError(message) {
+                errorMessage.textContent = message + '\n\nOpen terminal for details.';
+                errorBox.classList.add('visible');
+                log(message, 'error');
+              }
+
+              // Main bootstrap process
+              async function bootstrap() {
+                try {
+                  log('Starting Node-RED preview');
+
+                  // Step 1: Boot WebContainer
+                  updateStep(1, 'active', 'Booting WebContainer...');
+                  log('Booting WebContainer with credentialless COEP...');
+
+                  webcontainer = await WebContainer.boot({
+                    coep: 'credentialless'
+                  });
+
+                  log('WebContainer booted successfully');
+                  updateStep(1, 'active', 'Downloading snapshot...');
+
+                  // Download pre-built WebContainer snapshot (same origin, no CORS)
+                  log('Downloading snapshot...');
+                  const response = await fetch('/snapshot');
+                  if (!response.ok) {
+                    throw new Error(`Failed to download snapshot: ${response.status} ${response.statusText}`);
+                  }
+
+                  const snapshotData = await response.arrayBuffer();
+                  log(`Downloaded ${(snapshotData.byteLength / 1024 / 1024).toFixed(2)} MB`);
+
+                  updateStep(1, 'active', 'Mounting files...');
+                  log('Mounting snapshot...');
+                  await webcontainer.mount(snapshotData);
+
+                  log('Source mounted successfully');
+                  updateStep(1, 'completed', 'Environment ready');
+
+                  // Step 2: Install dependencies
+                  updateStep(2, 'active', 'Running npm ci...');
+                  log('Installing dependencies...');
+
+                  const installProcess = await webcontainer.spawn('npm', ['ci'], {
+                    output: true
+                  });
+
+                  installProcess.output.pipeTo(new WritableStream({
+                    write(data) {
+                      const text = data.trim();
+                      if (text) {
+                        log(text);
+                        // Extract package count if available
+                        const match = text.match(/added (\d+) packages/);
+                        if (match) {
+                          updateStep(2, 'active', `Installed ${match[1]} packages`);
+                        }
+                      }
+                    }
+                  }));
+
+                  const installExit = await installProcess.exit;
+                  if (installExit !== 0) {
+                    throw new Error(`npm ci failed with code ${installExit}`);
+                  }
+
+                  log('Dependencies installed');
+                  updateStep(2, 'completed', 'Dependencies installed');
+
+                  // Step 3: Build Node-RED
+                  updateStep(3, 'active', 'Running npm run build...');
+                  log('Building Node-RED...');
+
+                  const buildProcess = await webcontainer.spawn('npm', ['run', 'build'], {
+                    output: true
+                  });
+
+                  buildProcess.output.pipeTo(new WritableStream({
+                    write(data) {
+                      const text = data.trim();
+                      if (text) {
+                        log(text);
+                        // Update detail with build progress
+                        if (text.includes('Done')) {
+                          updateStep(3, 'active', 'Finalizing build...');
+                        }
+                      }
+                    }
+                  }));
+
+                  const buildExit = await buildProcess.exit;
+                  if (buildExit !== 0) {
+                    throw new Error(`Build failed with code ${buildExit}`);
+                  }
+
+                  log('Build completed');
+                  updateStep(3, 'completed', 'Build complete');
+
+                  // Step 4: Start Node-RED
+                  updateStep(4, 'active', 'Starting Node-RED server...');
+                  log('Starting Node-RED...');
+
+                  // Listen for server ready event
+                  webcontainer.on('server-ready', (port, url) => {
+                    log(`Server ready on port ${port}: ${url}`);
+                    serverUrl = url;
+
+                    updateStep(4, 'completed', 'Node-RED running');
+
+                    // Load editor in iframe
+                    setTimeout(() => {
+                      log('Loading Node-RED editor...');
+                      editorFrame.src = url;
+
+                      // Wait for iframe to load
+                      editorFrame.onload = () => {
+                        log('Editor loaded successfully');
+                        loader.classList.add('hidden');
+                        editorFrame.classList.add('visible');
+                      };
+                    }, 500);
+                  });
+
+                  const startProcess = await webcontainer.spawn('npm', ['start'], {
+                    output: true
+                  });
+
+                  startProcess.output.pipeTo(new WritableStream({
+                    write(data) {
+                      const text = data.trim();
+                      if (text) {
+                        log(text);
+                        if (text.includes('Server now running')) {
+                          updateStep(4, 'active', 'Server starting...');
+                        }
+                      }
+                    }
+                  }));
+
+                } catch (error) {
+                  log(`Bootstrap failed: ${error.message}`, 'error');
+                  console.error('Bootstrap error:', error);
+                  showError(error.message);
+                }
+              }
+
+              // Start the bootstrap process
+              bootstrap();
+            </script>
+          </body>
+          </html>
+          EOF
+          echo "✓ Generated preview/index.html"
+
+      - name: Generate Netlify headers
+        run: |
+          cat > preview/_headers << 'EOF'
+          /*
+            Cross-Origin-Embedder-Policy: credentialless
+            Cross-Origin-Opener-Policy: same-origin
+          EOF
+          echo "✓ Generated preview/_headers"
+
+      - name: Install Netlify CLI
+        run: npm install -g netlify-cli
+
+      - name: Deploy to Netlify
+        id: deploy
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+          GITHUB_REF: ${{ github.ref }}
+        run: |
+          # Safely extract branch name using environment variable
+          BRANCH_NAME="${GITHUB_REF#refs/heads/}"
+
+          # Deploy with branch-specific alias
+          if [ "$BRANCH_NAME" = "master" ]; then
+            echo "Deploying to production..."
+            OUTPUT=$(netlify deploy --dir=preview --prod --json)
+          else
+            echo "Deploying branch preview: $BRANCH_NAME"
+            OUTPUT=$(netlify deploy --dir=preview --alias="$BRANCH_NAME" --json)
+          fi
+
+          DEPLOY_URL=$(echo "$OUTPUT" | jq -r '.deploy_url // .url')
+          echo "deploy_url=$DEPLOY_URL" >> "$GITHUB_OUTPUT"
+          echo "Deployed to: $DEPLOY_URL"
