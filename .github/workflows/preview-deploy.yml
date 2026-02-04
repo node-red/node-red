@@ -103,7 +103,7 @@ jobs:
               .header h1 {
                 font-size: 2rem;
                 font-weight: 400;
-                color: #c12120;
+                color: #e0e0e0;
               }
 
               .progress-container {
@@ -216,12 +216,12 @@ jobs:
                 font-size: 1rem;
                 font-weight: 500;
                 margin-bottom: 0.25rem;
-                color: #888;
+                color: #aaaaaa;
                 transition: color 0.3s ease;
               }
 
               .step.active .step-label {
-                color: #c12120;
+                color: #e0e0e0;
               }
 
               .step.completed .step-label {
