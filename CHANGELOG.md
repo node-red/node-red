@@ -1,4 +1,9 @@
-#### 4.1.4: Maintenance Releas
+#### 4.1.5: Maintenance Release
+
+ - chore: bump tar to 7.5.7 (#5472) @bryopsida
+ - Update node-red-admin dependency @knolleary
+
+#### 4.1.4: Maintenance Release
 
  - Update tar dependency @knolleary
  - Revert overflow fix in editableList (#5467) @knolleary
