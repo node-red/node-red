@@ -14,11 +14,13 @@
 * limitations under the License.
 **/
 
-var should = require("should");
-var functionNode = require("nr-test-utils").require("@node-red/nodes/core/function/10-function.js");
-var Context = require("nr-test-utils").require("@node-red/runtime/lib/nodes/context");
-var helper = require("node-red-node-test-helper");
-var RED = require("nr-test-utils").require("node-red/lib/red");
+const should = require("should");
+const sinon = require("sinon");
+const functionNode = require("nr-test-utils").require("@node-red/nodes/core/function/10-function.js");
+const linkNode = require("nr-test-utils").require("@node-red/nodes/core/common/60-link.js");
+const Context = require("nr-test-utils").require("@node-red/runtime/lib/nodes/context");
+const helper = require("node-red-node-test-helper");
+const RED = require("nr-test-utils").require("node-red/lib/red");
 describe('function node', function() {
 
     before(function(done) {
@@ -1835,4 +1837,409 @@ describe('function node', function() {
         });
 
     });
+
+    describe('link call from function', function () {
+        afterEach(function () {
+            delete RED.settings.functionExternalModules;
+        })
+        it('should call subroutine on same tab by name and get response', async function () {
+            const flow = [
+                // ↓↓ subroutine ↓↓
+                { id: "li1", type: "link in", name: "subroutine", wires: [["sbn"]] },
+                { id: "sbn", type: "function", wires: [["lo1"]], func: "msg._payload=msg.payload; msg.payload='set-in-function'; return msg;" },
+                { id: "lo1", type: "link out", mode: "return" },
+                // ↓↓ main flow ↓↓
+                { id: "f1", type: "function", wires: [["h1"]], func: "const m = await node.linkcall('subroutine', msg, { timeout: 1000 }); return m;" },
+                { id: "c1", type: "catch", scope: ["f1"], uncaught: true, wires: [["h1"]] },
+                { id: "h1", type: "helper" }
+            ]
+
+            await helper.load([linkNode, functionNode], flow)
+            const f1 = helper.getNode("f1");
+            const h1 = helper.getNode("h1");
+            const c1 = helper.getNode("c1");
+            const c1SpyReceived = sinon.spy(c1, "receive")
+
+            await new Promise((resolve, reject) => {
+                h1.on("input", function (msg) {
+                    try {
+                        c1SpyReceived.called.should.be.false() // should not have been caught as error
+                        msg.should.have.property("payload", "set-in-function")
+                        msg.should.have.property("_payload", "original")
+                        msg.should.not.have.property("error")
+                        resolve()
+                    } catch (err) {
+                        reject(err)
+                    }
+                })
+                f1.receive({ payload: "original", topic: "test" }) // trigger function node which will call the subroutine
+            })
+        })
+        it('should call subroutine on different tab by name and get response', async function () {
+            const flow = [
+                // ↓↓ flow tabs ↓↓
+                { id: "tab-flow-main", type: "tab", label: "Main Flow" },
+                { id: "tab-flow-2", type: "tab", label: "Flow 2" },
+                // ↓↓ subroutine ↓↓
+                { id: "li1", type: "link in", z: "tab-flow-2", name: "subroutine-on-different-tab", wires: [["sbn"]] },
+                { id: "sbn", type: "function", z: "tab-flow-2", wires: [["lo1"]], func: "msg._payload=msg.payload; msg.payload='set-in-function'; return msg;" },
+                { id: "lo1", type: "link out", z: "tab-flow-2", mode: "return" },
+                // ↓↓ main flow ↓↓
+                { id: "f1", type: "function", z: "tab-flow-main", wires: [["h1"]], func: "const m = await node.linkcall('subroutine-on-different-tab', msg, { timeout: 1000 }); return m;" },
+                { id: "c1", type: "catch", z: "tab-flow-main", scope: ["f1"], uncaught: true, wires: [["h1"]] },
+                { id: "h1", type: "helper", z: "tab-flow-main" }
+            ]
+
+            await helper.load([linkNode, functionNode], flow)
+            const f1 = helper.getNode("f1");
+            const h1 = helper.getNode("h1");
+            const c1 = helper.getNode("c1");
+            const c1SpyReceived = sinon.spy(c1, "receive")
+            const li1 = helper.getNode("li1");
+            const li1SpyReceived = sinon.spy(li1, "receive")
+
+            await new Promise((resolve, reject) => {
+                h1.on("input", function (msg) {
+                    try {
+                        li1SpyReceived.called.should.be.true() // subroutine should have been called
+                        c1SpyReceived.called.should.be.false() // should not have been caught as error
+                        msg.should.have.property("payload", "set-in-function")
+                        msg.should.have.property("_payload", "original")
+                        msg.should.not.have.property("error")
+                        resolve()
+                    } catch (err) {
+                        reject(err)
+                    }
+                })
+                f1.receive({ payload: "original", topic: "test" }) // trigger function node which will call the subroutine
+            })
+        })
+        it('should call subroutine on same tab by node id and get response', async function () {
+            const flow = [
+                // ↓↓ subroutine ↓↓
+                { id: "li1", type: "link in", name: "subroutine", wires: [["sbn"]] },
+                { id: "sbn", type: "function", wires: [["lo1"]], func: "msg._payload=msg.payload; msg.payload='set-in-function'; return msg;" },
+                { id: "lo1", type: "link out", mode: "return" },
+                // ↓↓ main flow ↓↓
+                { id: "f1", type: "function", wires: [["h1"]], func: "const m = await node.linkcall('li1', msg, { timeout: 1000 }); return m;" },
+                { id: "c1", type: "catch", scope: ["f1"], uncaught: true, wires: [["h1"]] },
+                { id: "h1", type: "helper" }
+            ]
+
+            await helper.load([linkNode, functionNode], flow)
+            const f1 = helper.getNode("f1");
+            const h1 = helper.getNode("h1");
+            const c1 = helper.getNode("c1");
+            const c1SpyReceived = sinon.spy(c1, "receive")
+
+            await new Promise((resolve, reject) => {
+                h1.on("input", function (msg) {
+                    try {
+                        c1SpyReceived.called.should.be.false() // should not have been caught as error
+                        msg.should.have.property("payload", "set-in-function")
+                        msg.should.have.property("_payload", "original")
+                        msg.should.not.have.property("error")
+                        resolve()
+                    } catch (err) {
+                        reject(err)
+                    }
+                })
+                f1.receive({ payload: "original", topic: "test" }) // trigger function node which will call the subroutine
+            })
+        })
+        it('should call subroutine on different tab by node id and get response', async function () {
+            const flow = [
+                // ↓↓ flow tabs ↓↓
+                { id: "tab-flow-main", type: "tab", label: "Main Flow" },
+                { id: "tab-flow-2", type: "tab", label: "Flow 2" },
+                // ↓↓ subroutine on flow 2 ↓↓
+                { id: "li2", type: "link in", z: "tab-flow-2", name: "subroutine", wires: [["sbn2"]] },
+                { id: "sbn2", type: "function", z: "tab-flow-2", wires: [["lo2"]], func: "msg._payload=msg.payload; msg.payload='set-in-function'; return msg;" },
+                { id: "lo2", type: "link out", z: "tab-flow-2", mode: "return" },
+                // ↓↓ main flow ↓↓
+                { id: "f1", type: "function", z: "tab-flow-main", wires: [["h1"]], func: "const m = await node.linkcall('li2', msg, { timeout: 500 }); return m;" },
+                { id: "c1", type: "catch", z: "tab-flow-main", scope: ["f1"], uncaught: true, wires: [["h1"]] },
+                { id: "h1", type: "helper", z: "tab-flow-main" }
+            ]
+
+            await helper.load([linkNode, functionNode], flow)
+            const f1 = helper.getNode("f1");
+            const h1 = helper.getNode("h1");
+            const c1 = helper.getNode("c1");
+            const li2 = helper.getNode("li2");
+            const c1SpyReceived = sinon.spy(c1, "receive")
+            const li2SpyReceived = sinon.spy(li2, "receive")
+
+            await new Promise((resolve, reject) => {
+                h1.on("input", function (msg) {
+                    try {
+                        li2SpyReceived.called.should.be.true() // subroutine should have been called
+                        c1SpyReceived.called.should.be.false() // should not have been caught as error
+                        msg.should.have.property("payload", "set-in-function")
+                        msg.should.have.property("_payload", "original")
+                        msg.should.not.have.property("error")
+                        resolve()
+                    } catch (err) {
+                        reject(err)
+                    }
+                })
+                f1.receive({ payload: "original", topic: "test" }) // trigger function node which will call the subroutine
+            })
+        })
+
+        it('should call subroutine on same tab even when there are same named targets on other tabs', async function () {
+            const flow = [
+                // ↓↓ flow tabs ↓↓
+                { id: "tab-flow-main", type: "tab", label: "Main Flow" },
+                { id: "tab-flow-2", type: "tab", label: "Flow 2" },
+                // ↓↓ subroutine on main flow ↓↓
+                { id: "li1", type: "link in", z: "tab-flow-main", name: "subroutine", wires: [["sbn"]] },
+                { id: "sbn", type: "function", z: "tab-flow-main", wires: [["lo1"]], func: "msg._payload=msg.payload; msg.payload='set-in-function'; return msg;" },
+                { id: "lo1", type: "link out", z: "tab-flow-main", mode: "return" },
+                // ↓↓ subroutine on flow 2 ↓↓
+                { id: "li2", type: "link in", z: "tab-flow-2", name: "subroutine", wires: [["sbn2"]] },
+                { id: "sbn2", type: "function", z: "tab-flow-2", wires: [["lo2"]], func: "msg._payload=msg.payload; msg.payload='set-in-function'; return msg;" },
+                { id: "lo2", type: "link out", z: "tab-flow-2", mode: "return" },
+                // ↓↓ main flow ↓↓
+                { id: "f1", type: "function", z: "tab-flow-main", wires: [["h1"]], func: "const m = await node.linkcall('subroutine', msg, { timeout: 500 }); return m;" },
+                { id: "c1", type: "catch", z: "tab-flow-main", scope: ["f1"], uncaught: true, wires: [["h1"]] },
+                { id: "h1", type: "helper", z: "tab-flow-main" }
+            ]
+
+            await helper.load([linkNode, functionNode], flow)
+            const f1 = helper.getNode("f1");
+            const h1 = helper.getNode("h1");
+            const c1 = helper.getNode("c1");
+            const li1 = helper.getNode("li1");
+            const li2 = helper.getNode("li2");
+            const c1SpyReceived = sinon.spy(c1, "receive")
+            const li1SpyReceived = sinon.spy(li1, "receive")
+            const li2SpyReceived = sinon.spy(li2, "receive")
+
+            await new Promise((resolve, reject) => {
+                h1.on("input", function (msg) {
+                    try {
+                        li1SpyReceived.called.should.be.true() // subroutine on same tab should have been called
+                        li2SpyReceived.called.should.be.false() // subroutine on different tab should not have been called
+                        c1SpyReceived.called.should.be.false() // should not have been caught as error
+                        msg.should.have.property("payload", "set-in-function")
+                        msg.should.have.property("_payload", "original")
+                        msg.should.not.have.property("error")
+                        resolve()
+                    } catch (err) {
+                        reject(err)
+                    }
+                })
+                f1.receive({ payload: "original", topic: "test" }) // trigger function node which will call the subroutine
+            })
+        })
+        it('should call nested subroutines', async function () {
+            const flow = [
+                // ↓↓ flow tabs ↓↓
+                { id: "tab-flow-main", type: "tab", label: "Main Flow" },
+                { id: "tab-flow-2", type: "tab", label: "Flow 2" },
+                // ↓↓ subroutine on main flow ↓↓
+                { id: "li1", type: "link in", z: "tab-flow-main", name: "subroutine", wires: [["sbn"]] },
+                { id: "sbn", type: "function", z: "tab-flow-main", wires: [["lo1"]], func: "const m = await node.linkcall('subroutine2', msg, { timeout: 500 }); return m;" },
+                { id: "lo1", type: "link out", z: "tab-flow-main", mode: "return" },
+                // ↑↑ subroutine end ↑↑
+                // ↓↓ subroutine on flow 2 ↓↓
+                { id: "li2", type: "link in", z: "tab-flow-2", name: "subroutine2", wires: [["sbn2"]] },
+                { id: "sbn2", type: "function", z: "tab-flow-2", wires: [["lo2"]], func: "msg._payload=msg.payload; msg.payload='set-in-subroutine-2'; return msg;" },
+                { id: "lo2", type: "link out", z: "tab-flow-2", mode: "return" },
+                // ↑↑ subroutine end ↑↑
+                { id: "f1", type: "function", z: "tab-flow-main", wires: [["h1"]], func: "const m = await node.linkcall('subroutine', msg, { timeout: 500 }); return m;" },
+                { id: "c1", type: "catch", z: "tab-flow-main", scope: ["f1"], uncaught: true, wires: [["h1"]] },
+                { id: "h1", type: "helper", z: "tab-flow-main" }
+            ]
+
+            await helper.load([linkNode, functionNode], flow)
+            const f1 = helper.getNode("f1");
+            const h1 = helper.getNode("h1");
+            const c1 = helper.getNode("c1");
+            const c1SpyReceived = sinon.spy(c1, "receive")
+            const li1 = helper.getNode("li1");
+            const li1SpyReceived = sinon.spy(li1, "receive")
+            const li2 = helper.getNode("li2");
+            const li2SpyReceived = sinon.spy(li2, "receive")
+
+            await new Promise((resolve, reject) => {
+                h1.on("input", function (msg) {
+                    try {
+                        li1SpyReceived.called.should.be.true() // subroutine on same tab should have been called
+                        li2SpyReceived.called.should.be.true() // nested subroutine should have been called
+                        c1SpyReceived.called.should.be.false() // should not have been caught as error
+                        msg.should.have.property("payload", "set-in-subroutine-2")
+                        msg.should.have.property("_payload", "original")
+                        msg.should.not.have.property("error")
+                        resolve()
+                    } catch (err) {
+                        reject(err)
+                    }
+                })
+                f1.receive({ payload: "original", topic: "test" }) // trigger function node which will call the subroutine
+            })
+        })
+        it('should timeout waiting for link return', async function () {
+            this.timeout(1000);
+            const flow = [
+                // ↓↓ flow tabs ↓↓
+                { id: "tab-flow-main", type: "tab", label: "Main Flow" },
+                // ↓↓ subroutine ↓↓
+                { id: "li1", type: "link in", z: "tab-flow-main", name: "subroutine", wires: [["sbn"]] },
+                { id: "sbn", type: "function", z: "tab-flow-main", wires: [["lo1"]], func: "msg._payload=msg.payload; msg.payload='set-in-function'; return msg;" },
+                { id: "lo1", type: "link out", z: "tab-flow-main", mode: "" }, // not return mode, cause link-call timeout
+                // ↓↓ main flow ↓↓
+                { id: "f1", type: "function", z: "tab-flow-main", wires: [["h1"]], func: "const m = await node.linkcall('subroutine', msg, { timeout: 500 }); return m;" },
+                { id: "c1", type: "catch", z: "tab-flow-main", scope: ["f1"], uncaught: true, wires: [["h1"]] },
+                { id: "h1", type: "helper", z: "tab-flow-main" }
+            ]
+
+            await helper.load([linkNode, functionNode], flow)
+            const f1 = helper.getNode("f1")
+            const h1 = helper.getNode("h1")
+            const c1 = helper.getNode("c1")
+            const li1 = helper.getNode("li1")
+            const c1SpyReceived = sinon.spy(c1, "receive")
+            const li1SpyReceived = sinon.spy(li1, "receive")
+
+            await new Promise((resolve, reject) => {
+                h1.on("input", function (msg) {
+                    try {
+                        li1SpyReceived.called.should.be.true() // subroutine should have been called
+                        c1SpyReceived.called.should.be.true() // should have been caught as error
+                        msg.error.should.have.property("message").and.match(/timeout/)
+                        msg.error.should.have.property("source")
+                        msg.error.source.should.have.property("id", "f1")
+                        resolve()
+                    } catch (err) {
+                        reject(err)
+                    }
+                })
+                f1.receive({ payload: "original", topic: "test" })
+            })
+        })
+        it('should raise error for non-existent target subroutine', async function () {
+            this.timeout(1000);
+            const flow = [
+                // ↓↓ flow tabs ↓↓
+                { id: "tab-flow-main", type: "tab", label: "Main Flow" },
+                // ↓↓ subroutine ↓↓
+                { id: "li1", type: "link in", z: "tab-flow-main", name: "subroutine", wires: [["sbn"]] },
+                { id: "sbn", type: "function", z: "tab-flow-main", wires: [["lo1"]], func: "msg._payload=msg.payload; msg.payload='set-in-function'; return msg;" },
+                { id: "lo1", type: "link out", z: "tab-flow-main", mode: "" }, // not return mode, cause link-call timeout
+                // ↓↓ main flow ↓↓
+                { id: "f1", type: "function", z: "tab-flow-main", wires: [["h1"]], func: "const m = await node.linkcall('non-existent-subroutine', msg, { timeout: 500 }); return m;" },
+                { id: "c1", type: "catch", z: "tab-flow-main", scope: ["f1"], uncaught: true, wires: [["h1"]] },
+                { id: "h1", type: "helper", z: "tab-flow-main" }
+            ]
+
+            await helper.load([linkNode, functionNode], flow)
+            const f1 = helper.getNode("f1")
+            const h1 = helper.getNode("h1")
+            const c1 = helper.getNode("c1")
+            const li1 = helper.getNode("li1")
+            const c1SpyReceived = sinon.spy(c1, "receive")
+            const li1SpyReceived = sinon.spy(li1, "receive")
+
+            await new Promise((resolve, reject) => {
+                h1.on("input", function (msg) {
+                    try {
+                        li1SpyReceived.called.should.be.false() // subroutine should not have been called
+                        c1SpyReceived.called.should.be.true() // should have been caught as error
+                        msg.error.should.have.property("message").and.match(/target link-in node \'non-existent-subroutine\' not found/i)
+                        msg.error.should.have.property("source")
+                        msg.error.source.should.have.property("id", "f1")
+                        resolve()
+                    } catch (err) {
+                        reject(err)
+                    }
+                })
+                f1.receive({ payload: "original", topic: "test" })
+            })
+        })
+        it('should raise error due to multiple targets on same tab', async function () {
+            const flow = [
+                // ↓↓ flow tabs ↓↓
+                { id: "tab-flow-main", type: "tab", label: "Main Flow" },
+                // ↓↓ subroutine ↓↓
+                { id: "li1", type: "link in", z: "tab-flow-main", name: "subroutine", wires: [["sbn"]] },
+                { id: "li2", type: "link in", z: "tab-flow-main", name: "subroutine", wires: [["sbn"]] },
+                { id: "sbn", type: "function", z: "tab-flow-main", wires: [["lo1"]], func: "msg._payload=msg.payload; msg.payload='set-in-function'; return msg;" },
+                { id: "lo1", type: "link out", z: "tab-flow-main", mode: "return" },
+                // ↓↓ main flow ↓↓
+                { id: "f1", type: "function", z: "tab-flow-main", wires: [["h1"]], func: "const m = await node.linkcall('subroutine', msg, { timeout: 500 }); return m;" },
+                { id: "c1", type: "catch", z: "tab-flow-main", scope: ["f1"], uncaught: true, wires: [["h1"]] },
+                { id: "h1", type: "helper", z: "tab-flow-main" }
+            ]
+
+            await helper.load([linkNode, functionNode], flow)
+            const f1 = helper.getNode("f1")
+            const h1 = helper.getNode("h1")
+            const c1 = helper.getNode("c1")
+            const li1 = helper.getNode("li1")
+            const c1SpyReceived = sinon.spy(c1, "receive")
+            const li1SpyReceived = sinon.spy(li1, "receive")
+
+            await new Promise((resolve, reject) => {
+                h1.on("input", function (msg) {
+                    try {
+                        li1SpyReceived.called.should.be.false() // subroutine should not have been called
+                        c1SpyReceived.called.should.be.true() // should have been caught as error
+                        msg.error.should.have.property("message").and.match(/Multiple link-in nodes named 'subroutine' found/i)
+                        msg.error.should.have.property("source")
+                        msg.error.source.should.have.property("id", "f1")
+                        resolve()
+                    } catch (err) {
+                        reject(err)
+                    }
+                })
+                f1.receive({ payload: "original", topic: "test" })
+            })
+        })
+        it('should raise error due to multiple targets on different tabs', async function () {
+            const flow = [
+                // ↓↓ flow tabs ↓↓
+                { id: "tab-flow-main", type: "tab", label: "Main Flow" },
+                { id: "tab-flow-2", type: "tab", label: "Flow 2" },
+                { id: "tab-flow-3", type: "tab", label: "Flow 3" },
+                // ↓↓ subroutine on flow 2 ↓↓
+                { id: "li1", type: "link in", z: "tab-flow-2", name: "subroutine", wires: [["sbn"]] },
+                { id: "sbn", type: "function", z: "tab-flow-2", wires: [["lo1"]], func: "msg._payload=msg.payload; msg.payload='set-in-function'; return msg;" },
+                { id: "lo1", type: "link out", z: "tab-flow-2", mode: "return" },
+                // ↓↓ subroutine on flow 3 ↓↓
+                { id: "li2", type: "link in", z: "tab-flow-3", name: "subroutine", wires: [["sbn2"]] },
+                { id: "sbn2", type: "function", z: "tab-flow-3", wires: [["lo2"]], func: "msg._payload=msg.payload; msg.payload='set-in-function'; return msg;" },
+                { id: "lo2", type: "link out", z: "tab-flow-3", mode: "return" },
+                // ↓↓ main flow ↓↓
+                { id: "f1", type: "function", z: "tab-flow-main", wires: [["h1"]], func: "const m = await node.linkcall('subroutine', msg, { timeout: 500 }); return m;" },
+                { id: "c1", type: "catch", z: "tab-flow-main", scope: ["f1"], uncaught: true, wires: [["h1"]] },
+                { id: "h1", type: "helper", z: "tab-flow-main" }
+            ]
+
+            await helper.load([linkNode, functionNode], flow)
+            const f1 = helper.getNode("f1")
+            const h1 = helper.getNode("h1")
+            const c1 = helper.getNode("c1")
+            const li1 = helper.getNode("li1")
+            const c1SpyReceived = sinon.spy(c1, "receive")
+            const li1SpyReceived = sinon.spy(li1, "receive")
+
+            await new Promise((resolve, reject) => {
+                h1.on("input", function (msg) {
+                    try {
+                        li1SpyReceived.called.should.be.false() // subroutine should not have been called
+                        c1SpyReceived.called.should.be.true() // should have been caught as error
+                        msg.error.should.have.property("message").and.match(/Multiple link-in nodes named 'subroutine' found/i)
+                        msg.error.should.have.property("source")
+                        msg.error.source.should.have.property("id", "f1")
+                        resolve()
+                    } catch (err) {
+                        reject(err)
+                    }
+                })
+                f1.receive({ payload: "original", topic: "test" })
+            })
+        })
+    })
 });
