@@ -1986,7 +1986,90 @@ describe('function node', function() {
                 f1.receive({ payload: "original", topic: "test" }) // trigger function node which will call the subroutine
             })
         })
+        it('should clone the message by default', async function () {
+            const flow = [
+                // ↓↓ subroutine ↓↓
+                { id: "li1", type: "link in", name: "subroutine", wires: [["sbn"]] },
+                { id: "sbn", type: "function", wires: [["lo1"]], func: "msg.payload.prop='modified'; return msg;" },
+                { id: "lo1", type: "link out", mode: "return" },
+                // ↓↓ main flow ↓↓
+                { id: "f1",
+                    type: "function",
+                    wires: [["h1"]],
+                    func: `
+                        const payloadPropBefore = msg.payload.prop;
+                        const newMsg = await node.linkcall('li1', msg);
+                        const payloadPropAfter = msg.payload.prop;
+                        const newPayloadProp = newMsg.payload.prop;
+                        msg.testData = {payloadPropBefore, payloadPropAfter, newPayloadProp}; // attach data to message to make it easier to assert in test
+                        return msg;
+                    `
+                },
+                { id: "c1", type: "catch", scope: ["f1"], uncaught: true, wires: [["h1"]] },
+                { id: "h1", type: "helper" }
+            ]
 
+            await helper.load([linkNode, functionNode], flow)
+            const f1 = helper.getNode("f1");
+            const h1 = helper.getNode("h1");
+
+            await new Promise((resolve, reject) => {
+                h1.on("input", function (msg) {
+                    try {
+                        msg.should.have.property('payload').and.have.property('prop', 'original')
+                        should(msg.testData).have.property('payloadPropBefore', 'original')
+                        should(msg.testData).have.property('payloadPropAfter', 'original')
+                        should(msg.testData).have.property('newPayloadProp', 'modified')
+                        resolve()
+                    } catch (err) {
+                        reject(err)
+                    }
+                })
+                f1.receive({ payload: { prop: "original" }, topic: "test" }) // trigger function node which will call the subroutine
+            })
+        })
+        it('should not clone the message when clone option=false', async function () {
+            const flow = [
+                // ↓↓ subroutine ↓↓
+                { id: "li1", type: "link in", name: "subroutine", wires: [["sbn"]] },
+                { id: "sbn", type: "function", wires: [["lo1"]], func: "msg.payload.prop='modified'; return msg;" },
+                { id: "lo1", type: "link out", mode: "return" },
+                // ↓↓ main flow ↓↓
+                { id: "f1",
+                    type: "function",
+                    wires: [["h1"]],
+                    func: `
+                        const payloadPropBefore = msg.payload.prop;
+                        const newMsg = await node.linkcall('li1', msg, { clone: false });
+                        const payloadPropAfter = msg.payload.prop;
+                        const newPayloadProp = newMsg.payload.prop;
+                        msg.testData = {payloadPropBefore, payloadPropAfter, newPayloadProp}; // attach data to message to make it easier to assert in test
+                        return msg;
+                    `
+                },
+                { id: "c1", type: "catch", scope: ["f1"], uncaught: true, wires: [["h1"]] },
+                { id: "h1", type: "helper" }
+            ]
+
+            await helper.load([linkNode, functionNode], flow)
+            const f1 = helper.getNode("f1");
+            const h1 = helper.getNode("h1");
+
+            await new Promise((resolve, reject) => {
+                h1.on("input", function (msg) {
+                    try {
+                        msg.should.have.property('payload').and.have.property('prop', 'modified') // original message should have been mutated by subroutine
+                        should(msg.testData).have.property('payloadPropBefore', 'original')
+                        should(msg.testData).have.property('payloadPropAfter', 'modified')
+                        should(msg.testData).have.property('newPayloadProp', 'modified')
+                        resolve()
+                    } catch (err) {
+                        reject(err)
+                    }
+                })
+                f1.receive({ payload: { prop: "original" }, topic: "test" }) // trigger function node which will call the subroutine
+            })
+        })
         it('should call subroutine on same tab even when there are same named targets on other tabs', async function () {
             const flow = [
                 // ↓↓ flow tabs ↓↓
