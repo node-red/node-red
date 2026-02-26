@@ -1,3 +1,14 @@
+#### 4.1.6: Maintenance Release
+
+ - Allow palette.theme to be set via theme plugin and include icons (#5500) @knolleary
+ - Ensure config sidebar tooltip handles html content (#5501) @knolleary
+ - Allow node-red integrator access to available updates (#5499) @Steve-Mcl
+ - Add frontend pre and post debug message hooks (#5495) @Steve-Mcl
+ - Fix: allow middle-click panning over links and ports (#5496) @lklivingstone
+ - Support ctrl key to select configuration nodes (#5486) @kazuhitoyokoi
+ - Add § as shortcut meta-key (#5482) @gorenje
+ - Update dependencies (#5502) @knolleary
+
 #### 4.1.5: Maintenance Release
 
  - chore: bump tar to 7.5.7 (#5472) @bryopsida
