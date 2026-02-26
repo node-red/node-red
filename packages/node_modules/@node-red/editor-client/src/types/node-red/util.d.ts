@@ -207,5 +207,16 @@ declare namespace RED {
          * @memberof @node-red/util_util
          */
         function parseContextStore(key: string): any;
+        /**
+         * Utility function to call a reusable flow defined as a subroutine (link-in/link-out nodes).
+         * 
+         * @param {string} target - the target of the link-in subroutine to call (can be the name or ID of a link-in node)
+         * @param {Object} msg - the message object to pass to the subroutine
+         * @param {Object} [options] - call options
+         * @param {number} [options.timeout=5000] - the maximum time to wait for a response (default: 5000ms)
+         * @return {Promise<Object>} - resolves with the returned message
+         * @memberof @node-red/util_util
+         */
+        function linkcall(target: string, msg: object, options?: object): Promise<object>;
     }
 }
