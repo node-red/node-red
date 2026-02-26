@@ -53,7 +53,7 @@ describe("api/editor/theme", function () {
         context.asset.should.have.a.property("main", "red/main.min.js");
         context.asset.should.have.a.property("vendorMonaco", "vendor/monaco/monaco-bootstrap.js");
 
-        should.not.exist(theme.settings());
+        should.not.exist(await theme.settings());
     });
 
     it("uses non-minified js files when in dev mode", async function () {
@@ -158,7 +158,7 @@ describe("api/editor/theme", function () {
         context.should.have.a.property("login");
         context.login.should.have.a.property("image", "theme/login/image");
 
-        var settings = theme.settings();
+        var settings = await theme.settings();
         settings.should.have.a.property("deployButton");
         settings.deployButton.should.have.a.property("type", "simple");
         settings.deployButton.should.have.a.property("label", "Save");
@@ -199,7 +199,7 @@ describe("api/editor/theme", function () {
 
     });
 
-    it("test explicit userMenu set to true in theme setting", function () {
+    it("test explicit userMenu set to true in theme setting", async function () {
       theme.init({
           editorTheme: {
               userMenu: true,
@@ -208,7 +208,7 @@ describe("api/editor/theme", function () {
 
       theme.app();
 
-      var settings = theme.settings();
+      var settings = await theme.settings();
       settings.should.have.a.property("userMenu");
       settings.userMenu.should.be.eql(true);
 
