@@ -1,3 +1,9 @@
+#### 5.0.0-beta.3: Beta Release
+
+ - UX updates for beta 3 (#5498) @knolleary
+ - Update Monaco to latest (0.55.1) (#5508) @Steve-Mcl
+ - Move location of new creds files to be next to flows (if they don't exist already in userdir) (#4951) @dceejay
+
 #### 5.0.0-beta.2: Beta Release
 
 Editor
