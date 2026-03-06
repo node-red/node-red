@@ -39,6 +39,17 @@ Nodes
 
  - Add ability to use pfx or p12 file for TLS connection settings option (#4907) @dceejay
 
+#### 4.1.7: Maintenance Release
+
+ - Do not block touch events on ports (#5527) @knolleary
+ - Allow palette.categories to be set via theme plugin (#5526) @knolleary
+ - Bump i18next version (#5519) @knolleary
+ - Suppress i18n notice in frontend (#5528) @knolleary
+ - Set showSupportNotice option on i18n (#5520) @knolleary
+ - Do not cache subflow colors as each subflow can have its own (#5518) @knolleary
+ - Update tar/multer deps (#5515) @knolleary
+ - Remove IE7 CSS hacks (#5511) @bonanitech
+ 
 #### 4.1.6: Maintenance Release
 
  - Allow palette.theme to be set via theme plugin and include icons (#5500) @knolleary
