@@ -228,8 +228,6 @@ module.exports = function(grunt) {
                             "node_modules/jquery-i18next/jquery-i18next.min.js",
                             "node_modules/jsonata/jsonata-es5.min.js",
                             "packages/node_modules/@node-red/editor-client/src/vendor/jsonata/formatter.js",
-                            "packages/node_modules/@node-red/editor-client/src/vendor/ace/ace.js",
-                            "packages/node_modules/@node-red/editor-client/src/vendor/ace/ext-language_tools.js"
                         ],
                         nonull: true,
                         dest: "packages/node_modules/@node-red/editor-client/public/vendor/vendor.js"
