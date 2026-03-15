@@ -468,6 +468,19 @@ describe('switch Node', function() {
                     {id:"helperNode1", type:"helper", wires:[]}];
         customFlowSwitchTest(flow, true, "oneTWOthree", done);
     });
+
+    it('should match regex and return matches', function(done) {
+        var flow = [{id:"switchNode1",type:"switch",name:"switchNode",property:"payload",rules:[{"t":"regex","v":"(b[aio]..)","vt":"str"}],checkall:true,outputs:1,wires:[["helperNode1"]]},
+                    {id:"helperNode1", type:"helper", wires:[]}];
+        customFlowMessageSwitchTest(flow, true, {payload:"foobishbashboshpoo",matches:[{"match":"bish","index":3,"groups":["bish"]},{"match":"bash","index":7,"groups":["bash"]},{"match":"bosh","index":11,"groups":["bosh"]}]}, done);
+    });
+
+    it('should match regex and return matches - 2', function(done) {
+        var flow = [{id:"switchNode1",type:"switch",name:"switchNode",property:"payload",rules:[{"t":"regex","v":"[b][iao]","vt":"str"}],checkall:true,outputs:1,wires:[["helperNode1"]]},
+                    {id:"helperNode1", type:"helper", wires:[]}];
+        customFlowMessageSwitchTest(flow, true, {payload:"foobishbashboshpoo",matches:[{"match":"bi","index":3,"groups":[]},{"match":"ba","index":7,"groups":[]},{"match":"bo","index":11,"groups":[]}]}, done);
+    });
+
     it('should not match regex with ignore-case flag unset', function(done) {
         var flow = [{id:"switchNode1",type:"switch",name:"switchNode",property:"payload",rules:[{"t":"regex","v":"onetwothree"}],checkall:true,outputs:1,wires:[["helperNode1"]]},
                     {id:"helperNode1", type:"helper", wires:[]}];
