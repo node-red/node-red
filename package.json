@@ -71,6 +71,8 @@
         "oauth2orize": "1.12.0",
         "on-headers": "1.1.0",
         "passport": "0.7.0",
+        "passport-google-oauth20": "^2.0.0",
+        "passport-google-oidc": "^0.1.0",
         "passport-http-bearer": "1.0.1",
         "passport-oauth2-client-password": "0.1.2",
         "raw-body": "3.0.0",
