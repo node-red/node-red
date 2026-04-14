@@ -295,8 +295,8 @@ describe('Subflow', function() {
         it("instantiates a subflow and stops it", async function() {
             var config = flowUtils.parseConfig([
                 {id:"t1",type:"tab"},
-                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["2"]},
-                {id:"2",x:10,y:10,z:"t1",type:"subflow:sf1",wires:["3","4"]},
+                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[["2"]]},
+                {id:"2",x:10,y:10,z:"t1",type:"subflow:sf1",wires:[["3"],["4"]]},
                 {id:"3",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[]},
                 {id:"4",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[]},
                 {id:"sf1",type:"subflow","name":"Subflow 2","info":"",
@@ -359,8 +359,8 @@ describe('Subflow', function() {
         it("instantiates a subflow inside a subflow and stops it", async function() {
             var config = flowUtils.parseConfig([
                 {id:"t1",type:"tab"},
-                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["2"]},
-                {id:"2",x:10,y:10,z:"t1",type:"subflow:sf1",wires:["3","4"]},
+                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[["2"]]},
+                {id:"2",x:10,y:10,z:"t1",type:"subflow:sf1",wires:[["3"],["4"]]},
                 {id:"3",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[]},
                 {id:"4",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[]},
                 {id:"sf1",type:"subflow","name":"Subflow 1","info":"",
@@ -389,8 +389,8 @@ describe('Subflow', function() {
         it("rewires a subflow node on update/start", async function(){
             var rawConfig = [
                 {id:"t1",type:"tab"},
-                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["2"]},
-                {id:"2",x:10,y:10,z:"t1",type:"subflow:sf1",wires:["3"]},
+                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[["2"]]},
+                {id:"2",x:10,y:10,z:"t1",type:"subflow:sf1",wires:[["3"]]},
                 {id:"3",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[]},
                 {id:"4",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[]},
                 {id:"sf1",type:"subflow","name":"Subflow 2","info":"",
@@ -443,8 +443,8 @@ describe('Subflow', function() {
         it("stops subflow instance nodes", async function() {
             var config = flowUtils.parseConfig([
                 {id:"t1",type:"tab"},
-                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["2"]},
-                {id:"2",x:10,y:10,z:"t1",type:"subflow:sf1",wires:["3"]},
+                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[["2"]]},
+                {id:"2",x:10,y:10,z:"t1",type:"subflow:sf1",wires:[["3"]]},
                 {id:"3",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[]},
                 {id:"sf1",type:"subflow","name":"Subflow 2","info":"",
                     "in":[{"wires":[{"id":"sf1-1"}]}],"out":[{"wires":[{"id":"sf1-1","port":0}]}]},
@@ -466,8 +466,8 @@ describe('Subflow', function() {
         it("passes a status event to the subflow's parent tab status node - all scope", async function() {
             var config = flowUtils.parseConfig([
                 {id:"t1",type:"tab"},
-                {id:"1",x:10,y:10,z:"t1",type:"test",name:"a",wires:["2"]},
-                {id:"2",x:10,y:10,z:"t1",type:"subflow:sf1",wires:["3"]},
+                {id:"1",x:10,y:10,z:"t1",type:"test",name:"a",wires:[["2"]]},
+                {id:"2",x:10,y:10,z:"t1",type:"subflow:sf1",wires:[["3"]]},
                 {id:"3",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[]},
                 {id:"sf1",type:"subflow","name":"Subflow 2","info":"",
                     "in":[{"wires":[{"id":"sf1-1"}]}],"out":[{"wires":[{"id":"sf1-1","port":0}]}]},
@@ -496,8 +496,8 @@ describe('Subflow', function() {
         it("passes a status event to the subflow's parent tab status node - targetted scope", async function() {
             var config = flowUtils.parseConfig([
                 {id:"t1",type:"tab"},
-                {id:"1",x:10,y:10,z:"t1",type:"test",name:"a",wires:["2"]},
-                {id:"2",x:10,y:10,z:"t1",type:"subflow:sf1",wires:["3"]},
+                {id:"1",x:10,y:10,z:"t1",type:"test",name:"a",wires:[["2"]]},
+                {id:"2",x:10,y:10,z:"t1",type:"subflow:sf1",wires:[["3"]]},
                 {id:"3",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[]},
                 {id:"sf1",type:"subflow","name":"Subflow 2","info":"",
                     "in":[{"wires":[{"id":"sf1-1"}]}],"out":[{"wires":[{"id":"sf1-1","port":0}]}]},
@@ -534,8 +534,8 @@ describe('Subflow', function() {
         it("emits a status event when a message is passed to a subflow-status node - msg.payload as string", async function() {
             var config = flowUtils.parseConfig([
                 {id:"t1",type:"tab"},
-                {id:"1",x:10,y:10,z:"t1",type:"test",name:"a",wires:["2"]},
-                {id:"2",x:10,y:10,z:"t1",type:"subflow:sf1",wires:["3"]},
+                {id:"1",x:10,y:10,z:"t1",type:"test",name:"a",wires:[["2"]]},
+                {id:"2",x:10,y:10,z:"t1",type:"subflow:sf1",wires:[["3"]]},
                 {id:"3",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[]},
                 {
                     id:"sf1",
@@ -571,8 +571,8 @@ describe('Subflow', function() {
         it("emits a status event when a message is passed to a subflow-status node - msg.payload as status obj", async function() {
             var config = flowUtils.parseConfig([
                 {id:"t1",type:"tab"},
-                {id:"1",x:10,y:10,z:"t1",type:"test",name:"a",wires:["2"]},
-                {id:"2",x:10,y:10,z:"t1",type:"subflow:sf1",wires:["3"]},
+                {id:"1",x:10,y:10,z:"t1",type:"test",name:"a",wires:[["2"]]},
+                {id:"2",x:10,y:10,z:"t1",type:"subflow:sf1",wires:[["3"]]},
                 {id:"3",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[]},
                 {
                     id:"sf1",
@@ -610,8 +610,8 @@ describe('Subflow', function() {
         it("emits a status event when a message is passed to a subflow-status node - msg.status", async function() {
             var config = flowUtils.parseConfig([
                 {id:"t1",type:"tab"},
-                {id:"1",x:10,y:10,z:"t1",type:"test",name:"a",wires:["2"]},
-                {id:"2",x:10,y:10,z:"t1",type:"subflow:sf1",wires:["3"]},
+                {id:"1",x:10,y:10,z:"t1",type:"test",name:"a",wires:[["2"]]},
+                {id:"2",x:10,y:10,z:"t1",type:"subflow:sf1",wires:[["3"]]},
                 {id:"3",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[]},
                 {
                     id:"sf1",
@@ -649,8 +649,8 @@ describe('Subflow', function() {
         it("does not emit a regular status event if it contains a subflow-status node", async function() {
             var config = flowUtils.parseConfig([
                 {id:"t1",type:"tab"},
-                {id:"1",x:10,y:10,z:"t1",type:"test",name:"a",wires:["2"]},
-                {id:"2",x:10,y:10,z:"t1",type:"subflow:sf1",wires:["3"]},
+                {id:"1",x:10,y:10,z:"t1",type:"test",name:"a",wires:[["2"]]},
+                {id:"2",x:10,y:10,z:"t1",type:"subflow:sf1",wires:[["3"]]},
                 {id:"3",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[]},
                 {
                     id:"sf1",
@@ -682,8 +682,8 @@ describe('Subflow', function() {
         it("passes an error event to the subflow's parent tab catch node - all scope",async function() {
             var config = flowUtils.parseConfig([
                 {id:"t1",type:"tab"},
-                {id:"1",x:10,y:10,z:"t1",type:"test",name:"a",wires:["2"]},
-                {id:"2",x:10,y:10,z:"t1",type:"subflow:sf1",wires:["3"]},
+                {id:"1",x:10,y:10,z:"t1",type:"test",name:"a",wires:[["2"]]},
+                {id:"2",x:10,y:10,z:"t1",type:"subflow:sf1",wires:[["3"]]},
                 {id:"3",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[]},
                 {id:"sf1",type:"subflow","name":"Subflow 2","info":"",
                     "in":[{"wires":[{"id":"sf1-1"}]}],"out":[{"wires":[{"id":"sf1-1","port":0}]}]},
@@ -714,8 +714,8 @@ describe('Subflow', function() {
         it("passes an error event to the subflow's parent tab catch node - targetted scope", async function() {
             var config = flowUtils.parseConfig([
                 {id:"t1",type:"tab"},
-                {id:"1",x:10,y:10,z:"t1",type:"test",name:"a",wires:["2"]},
-                {id:"2",x:10,y:10,z:"t1",type:"subflow:sf1",wires:["3"]},
+                {id:"1",x:10,y:10,z:"t1",type:"test",name:"a",wires:[["2"]]},
+                {id:"2",x:10,y:10,z:"t1",type:"subflow:sf1",wires:[["3"]]},
                 {id:"3",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[]},
                 {id:"sf1",type:"subflow","name":"Subflow 2","info":"",
                     "in":[{"wires":[{"id":"sf1-1"}]}],"out":[{"wires":[{"id":"sf1-1","port":0}]}]},
@@ -752,8 +752,8 @@ describe('Subflow', function() {
         it("can access process env var", async function() {
             var config = flowUtils.parseConfig([
                 {id:"t1",type:"tab"},
-                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"t1.1",wires:["2"]},
-                {id:"2",x:10,y:10,z:"t1",type:"subflow:sf1",wires:["3"]},
+                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"t1.1",wires:[["2"]]},
+                {id:"2",x:10,y:10,z:"t1",type:"subflow:sf1",wires:[["3"]]},
                 {id:"3",x:10,y:10,z:"t1",type:"test",foo:"t1.3",wires:[]},
                 {id:"sf1",type:"subflow",name:"Subflow 2",info:"",
                  "in":[ {wires:[{id:"sf1-1"}]} ],
@@ -779,8 +779,8 @@ describe('Subflow', function() {
         it("can access subflow env var", async function() {
             var config = flowUtils.parseConfig([
                 {id:"t1",type:"tab"},
-                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"t1.1",wires:["2"]},
-                {id:"2",x:10,y:10,z:"t1",type:"subflow:sf1",wires:["3"]},
+                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"t1.1",wires:[["2"]]},
+                {id:"2",x:10,y:10,z:"t1",type:"subflow:sf1",wires:[["3"]]},
                 {id:"3",x:10,y:10,z:"t1",type:"test",foo:"t1.3",wires:[]},
                 {id:"sf1",type:"subflow",name:"Subflow 2",info:"",env: [{name: '__KEY__', value: '__VAL1__', type: 'str'}],
                     "in":[ {wires:[{id:"sf1-1"}]} ],
@@ -815,8 +815,8 @@ describe('Subflow', function() {
         it("can access nested subflow env var", async function() {
             var config = flowUtils.parseConfig([
                 {id:"t1",type:"tab", env: [{name: '__KEY1__', value: 't1', type: 'str'}]},
-                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"t1.1",wires:["2"]},
-                {id:"2",x:10,y:10,z:"t1",type:"subflow:sf1",wires:["3"]},
+                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"t1.1",wires:[["2"]]},
+                {id:"2",x:10,y:10,z:"t1",type:"subflow:sf1",wires:[["3"]]},
                 {id:"3",x:10,y:10,z:"t1",type:"test",foo:"t1.3",wires:[]},
                 {id:"sf1",type:"subflow",name:"Subflow 1",info:"",
                     env: [{name: '__KEY2__', value: 'sf1', type: 'str'}],
@@ -854,8 +854,8 @@ describe('Subflow', function() {
         it("can access name of subflow as env var", async function() {
             var config = flowUtils.parseConfig([
                 {id:"t1",type:"tab"},
-                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"t1.1",wires:["2"]},
-                {id:"2",x:10,y:10,z:"t1",type:"subflow:sf1",name:"SFN",wires:["3"]},
+                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"t1.1",wires:[["2"]]},
+                {id:"2",x:10,y:10,z:"t1",type:"subflow:sf1",name:"SFN",wires:[["3"]]},
                 {id:"3",x:10,y:10,z:"t1",type:"test",foo:"t1.3",wires:[]},
                 {id:"sf1",type:"subflow",name:"Subflow 2",info:"",
                  "in":[ {wires:[{id:"sf1-1"}]} ],
@@ -879,8 +879,8 @@ describe('Subflow', function() {
         it("can access id of subflow as env var", async function() {
             var config = flowUtils.parseConfig([
                 {id:"t1",type:"tab"},
-                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"t1.1",wires:["2"]},
-                {id:"2",x:10,y:10,z:"t1",type:"subflow:sf1",name:"SFN",wires:["3"]},
+                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"t1.1",wires:[["2"]]},
+                {id:"2",x:10,y:10,z:"t1",type:"subflow:sf1",name:"SFN",wires:[["3"]]},
                 {id:"3",x:10,y:10,z:"t1",type:"test",foo:"t1.3",wires:[]},
                 {id:"sf1",type:"subflow",name:"Subflow 2",info:"",
                  "in":[ {wires:[{id:"sf1-1"}]} ],
