@@ -1,44 +1,18 @@
-<p align="center"> 
-  <a href="https://opensource.org/license/apache-2-0"><img src="https://img.shields.io/badge/License-Apache_2.0-blue.svg?color=3F51B5&style=for-the-badge&label=License&logoColor=000000&labelColor=ececec" alt="License: Apache 2.0"></a>
-  <a href="https://github.com/node-red/node-red/actions?query=branch%3Amaster">
-    <img src="https://img.shields.io/github/actions/workflow/status/node-red/node-red/tests.yml?branch=master&label=Build%20Status&style=for-the-badge" alt="Build Status"/>
-  </a>
-  <br/>
-  <br/>
-  <a href="https://discourse.nodered.org">
-    <img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fdiscourse.nodered.org%2Fabout.json&query=%24.about.stats.users_count&suffix=%20members&label=Forum&logo=discourse&style=for-the-badge&color=0e76b2&logoColor=0e76b2&labelColor=ececec" alt="Node-RED Forum on Discourse"/>
-  </a>
-  <a href="https://github.com/node-red">
-    <img src="https://img.shields.io/badge/dynamic/json?url=https://api.github.com/orgs/node-red&query=$.followers&suffix=%20followers&label=GitHub%20org&style=for-the-badge&logo=github&logoColor=24292F&labelColor=ececec&color=24292F" alt="Node-RED GitHub Organisation Followers"/>
-  </a>
-  <a href="https://nodered.org/slack">
-      <img src="https://img.shields.io/badge/Slack-Join%20Us-4A154B.svg?logo=slack&style=for-the-badge&logoColor=4A154B&labelColor=ececec" alt="Slack"/>
-  </a>
-  <br/>
-  <br/>
-</p>
+<div align="center">
 
-<p align="center">
-<img src="https://nodered.org/about/resources/media/node-red-icon-2.svg" width="200" title="Node-RED Logo">
-</p>
-<h3 align="center">Low-code programming for event-driven applications</h3>
-<br/>
-<p align="center">
-<a href="https://flows.nodered.org/search?type=node">
-  <img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fflows.nodered.org%2Fthings%3Fformat%3Djson%26per_page%3D1%26type%3Dnode&query=$.meta.results.count&label=Nodes&style=for-the-badge&labelColor=ececec&color=8f0000" alt="Node-RED Library Nodes"/>
-</a>
-<a href="https://flows.nodered.org/search?type=flow">
-  <img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fflows.nodered.org%2Fthings%3Fformat%3Djson%26per_page%3D1%26type%3Dflow&query=$.meta.results.count&label=Flows&style=for-the-badge&labelColor=ececec&color=8f0000" alt="Node-RED Library Flows"/>
-</a>
-<a href="https://flows.nodered.org/search?type=collection">
-  <img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fflows.nodered.org%2Fthings%3Fformat%3Djson%26per_page%3D1%26type%3Dcollection&query=$.meta.results.count&label=Collections&style=for-the-badge&labelColor=ececec&color=8f0000" alt="Node-RED Library Collections"/>
-</a>
-</p>
-<br/>
-<a href="https://nodered.org/">
-<img src="https://nodered.org/images/node-red-screenshot.png" title="Node-RED: Low-code programming for event-driven applications">
-</a>
-<br/>
+[![License][badge-license]][link-license] [![Build Status][badge-build]][link-build]
+
+<br/><img src="https://nodered.org/about/resources/media/node-red-icon-2.svg" width="150" title="Node-RED Logo"><br/>
+
+[![Nodes][badge-nodes]][link-nodes] [![Flows][badge-flows]][link-flows] [![Collections][badge-collections]][link-collections]
+
+### Low-code programming for event-driven applications
+
+<br/><img src="https://nodered.org/images/node-red-screenshot.png" width="600" alt="Node-RED Screenshot"><br/>
+
+[![Forum][badge-forum]][link-forum] [![GitHub][badge-github]][link-github] [![Slack][badge-slack]][link-slack]
+
+</div>
 
 ## Quick Start
 
@@ -78,7 +52,7 @@ If you want to run the latest code from git, here's how to get started:
 
 2. Install the node-red dependencies
 
-        npm install
+        npm ci
 
 3. Build the code
 
@@ -124,3 +98,24 @@ Node-RED is a project of the [OpenJS Foundation](http://openjsf.org). Copyright 
 <a href="http://openjsf.org">
 <img src="https://raw.githubusercontent.com/node-red/community-survey/refs/heads/main/public/openjs-foundation-logo.svg" width="240" title="OpenJS Foundation Logo">
 </a>
+
+<!-- Badge images -->
+[badge-license]: https://img.shields.io/badge/License-Apache_2.0-blue.svg?color=3F51B5&style=for-the-badge&label=License&logoColor=000000&labelColor=ececec
+[badge-build]: https://img.shields.io/github/actions/workflow/status/node-red/node-red/tests.yml?branch=master&label=Build%20Status&style=for-the-badge
+[badge-forum]: https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fdiscourse.nodered.org%2Fabout.json&query=%24.about.stats.users_count&suffix=%20members&label=Forum&logo=discourse&style=for-the-badge&color=0e76b2&logoColor=0e76b2&labelColor=ececec
+[badge-github]: https://img.shields.io/badge/dynamic/json?url=https://api.github.com/orgs/node-red&query=$.followers&suffix=%20followers&label=GitHub%20org&style=for-the-badge&logo=github&logoColor=24292F&labelColor=ececec&color=24292F
+[badge-slack]: https://img.shields.io/badge/Slack-Join%20Us-4A154B.svg?logo=slack&style=for-the-badge&logoColor=4A154B&labelColor=ececec
+[badge-nodes]: https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fflows.nodered.org%2Fthings%3Fformat%3Djson%26per_page%3D1%26type%3Dnode&query=$.meta.results.count&label=Nodes&style=for-the-badge&labelColor=ececec&color=8f0000
+[badge-flows]: https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fflows.nodered.org%2Fthings%3Fformat%3Djson%26per_page%3D1%26type%3Dflow&query=$.meta.results.count&label=Flows&style=for-the-badge&labelColor=ececec&color=8f0000
+[badge-collections]: https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fflows.nodered.org%2Fthings%3Fformat%3Djson%26per_page%3D1%26type%3Dcollection&query=$.meta.results.count&label=Collections&style=for-the-badge&labelColor=ececec&color=8f0000
+
+<!-- Badge links -->
+[link-license]: https://opensource.org/license/apache-2-0
+[link-build]: https://github.com/node-red/node-red/actions?query=branch%3Amaster
+[link-forum]: https://discourse.nodered.org
+[link-github]: https://github.com/node-red
+[link-slack]: https://nodered.org/slack
+[link-nodes]: https://flows.nodered.org/search?type=node
+[link-flows]: https://flows.nodered.org/search?type=flow
+[link-collections]: https://flows.nodered.org/search?type=collection
+[link-nodered]: https://nodered.org/

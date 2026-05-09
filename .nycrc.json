@@ -1,0 +1,8 @@
+{
+    "all": true,
+    "exclude-node-modules": false,
+    "include": ["packages/node_modules/**"],
+    "exclude": ["packages/node_modules/@node-red/editor-client/**"],
+    "reporter": ["lcov", "html", "text-summary"],
+    "report-dir": "coverage"
+}

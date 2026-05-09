@@ -1,4 +1,13 @@
 $(function() {
+    const themeVariant = localStorage.getItem('view-dark-theme');
+    let isDark = false
+    if (themeVariant === 'dark') {
+        isDark = true;
+    } else if (themeVariant === 'auto') {
+        isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+    document.documentElement.classList.toggle('nr-theme-dark', isDark);
+
     RED.i18n.init({apiRootUrl:"../../"},function() {
         var options = {
             messageMouseEnter: function(sourceId) {

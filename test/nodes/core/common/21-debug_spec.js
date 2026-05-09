@@ -21,22 +21,22 @@ var WebSocket = require('ws');
 
 describe('debug node', function() {
 
-    before(function(done) {
-        helper.startServer(done);
+    before(async function() {
+        return helper.startServer();
     });
 
-    after(function(done) {
-        helper.stopServer(done);
+    after(async function() {
+        return helper.stopServer();
     });
 
-    beforeEach(function (done) {
-        setTimeout(function() {
-            done();
-        }, 55);
-    });
+    // beforeEach(function (done) {
+    //     setTimeout(function() {
+    //         done();
+    //     }, 55);
+    // });
 
-    afterEach(function() {
-        helper.unload();
+    afterEach(function(done) {
+        helper.unload().then(() => done());
     });
 
 

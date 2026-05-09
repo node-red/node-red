@@ -15,7 +15,7 @@
  **/
 
 var should = require("should");
-var catchNode = require("nr-test-utils").require("@node-red/nodes/core/common/25-status.js");
+var statusNode = require("nr-test-utils").require("@node-red/nodes/core/common/25-status.js");
 var helper = require("node-red-node-test-helper");
 
 describe('status Node', function() {
@@ -27,7 +27,7 @@ describe('status Node', function() {
     it('should output a message when called', function(done) {
         var flow = [ { id:"n1", type:"status", name:"status", wires:[["n2"]], scope:[] },
             {id:"n2", type:"helper"} ];
-        helper.load(catchNode, flow, function() {
+        helper.load(statusNode, flow, function() {
             var n1 = helper.getNode("n1");
             var n2 = helper.getNode("n2");
             n1.should.have.property('name', 'status');
