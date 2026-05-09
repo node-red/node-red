@@ -1009,6 +1009,67 @@ describe('delay Node', function() {
         });
     });
 
+    it('can handle a burst in burst mode', function(done) {
+        this.timeout(2000);
+        var flow = [{"id":"delayNode1","type":"delay","name":"delayNode","pauseType":"burst","timeout":1,"timeoutUnits":"seconds","rate":3,"nbRateUnits":1,"rateUnits":"second","randomFirst":"1","randomLast":"5","randomUnits":"seconds","drop":false,"wires":[["helperNode1"]]},
+                    {id:"helperNode1", type:"helper", wires:[]}];
+        helper.load(delayNode, flow, function() {
+            var delayNode1 = helper.getNode("delayNode1");
+            var helperNode1 = helper.getNode("helperNode1");
+            var t = Date.now();
+            var c = 0;
+            helperNode1.on("input", function(msg) {
+                msg.should.have.a.property('payload');
+                c += 1;
+                if (c > 3) { done(err)}
+                done();
+            });
+
+            setTimeout( function() {
+                if (c === 3) { done(); }
+            }, 700);
+
+            // send test messages
+            delayNode1.receive({payload:1});
+            setImmediate( function() { delayNode1.receive({payload:2}); }  );
+            setImmediate( function() { delayNode1.receive({payload:3}); }  );
+            setImmediate( function() { delayNode1.receive({payload:4}); }  );
+            setImmediate( function() { delayNode1.receive({payload:5}); }  );
+        });
+    });
+
+    it('can reset a burst in burst mode', function(done) {
+        this.timeout(2000);
+        var flow = [{"id":"delayNode1","type":"delay","name":"delayNode","pauseType":"burst","timeout":1,"timeoutUnits":"seconds","rate":3,"nbRateUnits":1,"rateUnits":"second","randomFirst":"1","randomLast":"5","randomUnits":"seconds","drop":false,"wires":[["helperNode1"]]},
+                    {id:"helperNode1", type:"helper", wires:[]}];
+        helper.load(delayNode, flow, function() {
+            var delayNode1 = helper.getNode("delayNode1");
+            var helperNode1 = helper.getNode("helperNode1");
+            var t = Date.now();
+            var c = 0;
+            helperNode1.on("input", function(msg) {
+                msg.should.have.a.property('payload');
+                c += 1;
+                if (c > 4) { done(err)}
+                done();
+            });
+
+            setTimeout( function() {
+                if (c === 4) { done(); }
+            }, 700);
+
+            // send test messages
+            delayNode1.receive({payload:1});
+            setImmediate( function() { delayNode1.receive({payload:2}); }  );
+            setImmediate( function() { delayNode1.receive({payload:3}); }  );
+            setImmediate( function() { delayNode1.receive({payload:4}); }  );
+            setImmediate( function() { delayNode1.receive({payload:5}); }  );
+            setImmediate( function() { delayNode1.receive({reset:true}); }  );
+            setImmediate( function() { delayNode1.receive({payload:6}); }  );
+        });
+    });
+
+
     it('sending a msg with reset to empty queue doesnt send anything', function(done) {
         this.timeout(2000);
         var flow = [{"id":"delayNode1","type":"delay","name":"delayNode","pauseType":"rate","timeout":1,"timeoutUnits":"seconds","rate":2,"rateUnits":"second","randomFirst":"1","randomLast":"5","randomUnits":"seconds","drop":false,"wires":[["helperNode1"]]},

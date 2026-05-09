@@ -275,7 +275,10 @@ describe('nodes/registry/installer', function() {
             });
 
             installer.installModule("foo",null,"/example path/foo-0.1.1.tgz").then(function(info) {
-                exec.run.lastCall.args[1].should.eql([ 'install', '--no-audit', '--no-update-notifier', '--no-fund', '--save', '--save-prefix=~', '--omit=dev', '--engine-strict', '"/example path/foo-0.1.1.tgz"' ]);
+                const lastCallArgs = exec.run.lastCall.args[1];
+                lastCallArgs[0].should.match(/npm\/bin\/npm-cli\.js$/)
+                const remainingArgs = lastCallArgs.slice(1);
+                remainingArgs.should.eql([ 'install', '--no-audit', '--no-update-notifier', '--no-fund', '--save', '--save-prefix=~', '--omit=dev', '--engine-strict', '--', '/example path/foo-0.1.1.tgz' ]);
                 info.should.eql(nodeInfo);
                 done();
             }).catch(done);
@@ -297,7 +300,7 @@ describe('nodes/registry/installer', function() {
 
             installer.installModule("this_wont_exist","1.2.3").then(function(info) {
                 exec.run.called.should.be.true();
-                exec.run.lastCall.args[1].should.eql([ 'install', 'a', 'this_wont_exist@1.2.3' ]);
+                exec.run.lastCall.args[1].slice(1).should.eql([ 'install', 'a', '--', 'this_wont_exist@1.2.3' ]);
                 info.should.eql(nodeInfo);
                 should.exist(receivedPreEvent)
                 receivedPreEvent.should.have.property("module","this_wont_exist")

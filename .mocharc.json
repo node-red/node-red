@@ -1,0 +1,6 @@
+{
+    "reporter": "spec",
+    "timeout": 3000,
+    "ui": "bdd",
+    "global": ["expect"]
+}
