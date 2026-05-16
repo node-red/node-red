@@ -46,7 +46,8 @@ If you've got a bug-fix or similar for us, then you are most welcome to
 get it raised - just make sure you link back to the issue it's fixing and
 try to include some tests!
 
-All contributors need to sign the OpenJS Foundation's Contributor License Agreement.
+All contributors need to sign the OpenJS Foundation's
+[Contributor License Agreement](https://openjsf.org/about/the-openjs-foundation-cla/).
 It is an online process and quick to do. If you raise a pull-request without
 having signed the CLA, you will be prompted to do so automatically.
 
