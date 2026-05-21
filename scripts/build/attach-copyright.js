@@ -22,7 +22,10 @@ async function attachToFile(file) {
     if (!fs.existsSync(file)) {
         throw new Error(`attachCopyright: file not found: ${file}`);
     }
-    const content = await fs.promises.readFile(file, "utf8");
+    let content = await fs.promises.readFile(file, "utf8");
+    if (content.charCodeAt(0) === 0xFEFF) {
+        content = content.slice(1);
+    }
     if (content.indexOf(HEADER) !== -1) {
         return false;
     }
