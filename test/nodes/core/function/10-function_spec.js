@@ -2241,6 +2241,45 @@ describe('function node', function() {
                 f1.receive({ payload: "original", topic: "test" })
             })
         })
+        it('should allow function code to catch linkcall errors via try/catch', async function () {
+            this.timeout(1000);
+            const flow = [
+                { id: "tab-flow-main", type: "tab", label: "Main Flow" },
+                // ↓↓ main flow — user code catches the error itself ↓↓
+                { id: "f1", type: "function", z: "tab-flow-main", wires: [["h1"]], func: `
+                    try {
+                        await node.linkcall('non-existent-subroutine', msg, { timeout: 500 });
+                        msg.caught = false;
+                    } catch (err) {
+                        msg.caught = true;
+                        msg.caughtMessage = err.message;
+                    }
+                    return msg;
+                ` },
+                { id: "c1", type: "catch", z: "tab-flow-main", scope: ["f1"], uncaught: true, wires: [["h1"]] },
+                { id: "h1", type: "helper", z: "tab-flow-main" }
+            ]
+
+            await helper.load([linkNode, functionNode], flow)
+            const f1 = helper.getNode("f1")
+            const h1 = helper.getNode("h1")
+            const c1 = helper.getNode("c1")
+            const c1SpyReceived = sinon.spy(c1, "receive")
+
+            await new Promise((resolve, reject) => {
+                h1.on("input", function (msg) {
+                    try {
+                        msg.should.have.property("caught", true)
+                        msg.should.have.property("caughtMessage").and.match(/target link-in node 'non-existent-subroutine' not found/i)
+                        c1SpyReceived.called.should.be.false() // user handled it, so catch-node should NOT fire
+                        resolve()
+                    } catch (err) {
+                        reject(err)
+                    }
+                })
+                f1.receive({ payload: "original", topic: "test" })
+            })
+        })
         it('should raise error due to multiple targets on same tab', async function () {
             const flow = [
                 // ↓↓ flow tabs ↓↓
