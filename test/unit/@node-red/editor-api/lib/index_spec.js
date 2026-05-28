@@ -144,14 +144,14 @@ describe("api/index", function() {
         it('uses default cors middleware when user settings absent', function(done){
             api.init({ httpAdminRoot: true }, {}, {}, {});
             const middlewareFound = api.httpAdmin._router.stack.filter((layer) => layer.name === 'corsMiddleware')
-            should(middlewareFound).be.length(1);
+            should(middlewareFound).be.length(0);
             done();
         })
 
         it('enables custom cors middleware when settings present', function(done){
             api.init({ httpAdminRoot: true, httpAdminCors }, {}, {}, {});
             const middlewareFound = api.httpAdmin._router.stack.filter((layer) => layer.name === 'corsMiddleware')
-            should(middlewareFound).be.length(2);
+            should(middlewareFound).be.length(1);
             done();
         })
     });

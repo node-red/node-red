@@ -153,6 +153,120 @@ describe("api/auth/tokens", function() {
         });
     });
 
+    describe('Exchange code for token', function () {
+        it('creates a token with an exchange code', function (done) {
+            let savedSession;
+            Tokens.init({sessionExpiryTime: 10, exchangeCodeExpiryTime: 0.5},{
+                getSessions:function() {
+                    return Promise.resolve({});
+                },
+                saveSessions:function(sess) {
+                    savedSession = sess;
+                    return Promise.resolve();
+                }
+            });
+            Tokens.create("user", "client", "scope", true).then(function(token) {
+                // When created with an exchange code, the session should not be saved until the code is exchanged
+                should.not.exist(savedSession);
+                token.should.have.a.property('exchangeCode');
+
+                return Tokens.exchangeCodeForToken(token.exchangeCode).then(function(tokenResponse) {
+                    tokenResponse.should.have.a.property('accessToken');
+                    tokenResponse.should.have.a.property('expires_in');
+                    should.exist(savedSession);
+                    var sessionKeys = Object.keys(savedSession);
+                    sessionKeys.should.have.lengthOf(1);
+                    savedSession[sessionKeys[0]].should.have.a.property('user','user');
+                    savedSession[sessionKeys[0]].should.have.a.property('client','client');
+                    savedSession[sessionKeys[0]].should.have.a.property('scope','scope');
+                    savedSession[sessionKeys[0]].should.have.a.property('expires');
+                })
+            }).then(done).catch(err => {
+                done(err)
+            })
+        })
+        it('cannot exchange an invalid code', function (done) {
+            let savedSession;
+            Tokens.init({sessionExpiryTime: 10, exchangeCodeExpiryTime: 0.5},{
+                getSessions:function() {
+                    return Promise.resolve({});
+                },
+                saveSessions:function(sess) {
+                    savedSession = sess;
+                    return Promise.resolve();
+                }
+            });
+            Tokens.create("user", "client", "scope", true).then(function(token) {
+                // When created with an exchange code, the session should not be saved until the code is exchanged
+                should.not.exist(savedSession);
+                token.should.have.a.property('exchangeCode');
+                return Tokens.exchangeCodeForToken('invalid').then(function(tokenResponse) {
+                    throw new Error("Should not have exchanged an invalid code");
+                }).catch(err => {
+                    err.toString().should.match(/Invalid exchange code/);
+                })
+            }).then(done).catch(err => {
+                done(err)
+            })
+        })
+        it('cannot exchange an expired code', function (done) {
+            let savedSession;
+            Tokens.init({sessionExpiryTime: 10, exchangeCodeExpiryTime: 0.1},{
+                getSessions:function() {
+                    return Promise.resolve({});
+                },
+                saveSessions:function(sess) {
+                    savedSession = sess;
+                    return Promise.resolve();
+                }
+            });
+            Tokens.create("user", "client", "scope", true).then(function(token) {
+                // When created with an exchange code, the session should not be saved until the code is exchanged
+                should.not.exist(savedSession);
+                token.should.have.a.property('exchangeCode');
+                return new Promise(resolve => setTimeout(resolve, 200)).then(() => {
+                    return Tokens.exchangeCodeForToken(token.exchangeCode).then(function(tokenResponse) {
+                        throw new Error("Should not have exchanged an invalid code");
+                    }).catch(err => {
+                        err.toString().should.match(/Invalid exchange code/);
+                    })
+                })
+            }).then(done).catch(err => {
+                done(err)
+            })
+        })
+        it('cannot exchange a code twice', function (done) {
+            let savedSession;
+            Tokens.init({sessionExpiryTime: 10, exchangeCodeExpiryTime: 0.1},{
+                getSessions:function() {
+                    return Promise.resolve({});
+                },
+                saveSessions:function(sess) {
+                    savedSession = sess;
+                    return Promise.resolve();
+                }
+            });
+            Tokens.create("user", "client", "scope", true).then(function(token) {
+                // When created with an exchange code, the session should not be saved until the code is exchanged
+                should.not.exist(savedSession);
+                token.should.have.a.property('exchangeCode');
+                return Tokens.exchangeCodeForToken(token.exchangeCode).then(function(tokenResponse) {
+                    tokenResponse.should.have.a.property('accessToken');
+                    tokenResponse.should.have.a.property('expires_in');
+                    return Tokens.exchangeCodeForToken(token.exchangeCode).then(function(tokenResponse) {
+                        throw new Error("Should not have been able to exchange the same code twice");
+                    }).catch(err => {
+                        err.toString().should.match(/Invalid exchange code/);
+                    })
+                }).catch(err => {
+                    err.toString().should.match(/Invalid exchange code/);
+                })
+            }).then(done).catch(err => {
+                done(err)
+            })
+        })
+    })
+
     describe("#revoke", function() {
         it('revokes a token', function(done) {
             var savedSession;

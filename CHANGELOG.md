@@ -1,3 +1,55 @@
+#### 5.0.0-beta.6: Beta Release
+
+Highlights
+
+ - We now bundle `npm` as our own dependency to improve how the Palette Manager uses it
+ - Lots of UI fixes from previous beta feedback
+ - Incremental accessiblity improvements in the editor - adding aria labels to buttons and images
+ - Ability to call Link In nodes directly from a Function node
+
+Editor
+
+ - Ensure png icon is centrally aligned on first layout (#5688) @knolleary
+ - Clip user profile image to the round button in the header (#5690) @knolleary
+ - [5683] No discernible outline on junctions and node ports in dark mode in NR5 + lighten shade color (#5691) @n-lark
+ - Do not show section title if all options are hidden (#5689) @knolleary
+ - Remove reveal on hover in search results and provide button (#5684) @knolleary
+ - Invert selected tab button border color to improve contrast (#5681) @knolleary
+ - [5658] ctrl+space shortcut isn't always firing (#5670) @n-lark
+ - [5674] UX: pointer-event deadzone in the tab bar (#5675) @n-lark
+ - [5534] UX: create mechanism for themes to provide multiple variants (#5659) @n-lark
+ - Remove aria label application from popover (#5654) @knolleary
+ - Remove default admin cors rules (#5652) @knolleary
+ - [5653] Accessibility — Attributes (#5655) @n-lark
+ - Remove SASS variables marked as deprecated (#5642) @bonanitech
+ - [5647] Accessibility - Names and labels (#5648) @n-lark
+ - [5649] Accessibility - Viewports, language attributes, and tabIndex (#5650) @n-lark
+ - [5644] UX: Address dark theme feedback from latest beta release (#5646) @n-lark
+ - Tighten select halo margin (#5651) @knolleary
+ - Fix multiplayer icon appearance (#5640) @knolleary
+ - Remove unslightly gap in the debug sidebar (#5639) @knolleary
+ - [5634] Junctions and ports on hover disappear with light theme (#5635) @n-lark
+ - [5636] V5, B5 : Sporadic Panel Height Calculations (#5638) @n-lark
+
+Runtime
+
+ - Fix build scripts for windows (#5687) @knolleary
+ - Set minimum node.js version to 22.9 (#5678) @knolleary
+ - Update to latest npm (#5677) @knolleary
+ - Update some dev dependencies to clear audit noise (#5673) @knolleary
+ - Introduce eslint (#5671) @knolleary
+ - Remove Grunt as the task runner (#5669) @knolleary
+ - Use req.hostname in https redirect to ensure proxy trust is maintained (#5666) @knolleary
+ - Sync master updates to dev (#5664) @knolleary
+ - Use a token exchange pattern for OAuth logins (#5657) @knolleary
+
+Nodes
+
+ - Allow TLS SNI Server name to be set in the http-request node (#5667) @hardillb
+ - Defining utility functions for re-use in a function node (#5494) @Steve-Mcl
+ - Only connect websocket client if need to (#5533) @dceejay
+
+
 #### 5.0.0-beta.5: Beta Release
 
  - [5517] UX: Create default dark theme (#5625) @n-lark
@@ -86,6 +138,25 @@ Nodes
 
  - Add ability to use pfx or p12 file for TLS connection settings option (#4907) @dceejay
 
+#### 4.1.10: Maintenance Release
+
+ - Ensure project files are inside project root path (#5724) @knolleary
+ - Fix module name validation for uninstall and tgz install (#5722) @knolleary
+
+#### 4.1.9: Maintenance Release
+
+ - Update "use-tls" translations to indicate that a custom cert is used (#5685) @tobias47n9e
+ - Indicate that "use-tls" label is using a custom config (#5665) @tobias47n9e
+ - Bump dependencies for 4.1.9 release (#5663) @knolleary
+ - Bundle npm to enable cross-platform module management (#5662) @knolleary
+ - Replace uuid library with native function crypto.randomUUID (#5660) @hlovdal
+ - Ensure tcp-request doesn't reuse uncloned msg objects (#5612) @hardillb
+ - Ensure custom subflow colors override theme overrides (#5599) @knolleary
+ - Handle invalid theme regex (#5598) @knolleary
+ - Allow a nodes defaults to be overridden by settings.js file (#5591) @dceejay
+ - Fix reinitializing server with custom node (#5596) @tobias47n9e
+ - Update config sidebar id handling (#5597) @knolleary
+ 
 #### 4.1.8: Maintenance Release
 
  - Add badges to func node tabs with code in (#5585) @knolleary

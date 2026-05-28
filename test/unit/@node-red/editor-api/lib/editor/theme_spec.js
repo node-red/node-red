@@ -272,4 +272,57 @@ describe("api/editor/theme", function () {
         context.page.scripts[0].should.eql('theme/scripts/file1.js');
 
     });
+
+    function initThemeWithPlugin(pluginConfig) {
+        // theme.js keeps `activeThemeInitialised` as private module state that init()
+        // does not reset, so loadThemePlugin() short-circuits on the second call within
+        // the same process. Reload the module to get a clean slate per test.
+        delete require.cache[require.resolve(NR_TEST_UTILS.resolve("@node-red/editor-api/lib/editor/theme"))];
+        theme = NR_TEST_UTILS.require("@node-red/editor-api/lib/editor/theme");
+        theme.init({
+            editorTheme: { theme: 'test-theme' }
+        },{
+            plugins: { getPlugin: t => ({'test-theme': pluginConfig}[t.id]) }
+        });
+        theme.app();
+    }
+
+    it("surfaces theme plugin schemes when both light and dark are declared", async function () {
+        initThemeWithPlugin({ path: '/abs/path', schemes: ['light', 'dark'] });
+        var settings = await theme.settings();
+        settings.should.have.a.property("schemes");
+        settings.schemes.should.eql(['light', 'dark']);
+    });
+
+    it("surfaces a single declared scheme", async function () {
+        initThemeWithPlugin({ path: '/abs/path', schemes: ['dark'] });
+        var settings = await theme.settings();
+        settings.should.have.a.property("schemes");
+        settings.schemes.should.eql(['dark']);
+    });
+
+    it("filters invalid entries from theme plugin schemes", async function () {
+        initThemeWithPlugin({ path: '/abs/path', schemes: ['light', 'foo', 'dark', 42] });
+        var settings = await theme.settings();
+        settings.should.have.a.property("schemes");
+        settings.schemes.should.eql(['light', 'dark']);
+    });
+
+    it("omits schemes when the plugin declares none", async function () {
+        initThemeWithPlugin({ path: '/abs/path' });
+        var settings = await theme.settings();
+        settings.should.not.have.a.property("schemes");
+    });
+
+    it("omits schemes when all declared entries are invalid", async function () {
+        initThemeWithPlugin({ path: '/abs/path', schemes: ['foo', 'bar'] });
+        var settings = await theme.settings();
+        settings.should.not.have.a.property("schemes");
+    });
+
+    it("omits schemes when the property is not an array", async function () {
+        initThemeWithPlugin({ path: '/abs/path', schemes: 'dark' });
+        var settings = await theme.settings();
+        settings.should.not.have.a.property("schemes");
+    });
 });

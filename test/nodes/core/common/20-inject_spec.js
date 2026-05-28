@@ -49,8 +49,8 @@ describe('inject node', function() {
         }).then(function () {
             return Context.close();
         }).then(function () {
-            helper.stopServer(done);
-        });
+            return helper.stopServer();
+        })
     });
 
     function basicTest(type, val, rval) {
