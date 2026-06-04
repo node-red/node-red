@@ -18,6 +18,7 @@ var should = require("should");
 var sinon = require("sinon");
 var request = require("supertest");
 var express = require("express");
+var cors = require("cors");
 
 var NR_TEST_UTILS = require("nr-test-utils");
 const auth = require("basic-auth");
@@ -153,6 +154,31 @@ describe("api/index", function() {
             const middlewareFound = api.httpAdmin._router.stack.filter((layer) => layer.name === 'corsMiddleware')
             should(middlewareFound).be.length(2);
             done();
+        })
+
+        it('lets http node cors handle node preflight requests mounted below the editor', function(done){
+            const httpAdminCors = {
+                origin: "*",
+                methods: "GET,PUT,POST"
+            };
+            const httpNodeCors = {
+                origin: "*",
+                methods: "GET,PUT,POST,DELETE,PATCH"
+            };
+            const httpNode = express();
+            httpNode.options("*", cors(httpNodeCors));
+
+            api.init({ httpAdminRoot: true, httpNodeRoot: "/api", httpAdminCors, httpNodeCors }, {}, {}, {});
+
+            const app = express();
+            app.use("/", api.httpAdmin);
+            app.use("/api", httpNode);
+
+            request(app)
+                .options("/api/route")
+                .expect("access-control-allow-methods", "GET,PUT,POST,DELETE,PATCH")
+                .expect(204)
+                .end(done);
         })
     });
 
