@@ -138,6 +138,19 @@ Nodes
 
  - Add ability to use pfx or p12 file for TLS connection settings option (#4907) @dceejay
 
+#### 4.1.11: Maintenance Release
+
+ - Add styles to prevent controls wrapping in find bar (#5779) @Steve-Mcl
+ - Update mermaid in dev dependencies (#5775) @knolleary
+ - Update dependencies (#5772) @knolleary
+ - Allow theme plugin to override node categories (#5770) @knolleary
+ - Add description tooltips to palette categories (#5769) @knolleary
+ - Fix box-shadow property value (#5764) @bonanitech
+ - Typo fixes (#5767) @bonanitech
+ - Sanitize all args passed to projects/git api (#5768) @knolleary
+ - Ensure subsequent calls to the node editor can open (#5734) @Steve-Mcl
+ - Remove debug console.log from externalModules (#5737) @Autre31415
+
 #### 4.1.10: Maintenance Release
 
  - Ensure project files are inside project root path (#5724) @knolleary
