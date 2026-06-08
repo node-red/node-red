@@ -1,6 +1,6 @@
 {
     "name": "node-red",
-    "version": "5.0.0-beta.6",
+    "version": "5.0.0",
     "description": "Low-code programming for event-driven applications",
     "homepage": "https://nodered.org",
     "license": "Apache-2.0",
@@ -85,7 +85,7 @@
         "node-red-admin": "^4.1.6",
         "node-watch": "0.7.4",
         "nopt": "5.0.0",
-        "npm": "11.13.0",
+        "npm": "11.16.0",
         "oauth2orize": "1.12.0",
         "on-headers": "1.1.0",
         "passport": "0.7.0",

@@ -1,3 +1,63 @@
+#### 5.0.0: : Milestone Release
+
+This marks the next major release of Node-RED. The following changes represent
+those added since the last beta. Check the beta release details below for the complete
+list.
+
+Breaking Changes
+
+ - Node-RED now requires Node 22.9 or later.
+ - We recommend Node 24.
+
+Editor
+
+New Features
+
+ - Add support for GH style blockquote alerts (#5733) @Steve-Mcl
+ - Add alert types toolbar functionality to markdown editor (#5757) @Steve-Mcl
+ - Rework search statusBar (#5744) @knolleary
+ - Welcome tour v5 (#5784) @knolleary
+
+Fixes
+
+ - Do not alter button text for active/focus if its the primary button (#5787) @knolleary
+ - Align unknown node style (#5785) @knolleary
+ - Add missing core actions (#5777) @knolleary
+ - Ensure hidden tabs are restored on reload (#5762) @knolleary
+ - Do not show context menu if in the middle of another action (#5763) @knolleary
+ - Standardize the scrollbar colors (#5750) @bonanitech
+ - Ensure quick-add aligns nodes and junctions to the grid (#5759) @knolleary
+ - Fix svg tooltip text alignment (#5753) @knolleary
+ - Do not adjust focus when navigating search results (#5749) @knolleary
+ - [5712] Accessibility - Buttons and links missing accessible names (#5713) @n-lark
+ - Fix subflow virtual port halo sizing (#5748) @knolleary
+ - Group sidebar tab buttons (#5747) @knolleary
+ - Tidy up import error popover (#5745) @knolleary
+ - Move notifications bar to below tab bar (#5743) @knolleary
+ - Align sidebar toggle actions (#5742) @knolleary
+ - Shrink popover height if not sufficient vertical space (#5741) @knolleary
+ - Standardize popover colors (#5738) @knolleary
+ - Enable badge annotations on groups (#5729) @Steve-Mcl
+ - Refactor workspace grid to use single pattern definition (#5735) @Steve-Mcl
+ - Overlay status above selection halo (#5736) @knolleary
+ - Tidy up popover appearance (#5740) @knolleary
+ - Improve view navigator interaction (#5709) @knolleary
+ - [5704] UX: Deploy menu dropdown icon appears too inactive (#5711) @n-lark
+ - Redraw halo if node status changes (#5708) @knolleary
+ - [5702] UX: Sidebar tab buttons do not show focus indicator when clicking on them (#5710) @n-lark
+ - [5693 + 5699] Aligning Dark Theme with Light Theme's SCSS Structure + `node.status` fill of blue is shown as red in dark theme (#5694) @n-lark
+ - [5696] `editorTheme.header.title`: long values clip without ellipsis, and misalign when `header.url` is set (#5697) @n-lark
+ - [5695] Dropping a node over certain buttons in the footer toolbar causes those buttons to execute (NR5) (#5700) @n-lark
+
+Runtime
+
+ - Add support for installing ESM module nodes (#4355) @hlovdal
+
+Nodes
+
+ - Fix error handling for `linkcall` in function node (#5755) @Steve-Mcl
+ - Sort node lists alphabetically (#5739) @knolleary
+
 #### 5.0.0-beta.6: Beta Release
 
 Highlights
