@@ -64,7 +64,7 @@ If you want to run the latest code from git, here's how to get started:
 
 ## Contributing
 
-Before raising a pull-request, please read our [contributing guide](https://github.com/node-red/node-red/blob/master/CONTRIBUTING.md).
+Before raising a pull-request, please read our [contributing guide](https://github.com/node-red/node-red/blob/main/CONTRIBUTING.md).
 
 This project adheres to the [Contributor Covenant 1.4](http://contributor-covenant.org/version/1/4/). By participating, you are expected to uphold this code. Please report unacceptable behavior to any of the project's core team at team@nodered.org.
 
@@ -101,7 +101,7 @@ Node-RED is a project of the [OpenJS Foundation](http://openjsf.org). Copyright 
 
 <!-- Badge images -->
 [badge-license]: https://img.shields.io/badge/License-Apache_2.0-blue.svg?color=3F51B5&style=for-the-badge&label=License&logoColor=000000&labelColor=ececec
-[badge-build]: https://img.shields.io/github/actions/workflow/status/node-red/node-red/tests.yml?branch=master&label=Build%20Status&style=for-the-badge
+[badge-build]: https://img.shields.io/github/actions/workflow/status/node-red/node-red/tests.yml?branch=main&label=Build%20Status&style=for-the-badge
 [badge-forum]: https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fdiscourse.nodered.org%2Fabout.json&query=%24.about.stats.users_count&suffix=%20members&label=Forum&logo=discourse&style=for-the-badge&color=0e76b2&logoColor=0e76b2&labelColor=ececec
 [badge-github]: https://img.shields.io/badge/dynamic/json?url=https://api.github.com/orgs/node-red&query=$.followers&suffix=%20followers&label=GitHub%20org&style=for-the-badge&logo=github&logoColor=24292F&labelColor=ececec&color=24292F
 [badge-slack]: https://img.shields.io/badge/Slack-Join%20Us-4A154B.svg?logo=slack&style=for-the-badge&logoColor=4A154B&labelColor=ececec
@@ -111,7 +111,7 @@ Node-RED is a project of the [OpenJS Foundation](http://openjsf.org). Copyright 
 
 <!-- Badge links -->
 [link-license]: https://opensource.org/license/apache-2-0
-[link-build]: https://github.com/node-red/node-red/actions?query=branch%3Amaster
+[link-build]: https://github.com/node-red/node-red/actions?query=branch%3Amain
 [link-forum]: https://discourse.nodered.org
 [link-github]: https://github.com/node-red
 [link-slack]: https://nodered.org/slack
