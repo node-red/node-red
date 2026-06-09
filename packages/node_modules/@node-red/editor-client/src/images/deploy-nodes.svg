@@ -1,1 +1,54 @@
-<svg width="32" height="32" xmlns="http://www.w3.org/2000/svg"><path color="#000" fill="#8c101c" d="M0 .002h32v32H0z"/><path color="#000" d="M2 13.002h10v5H2zM19 21.002h10v5H19z"/><path d="M11.5 15.502h2l4-5h2" fill="none" stroke="#000" stroke-width="1.5"/><path color="#000" fill="#fff" d="M19 8.002h10v5H19z"/></svg>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="32"
+   height="32"
+   version="1.1"
+   id="svg4"
+   sodipodi:docname="deploy-nodes.svg"
+   inkscape:version="1.4.2 (ebf0e940, 2025-05-08)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs4" />
+  <sodipodi:namedview
+     id="namedview4"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="8.2914769"
+     inkscape:cx="1.0251491"
+     inkscape:cy="11.939972"
+     inkscape:window-width="888"
+     inkscape:window-height="579"
+     inkscape:window-x="265"
+     inkscape:window-y="388"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="svg4" />
+  <path
+     color="#000"
+     fill="#8c101c"
+     d="M0 .002h32v32H0z"
+     id="path1"
+     style="fill:#bb0000;fill-opacity:1" />
+  <path
+     color="#000"
+     d="M2 13.002h10v5H2zM19 21.002h10v5H19z"
+     id="path2" />
+  <path
+     d="M11.5 15.502h2l4-5h2"
+     fill="none"
+     stroke="#000"
+     stroke-width="1.5"
+     id="path3" />
+  <path
+     color="#000"
+     fill="#fff"
+     d="M19 8.002h10v5H19z"
+     id="path4" />
+</svg>

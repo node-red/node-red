@@ -1,3 +1,203 @@
+#### 5.0.0: : Milestone Release
+
+This marks the next major release of Node-RED. The following changes represent
+those added since the last beta. Check the beta release details below for the complete
+list.
+
+Breaking Changes
+
+ - Node-RED now requires Node 22.9 or later.
+ - We recommend Node 24.
+
+Editor
+
+New Features
+
+ - Add support for GH style blockquote alerts (#5733) @Steve-Mcl
+ - Add alert types toolbar functionality to markdown editor (#5757) @Steve-Mcl
+ - Rework search statusBar (#5744) @knolleary
+ - Welcome tour v5 (#5784) @knolleary
+
+Fixes
+
+ - Do not alter button text for active/focus if its the primary button (#5787) @knolleary
+ - Align unknown node style (#5785) @knolleary
+ - Add missing core actions (#5777) @knolleary
+ - Ensure hidden tabs are restored on reload (#5762) @knolleary
+ - Do not show context menu if in the middle of another action (#5763) @knolleary
+ - Standardize the scrollbar colors (#5750) @bonanitech
+ - Ensure quick-add aligns nodes and junctions to the grid (#5759) @knolleary
+ - Fix svg tooltip text alignment (#5753) @knolleary
+ - Do not adjust focus when navigating search results (#5749) @knolleary
+ - [5712] Accessibility - Buttons and links missing accessible names (#5713) @n-lark
+ - Fix subflow virtual port halo sizing (#5748) @knolleary
+ - Group sidebar tab buttons (#5747) @knolleary
+ - Tidy up import error popover (#5745) @knolleary
+ - Move notifications bar to below tab bar (#5743) @knolleary
+ - Align sidebar toggle actions (#5742) @knolleary
+ - Shrink popover height if not sufficient vertical space (#5741) @knolleary
+ - Standardize popover colors (#5738) @knolleary
+ - Enable badge annotations on groups (#5729) @Steve-Mcl
+ - Refactor workspace grid to use single pattern definition (#5735) @Steve-Mcl
+ - Overlay status above selection halo (#5736) @knolleary
+ - Tidy up popover appearance (#5740) @knolleary
+ - Improve view navigator interaction (#5709) @knolleary
+ - [5704] UX: Deploy menu dropdown icon appears too inactive (#5711) @n-lark
+ - Redraw halo if node status changes (#5708) @knolleary
+ - [5702] UX: Sidebar tab buttons do not show focus indicator when clicking on them (#5710) @n-lark
+ - [5693 + 5699] Aligning Dark Theme with Light Theme's SCSS Structure + `node.status` fill of blue is shown as red in dark theme (#5694) @n-lark
+ - [5696] `editorTheme.header.title`: long values clip without ellipsis, and misalign when `header.url` is set (#5697) @n-lark
+ - [5695] Dropping a node over certain buttons in the footer toolbar causes those buttons to execute (NR5) (#5700) @n-lark
+
+Runtime
+
+ - Add support for installing ESM module nodes (#4355) @hlovdal
+
+Nodes
+
+ - Fix error handling for `linkcall` in function node (#5755) @Steve-Mcl
+ - Sort node lists alphabetically (#5739) @knolleary
+
+#### 5.0.0-beta.6: Beta Release
+
+Highlights
+
+ - We now bundle `npm` as our own dependency to improve how the Palette Manager uses it
+ - Lots of UI fixes from previous beta feedback
+ - Incremental accessiblity improvements in the editor - adding aria labels to buttons and images
+ - Ability to call Link In nodes directly from a Function node
+
+Editor
+
+ - Ensure png icon is centrally aligned on first layout (#5688) @knolleary
+ - Clip user profile image to the round button in the header (#5690) @knolleary
+ - [5683] No discernible outline on junctions and node ports in dark mode in NR5 + lighten shade color (#5691) @n-lark
+ - Do not show section title if all options are hidden (#5689) @knolleary
+ - Remove reveal on hover in search results and provide button (#5684) @knolleary
+ - Invert selected tab button border color to improve contrast (#5681) @knolleary
+ - [5658] ctrl+space shortcut isn't always firing (#5670) @n-lark
+ - [5674] UX: pointer-event deadzone in the tab bar (#5675) @n-lark
+ - [5534] UX: create mechanism for themes to provide multiple variants (#5659) @n-lark
+ - Remove aria label application from popover (#5654) @knolleary
+ - Remove default admin cors rules (#5652) @knolleary
+ - [5653] Accessibility — Attributes (#5655) @n-lark
+ - Remove SASS variables marked as deprecated (#5642) @bonanitech
+ - [5647] Accessibility - Names and labels (#5648) @n-lark
+ - [5649] Accessibility - Viewports, language attributes, and tabIndex (#5650) @n-lark
+ - [5644] UX: Address dark theme feedback from latest beta release (#5646) @n-lark
+ - Tighten select halo margin (#5651) @knolleary
+ - Fix multiplayer icon appearance (#5640) @knolleary
+ - Remove unslightly gap in the debug sidebar (#5639) @knolleary
+ - [5634] Junctions and ports on hover disappear with light theme (#5635) @n-lark
+ - [5636] V5, B5 : Sporadic Panel Height Calculations (#5638) @n-lark
+
+Runtime
+
+ - Fix build scripts for windows (#5687) @knolleary
+ - Set minimum node.js version to 22.9 (#5678) @knolleary
+ - Update to latest npm (#5677) @knolleary
+ - Update some dev dependencies to clear audit noise (#5673) @knolleary
+ - Introduce eslint (#5671) @knolleary
+ - Remove Grunt as the task runner (#5669) @knolleary
+ - Use req.hostname in https redirect to ensure proxy trust is maintained (#5666) @knolleary
+ - Sync master updates to dev (#5664) @knolleary
+ - Use a token exchange pattern for OAuth logins (#5657) @knolleary
+
+Nodes
+
+ - Allow TLS SNI Server name to be set in the http-request node (#5667) @hardillb
+ - Defining utility functions for re-use in a function node (#5494) @Steve-Mcl
+ - Only connect websocket client if need to (#5533) @dceejay
+
+
+#### 5.0.0-beta.5: Beta Release
+
+ - [5517] UX: Create default dark theme (#5625) @n-lark
+ - [5629] UX: Deploy menu: Restart Flows should not be faded (#5632) @n-lark
+ - Pull master changes to dev (#5631) @knolleary
+ - [5532] UX: Improve accessibility of default theme - colour palette (#5613) @n-lark
+ - [5616] Add back in expand/collapse tabs for sidenavs (#5626) @n-lark
+ - [5572] UX: Handle long instance title text (#5628) @n-lark
+ - [5621] UX: Fix styling of dragging sidebar panels (#5627) @n-lark
+ - Rework selected/hightlighted node appearance (#5623) @knolleary
+ - Ensure active tab is fully visible (#5624) @knolleary
+ - Rework sidebars to be draggable (#5618) @knolleary
+ - Make scrollbar hitbox larger (#5576) @knolleary
+ - [5617] Deploy Menu Redesign (#5619) @n-lark
+ - [5603] UX: Header buttons shown whilst editor loading (#5606) @n-lark
+ - [5602] UX: Unexpected tab border showing (#5607) @n-lark
+ - [5374] UX: replace touch radial menu with standard context menu (#5614) @n-lark
+ - [3431] feature: Store sidebar width between editor sessions (#5605) @n-lark
+ - Ensure edit dialog fills the tray (#5600) @knolleary
+ - Sync 4.1.8 to dev branch (#5587) @knolleary
+
+#### 5.0.0-beta.4: Beta Release
+
+ - Various UX tweaks and tidy ups
+ - Renable click to close for edit dialog (#5567) @knolleary
+ - Improve the `user-select` CSS code usage (#5565) @bonanitech
+ - Tidy up modal shade appearance (#5566) @knolleary
+ - Scale highlight based on workspace zoom (#5563) @knolleary
+ - Ensure disabled tab has fully dashed border (#5564) @knolleary
+ - Add error handling for markdown parser (#5560) @knolleary
+ - Update reveal node styling (#5562) @knolleary
+ - Minor change to treeList select/expand behaviour (#5556) @knolleary
+ - Handle shift-scroll more robustly (#5559) @knolleary
+ - Remove obsolete vendor-prefixed CSS properties (#5554) @bonanitech
+ - Include sidebar width in position calculation for reveal function (#5555) @knolleary
+ - [5377] UX: Ensure menus handle vertical overflow (#5448) @n-lark
+ - Account for sidebar width when calculating zoom-to-fit scale (#5551) @knolleary
+ - Fix fade effect for tab labels that overflow (#5552) @bonanitech
+ - Better touch handling for submenus (#5550) @knolleary
+ - Improve workspace footer handling of smaller screen widths (#5549) @knolleary
+ - [5540] UX: handle node-red-dashboard css poisoning (#5548) @n-lark
+ - [5522] UX: vertical scrollbar should not overlap subflow toolbar (#5537) @n-lark
+ - [5523] UX: Cursor events in workspace get interrupted when over status/scroll bars (#5539) @n-lark
+ - [5521] UX: Selecting non-flow object in Explorer causes Info to go blank (#5538) @n-lark
+ - [5525] UX: Misaligned first tab (#5536) @n-lark
+ - Sync 4.1.7 to dev branch (#5531) @knolleary
+
+#### 5.0.0-beta.3: Beta Release
+
+ - UX updates for beta 3 (#5498) @knolleary
+ - Update Monaco to latest (0.55.1) (#5508) @Steve-Mcl
+ - Move location of new creds files to be next to flows (if they don't exist already in userdir) (#4951) @dceejay
+
+#### 5.0.0-beta.2: Beta Release
+
+Editor
+
+ - UX updates for next beta (#5444) @knolleary
+
+Nodes
+
+ - Add pause button to debug sidebar (#5390) @dceejay
+ - Add burst mode to delay node (#5391) @dceejay
+ - Add TLS certs/keys from Env Vars (#5376) @hardillb
+
+#### 5.0.0-beta.1: Beta Release
+
+Editor
+
+ - Allow sidebar to be split into two panels (#5378) @knolleary
+
+#### 5.0.0-beta.0: Beta Release
+
+Editor
+
+ - Update Sidebar UX (#5318) @knolleary
+ - Workspace pan/zoom updates (#5312) @knolleary
+ - Fix panning workspace on touchscreens (#5371) @knolleary
+ - Update tour for 5-beta (#5370) @knolleary
+
+Runtime
+
+ - Prep dev branch for beta releases (#5367) @knolleary
+
+Nodes
+
+ - Add ability to use pfx or p12 file for TLS connection settings option (#4907) @dceejay
+
 #### 4.1.11: Maintenance Release
 
  - Add styles to prevent controls wrapping in find bar (#5779) @Steve-Mcl

@@ -211,7 +211,7 @@ describe('HTTP Request Node', function() {
         } else {
             hash = crypto.createHash('md5');
         }
-        
+
         var hex = hash.update(value).digest('hex');
         if (algorithm === 'SHA-512-256') {
             hex = hex.slice(0, 64);
@@ -1802,10 +1802,37 @@ describe('HTTP Request Node', function() {
             })
         });
 
+        it('should use pfx tls file', function(done) {
+            var flow = [
+                {id:"n1",type:"http request",wires:[["n2"]],method:"GET",ret:"txt",url:getSslTestURLWithoutProtocol('/text'),tls:"n3"},
+                {id:"n2", type:"helper"},
+                {id:"n3", type:"tls-config", p12:"test/resources/ssl/test.pfx", verifyservercert:false}];
+            var testNodes = [httpRequestNode, tlsNode];
+            helper.load(testNodes, flow, function() {
+                var n3 = helper.getNode("n3");
+                var n2 = helper.getNode("n2");
+                var n1 = helper.getNode("n1");
+                n2.on("input", function(msg) {
+                    try {
+                        msg.should.have.property('payload','hello');
+                        msg.should.have.property('statusCode',200);
+                        msg.should.have.property('headers');
+                        msg.headers.should.have.property('content-length',''+('hello'.length));
+                        msg.headers.should.have.property('content-type').which.startWith('text/html');
+                        msg.should.have.property('responseUrl').which.startWith('https://');
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                n1.receive({payload:"foo"});
+            });
+        });
+
         it('should use env var http_proxy', function(done) {
             const url = getTestURL('/postInspect')
             const proxyUrl = "http://localhost:" + testProxyPort
-            
+
             const flow = [
                 { id: "n1", type: "http request", wires: [["n2"]], method: "POST", ret: "obj", url: url },
                 { id: "n2", type: "helper" },
@@ -1830,7 +1857,7 @@ describe('HTTP Request Node', function() {
         it('should use env var https_proxy', function(done) {
             const url = getSslTestURL('/postInspect')
             const proxyUrl = "http://localhost:" + testProxyPort
-            
+
             const flow = [
                 { id: "n1", type: "http request", wires: [["n2"]], method: "POST", ret: "obj", url: url },
                 { id: "n2", type: "helper" },
@@ -1855,7 +1882,7 @@ describe('HTTP Request Node', function() {
         it('should not use env var http*_proxy when no_proxy is set', function(done) {
             const url = getSslTestURL('/postInspect')
             const proxyUrl = "http://localhost:" + testProxyPort
-            
+
             const flow = [
                 { id: "n1", type: "http request", wires: [["n2"]], method: "POST", ret: "obj", url: url },
                 { id: "n2", type: "helper" },
