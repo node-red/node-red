@@ -5,7 +5,6 @@ We welcome contributions, but request you follow these guidelines.
  - [Raising issues](#raising-issues)
  - [Feature requests](#feature-requests)
  - [Pull-Requests](#pull-requests)
-   - [Contributor License Agreement](#contributor-license-agreement)
 
 This project adheres to the [Contributor Covenant 1.4](http://contributor-covenant.org/version/1/4/).
 By participating, you are expected to uphold this code. Please report unacceptable
