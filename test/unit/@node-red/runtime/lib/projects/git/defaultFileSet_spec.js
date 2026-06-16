@@ -17,9 +17,9 @@
 
 var should = require("should");
 var NR_TEST_UTILS = require("nr-test-utils");
-var defaultFileSet = NR_TEST_UTILS.require("@node-red/runtime/lib/storage/localfilesystem/projects/defaultFileSet");
+var defaultFileSet = NR_TEST_UTILS.require("@node-red/runtime/lib/projects/git/defaultFileSet");
 
-describe('storage/localfilesystem/projects/defaultFileSet', function() {
+describe('storage/projects/git/defaultFileSet', function() {
     var runtime = {
         i18n: {
             "_": function(name) {
@@ -27,7 +27,9 @@ describe('storage/localfilesystem/projects/defaultFileSet', function() {
             }
         }
     };
-    it('generates package.json for a project', function() {
+    it('generates a package.json skeleton for a project', function() {
+        // The flow file references in node-red.settings are recorded by the
+        // storage layout (layoutckageSettings), not defaultFileSet.
         var generated = defaultFileSet["package.json"]({
             name: "A TEST NAME",
             summary: "A TEST SUMMARY",
@@ -42,8 +44,8 @@ describe('storage/localfilesystem/projects/defaultFileSet', function() {
         parsed.should.have.property('description',"A TEST SUMMARY");
         parsed.should.have.property('node-red');
         parsed['node-red'].should.have.property('settings');
-        parsed['node-red'].settings.should.have.property('flowFile',"MY FLOW FILE");
-        parsed['node-red'].settings.should.have.property('credentialsFile',"MY CREDENTIALS FILE");
+        parsed['node-red'].settings.should.not.have.property('flowFile');
+        parsed['node-red'].settings.should.not.have.property('credentialsFile');
     });
 
     it('generates README.md for a project', function() {

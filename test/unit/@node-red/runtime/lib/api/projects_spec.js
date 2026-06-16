@@ -44,11 +44,9 @@ function rejectedError() {
 function createRuntime(projectMethods) {
     return {
         log: mockLog(),
-        storage: {
-            projects: Object.assign({
-                available: function() { return true; }
-            }, projectMethods)
-        }
+        projects: Object.assign({
+            available: function() { return true; }
+        }, projectMethods)
     };
 }
 
@@ -67,7 +65,9 @@ function assertRejects(promiseFactory, done, status) {
 describe("runtime-api/projects", function() {
     describe("available", function() {
         it("resolves true if projects available", function(done) {
-            projects.init({ storage: { projects: {} } });
+            projects.init(createRuntime({
+                available: function() { return true; }
+            }));
             projects.available().then(function(result) {
                 result.should.be.true();
                 done();
@@ -75,7 +75,9 @@ describe("runtime-api/projects", function() {
         });
 
         it("resolves false if projects unavailable", function(done) {
-            projects.init({ storage: {} });
+            projects.init(createRuntime({
+                available: function() { return false; }
+            }));
             projects.available().then(function(result) {
                 result.should.be.false();
                 done();
