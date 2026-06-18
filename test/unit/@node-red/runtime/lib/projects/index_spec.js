@@ -82,7 +82,7 @@ function capabilityStorage(capability, extra) {
     runtimeProjects.registerProjectType("test", capability);
     return Object.assign({
         getProjectType: function() { return "test"; },
-        getFlowLayout: function() { return {}; },
+        getProjectLayout: function() { return {}; },
         saveCredentials: sinon.stub().resolves()
     }, extra || {});
 }
@@ -118,14 +118,14 @@ describe("runtime/projects", function() {
         runtimeProjects.available().should.be.false();
     });
 
-    it("selects a built-in project type and drives it with the storage module's flow layout", async function() {
+    it("selects a built-in project type and drives it with the storage module's project layout", async function() {
         sinon.stub(gitProjectType, "init").resolves();
         sinon.stub(gitProjectType, "available").returns(false);
         var layout = { marker: "single-file-layout" };
         var runtime = createRuntime({
             storage: {
                 getProjectType: function() { return "git"; },
-                getFlowLayout: function() { return layout; }
+                getProjectLayout: function() { return layout; }
             }
         });
 
@@ -140,7 +140,7 @@ describe("runtime/projects", function() {
         var runtime = createRuntime({
             storage: {
                 getProjectType: function() { return "does-not-exist"; },
-                getFlowLayout: function() { return {}; }
+                getProjectLayout: function() { return {}; }
             }
         });
 
