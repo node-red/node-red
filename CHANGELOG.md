@@ -1,4 +1,34 @@
-#### 5.0.0: : Milestone Release
+#### 5.0.1: Maintenance Release
+
+ - Update dependencies (#5847) @knolleary
+ - Handle unknown node type properties in info properties table (#5846) @knolleary
+ - Add a button to ignore the import of unknown types (#5836) @GogoVega
+ - Add --watch option to npm run dev (#5843) @knolleary
+ - Load images in info popup before positioning (#5845) @knolleary
+ - Handle repositioning tooltip when aligned to top (#5844) @knolleary
+ - [5839] NR5: info popover does not support node.info() (#5841) @n-lark
+ - [5828] Scroll bars don't update properly (#5832) @n-lark
+ - [BUGFIX] Fix git ref parsing resulting in broken merge conflicts and commit diffs (#5833) @beasteers
+ - [5808] NR5: navigaton elements overlap workspace content at edges (#5827) @n-lark
+ - Fix issue with monaco after expanding and collapsing the editor (#5830) @Steve-Mcl
+ - [7522] Sync theme preference into the embedded Node-RED editor (#5819) @n-lark
+ - [5809] NR5: Scrollbars are not updating when jumping between nodes in the same workspace (#5826) @n-lark
+ - [5810] NR5: "0 plugins" in palette manager (#5825) @n-lark
+ - Reposition active popups in response to window resize events (#5823) @knolleary
+ - Make docs popup styling consistent with info sidebar (#5822) @knolleary
+ - Don't throw error looking up locales for themes (#5813) @hardillb
+ - german translation for help texts of the link nodes (#5801) @m-schaeffler
+ - Add Japanese Translations for v5.0.0 (#5815) @kazuhitoyokoi
+ - Fix images in welcome tour for 4.1 (#5814) @kazuhitoyokoi
+ - Fix expandOnClick behaviour of treeList (#5821) @knolleary
+ - Avoid initialising sidebars with tabs that do not exist yet (#5818) @knolleary
+ - Move sidebar resize-handle down one level in z-index (#5817) @knolleary
+ - Fix RED.sidebar.containsTab api (#5816) @knolleary
+ - Remove dead link in contributing guide (#5797) @knolleary
+ - Set minimum node version to 22.9 (#5792) @bonanitech
+ - Update default branch references (#5793) @knolleary
+
+#### 5.0.0: Milestone Release
 
 This marks the next major release of Node-RED. The following changes represent
 those added since the last beta. Check the beta release details below for the complete
