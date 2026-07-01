@@ -24,7 +24,7 @@ var fs = require("fs-extra");
 
 var NR_TEST_UTILS = require("nr-test-utils");
 
-var authWriter = NR_TEST_UTILS.resolve("@node-red/runtime/lib/storage/localfilesystem/projects/git/authWriter");
+var authWriter = NR_TEST_UTILS.resolve("@node-red/runtime/lib/projects/git/git/authWriter");
 
 function getListenPath() {
     var seed = (0x100000+Math.random()*0x999999).toString(16);
@@ -40,7 +40,7 @@ function getListenPath() {
 }
 
 
-describe("localfilesystem/projects/git/authWriter", function() {
+describe("projects/git/git/authWriter", function() {
     it("connects to port and sends passphrase", function(done) {
         var receivedData = "";
         var server = net.createServer(function(connection) {

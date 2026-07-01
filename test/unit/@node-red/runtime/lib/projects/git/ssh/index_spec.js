@@ -18,9 +18,9 @@ var fs = require('fs-extra');
 var path = require('path');
 
 var NR_TEST_UTILS = require("nr-test-utils");
-var sshkeys = NR_TEST_UTILS.require("@node-red/runtime/lib/storage/localfilesystem/projects/ssh");
+var sshkeys = NR_TEST_UTILS.require("@node-red/runtime/lib/projects/git/ssh");
 
-describe("storage/localfilesystem/projects/ssh", function() {
+describe("storage/projects/git/ssh", function() {
     var userDir = path.join(__dirname,".testSSHKeyUserHome");
     var mockSettings = {
         userDir: userDir
