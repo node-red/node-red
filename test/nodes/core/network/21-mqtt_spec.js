@@ -5,26 +5,60 @@
 const should = require("should");
 const helper = require("node-red-node-test-helper");
 const { doesNotThrow } = require("should");
-const mqttNodes = require("nr-test-utils").require("@node-red/nodes/core/network/10-mqtt.js");
+const { FakeMqttServer } = require("./mqtt_mock_broker.js");
 const BROKER_HOST = process.env.MQTT_BROKER_SERVER || "localhost";
 const BROKER_PORT = process.env.MQTT_BROKER_PORT || 1883;
-//By default, MQTT tests are disabled. Set ENV VAR  NR_MQTT_TESTS  to "1" or "true" to enable
-const skipTests = process.env.NR_MQTT_TESTS != "true" &&  process.env.NR_MQTT_TESTS != "1";
+// By default the broker is mocked in-process (no real broker required), so the tests below always run.
+// Set env var NR_MQTT_TESTS to "1"/"true" to instead exercise a real broker at BROKER_HOST:BROKER_PORT.
+const useRealBroker = process.env.NR_MQTT_TESTS == "true" || process.env.NR_MQTT_TESTS == "1";
+
+// -- Broker mocking ---------------------------------------------------------------------------------
+// The `mqtt` module exposes `connect` as a NON-configurable getter (transpiled ESM export), so it can't
+// be stubbed with sinon. Instead we swap the module's cached exports for a shim whose `connect` we
+// control, and require the node AFTER installing the shim so 10-mqtt.js's `require("mqtt")` captures it.
+// When `activeFakeConnect` is null (e.g. NR_MQTT_TESTS mode) the shim delegates to the real connect.
+const realMqtt = require("mqtt");
+let activeFakeConnect = null;
+const mqttShim = Object.create(realMqtt);
+Object.defineProperty(mqttShim, "connect", {
+    configurable: true, enumerable: true, writable: true,
+    value: function (url, options) {
+        return activeFakeConnect ? activeFakeConnect(url, options) : realMqtt.connect(url, options);
+    }
+});
+require.cache[require.resolve("mqtt")].exports = mqttShim;
+
+const mqttNodes = require("nr-test-utils").require("@node-red/nodes/core/network/10-mqtt.js");
 
 describe('MQTT Nodes', function () {
+
+    let fakeBroker = null;
 
     before(function (done) {
         helper.startServer(done);
     });
 
     after(function (done) {
+        // restore the real mqtt exports for any specs that run after this file
+        require.cache[require.resolve("mqtt")].exports = realMqtt;
         helper.stopServer(done);
     });
 
-    afterEach(function () {
+    beforeEach(function () {
+        if (!useRealBroker) {
+            fakeBroker = new FakeMqttServer();
+            activeFakeConnect = (url, options) => fakeBroker.connect(url, options);
+        }
+    });
+
+    afterEach(async function () {
+        // Await full teardown so a flow's nodes/listeners are gone before the next test loads - otherwise
+        // a lingering helper "input" listener can catch a later test's message (cross-test leakage).
         try {
-            helper.unload();
+            await helper.unload();
         } catch (error) { }
+        activeFakeConnect = null;
+        if (fakeBroker) { fakeBroker.destroy(); fakeBroker = null; }
     });
 
     it('should be loaded and have default values (MQTT V4)', function (done) {
@@ -114,20 +148,9 @@ describe('MQTT Nodes', function () {
         });
     });
 
-    if (skipTests) {
-        it('skipping MQTT tests. Set env var "NR_MQTT_TESTS=true" to enable. Requires a v5 capable broker running on localhost:1883.', function (done) {
-            done();
-        });
-    }
-    // Conditional test runner (only run if skipTests=false) 
-    function itConditional(title, test) {
-        return !skipTests ? it(title, test) : it.skip(title, test);
-    }
-
     //#region ################### BASIC TESTS ################### #//
 
-    itConditional('basic send and receive tests', function (done) {
-        if (skipTests) { return this.skip() }
+    it('basic send and receive tests', function (done) {
         this.timeout = 2000;
         const options = {}
         options.sendMsg = {
@@ -139,8 +162,7 @@ describe('MQTT Nodes', function () {
         testSendRecv({}, { datatype: "auto", topicType: "static" }, {}, options, { done: done });
     });
     //Prior to V3, "auto" mode would only parse to string or buffer.
-    itConditional('should send JSON and receive string (auto mode)', function (done) {
-        if (skipTests) { return this.skip() }
+    it('should send JSON and receive string (auto mode)', function (done) {
         this.timeout = 2000;
         const options = {}
         options.sendMsg = {
@@ -152,8 +174,7 @@ describe('MQTT Nodes', function () {
         testSendRecv({}, { datatype: "auto", topicType: "static" }, {}, options, { done: done });
     })
     //In V3, "auto" mode should try to parse JSON, then string and fall back to buffer
-    itConditional('should send JSON and receive object (auto-detect mode)', function (done) {
-        if (skipTests) { return this.skip() }
+    it('should send JSON and receive object (auto-detect mode)', function (done) {
         this.timeout = 2000;
         const options = {}
         options.sendMsg = {
@@ -165,8 +186,7 @@ describe('MQTT Nodes', function () {
         options.expectMsg.payload = JSON.parse(options.sendMsg.payload);
         testSendRecv({}, { datatype: "auto-detect", topicType: "static" }, {}, options, { done: done });
     })
-    itConditional('should send invalid JSON and receive string (auto mode)', function (done) {
-        if (skipTests) { return this.skip() }
+    it('should send invalid JSON and receive string (auto mode)', function (done) {
         this.timeout = 2000;
         const options = {}
         options.sendMsg = {
@@ -176,8 +196,7 @@ describe('MQTT Nodes', function () {
         options.expectMsg = Object.assign({}, options.sendMsg);//expect same payload
         testSendRecv({}, { datatype: "auto", topicType: "static" }, {}, options, { done: done });
     });
-    itConditional('should send invalid JSON and receive string (auto-detect mode)', function (done) {
-        if (skipTests) { return this.skip() }
+    it('should send invalid JSON and receive string (auto-detect mode)', function (done) {
         this.timeout = 2000;
         const options = {}
         options.sendMsg = {
@@ -188,8 +207,7 @@ describe('MQTT Nodes', function () {
         testSendRecv({}, { datatype: "auto-detect", topicType: "static" }, {}, options, { done: done });
     });
 
-    itConditional('should send JSON and receive string (utf8 mode)', function (done) {
-        if (skipTests) { return this.skip() }
+    it('should send JSON and receive string (utf8 mode)', function (done) {
         this.timeout = 2000;
         const options = {}
         options.sendMsg = {
@@ -200,8 +218,7 @@ describe('MQTT Nodes', function () {
         options.expectMsg = Object.assign({}, options.sendMsg);
         testSendRecv({}, { datatype: "utf8", topicType: "static" }, {}, options, { done: done });
     });
-    itConditional('should send JSON and receive Object (json mode)', function (done) {
-        if (skipTests) { return this.skip() }
+    it('should send JSON and receive Object (json mode)', function (done) {
         this.timeout = 2000;
         const options = {}
         options.sendMsg = {
@@ -211,8 +228,7 @@ describe('MQTT Nodes', function () {
         options.expectMsg = Object.assign({}, options.sendMsg, { payload: { "prop": "value3", "num": 3 } });//expect an object
         testSendRecv({}, { datatype: "json", topicType: "static" }, {}, options, { done: done });
     });
-    itConditional('should send invalid JSON and raise error (json mode)', function (done) {
-        if (skipTests) { return this.skip() }
+    it('should send invalid JSON and raise error (json mode)', function (done) {
         this.timeout = 2000;
         const options = {}
         options.sendMsg = {
@@ -235,8 +251,7 @@ describe('MQTT Nodes', function () {
         }
         testSendRecv({}, { datatype: "json", topicType: "static" }, {}, options, hooks);
     });
-    itConditional('should send String and receive Buffer (buffer mode)', function (done) {
-        if (skipTests) { return this.skip() }
+    it('should send String and receive Buffer (buffer mode)', function (done) {
         this.timeout = 2000;
         const options = {}
         options.sendMsg = {
@@ -246,8 +261,7 @@ describe('MQTT Nodes', function () {
         options.expectMsg = Object.assign({}, options.sendMsg, { payload: Buffer.from(options.sendMsg.payload) });//expect Buffer.from(msg.payload)
         testSendRecv({}, { datatype: "buffer", topicType: "static" }, {}, options, { done: done });
     });
-    itConditional('should send utf8 Buffer and receive String (auto mode)', function (done) {
-        if (skipTests) { return this.skip() }
+    it('should send utf8 Buffer and receive String (auto mode)', function (done) {
         this.timeout = 2000;
         const options = {}
         options.sendMsg = {
@@ -257,8 +271,7 @@ describe('MQTT Nodes', function () {
         options.expectMsg = Object.assign({}, options.sendMsg, { payload: "x y z" });//set expected payload to "x y z"
         testSendRecv({}, { datatype: "auto", topicType: "static" }, {}, options, { done: done });
     });
-    itConditional('should send non utf8 Buffer and receive Buffer (auto mode)', function (done) {
-        if (skipTests) { return this.skip() }
+    it('should send non utf8 Buffer and receive Buffer (auto mode)', function (done) {
         this.timeout = 2000;
         const options = {}
         const hooks = { done: done, beforeLoad: null, afterLoad: null, afterConnect: null }
@@ -269,8 +282,7 @@ describe('MQTT Nodes', function () {
         options.expectMsg = Object.assign({}, options.sendMsg, {payload: Buffer.from([0xC0, 0xC1, 0xF5, 0xF6, 0xF7, 0xF8, 0xF9, 0xFA, 0xFB, 0xFC, 0xFD, 0xFE, 0xFF])});
         testSendRecv({}, { datatype: "auto", topicType: "static" }, {}, options, hooks);
     });
-    itConditional('should send/receive all v5 flags and settings', function (done) {
-        if (skipTests) { return this.skip() }
+    it('should send/receive all v5 flags and settings', function (done) {
         this.timeout = 2000;
         const t = nextTopic();
         const options = {}
@@ -293,8 +305,7 @@ describe('MQTT Nodes', function () {
         }
         testSendRecv({ protocolVersion: 5 }, inOptions, {}, options, hooks);
     });
-    itConditional('should send regular string with v5 media type "text/plain" and receive a string (auto mode)', function (done) {
-        if (skipTests) { return this.skip() }
+    it('should send regular string with v5 media type "text/plain" and receive a string (auto mode)', function (done) {
         this.timeout = 2000;
         const options = {}
         const hooks = { done: done, beforeLoad: null, afterLoad: null, afterConnect: null }
@@ -304,8 +315,7 @@ describe('MQTT Nodes', function () {
         options.expectMsg = Object.assign({}, options.sendMsg);
         testSendRecv({ protocolVersion: 5 }, { datatype: "auto", topicType: "static" }, {}, options, hooks);
     });
-    itConditional('should send JSON with v5 media type "text/plain" and receive a string (auto mode)', function (done) {
-        if (skipTests) { return this.skip() }
+    it('should send JSON with v5 media type "text/plain" and receive a string (auto mode)', function (done) {
         this.timeout = 2000;
         const options = {}
         const hooks = { done: done, beforeLoad: null, afterLoad: null, afterConnect: null }
@@ -315,8 +325,7 @@ describe('MQTT Nodes', function () {
         options.expectMsg = Object.assign({}, options.sendMsg);
         testSendRecv({ protocolVersion: 5 }, { datatype: "auto", topicType: "static" }, {}, options, hooks);
     });
-    itConditional('should send JSON with v5 media type "text/plain" and receive a string (auto-detect mode)', function (done) {
-        if (skipTests) { return this.skip() }
+    it('should send JSON with v5 media type "text/plain" and receive a string (auto-detect mode)', function (done) {
         this.timeout = 2000;
         const options = {}
         const hooks = { done: done, beforeLoad: null, afterLoad: null, afterConnect: null }
@@ -326,8 +335,7 @@ describe('MQTT Nodes', function () {
         options.expectMsg = Object.assign({}, options.sendMsg);
         testSendRecv({ protocolVersion: 5 }, { datatype: "auto-detect", topicType: "static" }, {}, options, hooks);
     });
-    itConditional('should send JSON with v5 media type "application/json" and receive an object (auto-detect mode)', function (done) {
-        if (skipTests) { return this.skip() }
+    it('should send JSON with v5 media type "application/json" and receive an object (auto-detect mode)', function (done) {
         this.timeout = 2000;
         const options = {}
         const hooks = { done: done, beforeLoad: null, afterLoad: null, afterConnect: null }
@@ -337,8 +345,7 @@ describe('MQTT Nodes', function () {
         options.expectMsg = Object.assign({}, options.sendMsg, { payload: JSON.parse(options.sendMsg.payload)});
         testSendRecv({ protocolVersion: 5 }, { datatype: "auto-detect", topicType: "static" }, {}, options, hooks);
     });
-    itConditional('should send invalid JSON with v5 media type "application/json" and raise an error (auto mode)', function (done) {
-        if (skipTests) { return this.skip() }
+    it('should send invalid JSON with v5 media type "application/json" and raise an error (auto mode)', function (done) {
         this.timeout = 2000;
         const options = {}
         options.sendMsg = {
@@ -362,8 +369,7 @@ describe('MQTT Nodes', function () {
         testSendRecv({ protocolVersion: 5 }, { datatype: "auto", topicType: "static" }, {}, options, hooks);
     });
     
-    itConditional('should send buffer with v5 media type "application/json" and receive an object (auto-detect mode)', function (done) {
-        if (skipTests) { return this.skip() }
+    it('should send buffer with v5 media type "application/json" and receive an object (auto-detect mode)', function (done) {
         this.timeout = 2000;
         const options = {}
         const hooks = { done: done, beforeLoad: null, afterLoad: null, afterConnect: null }
@@ -373,8 +379,7 @@ describe('MQTT Nodes', function () {
         options.expectMsg = Object.assign({}, options.sendMsg, { payload: {"prop":"val"}});
         testSendRecv({ protocolVersion: 5 }, { datatype: "auto-detect", topicType: "static" }, {}, options, hooks);
     });
-    itConditional('should send buffer with v5 media type "text/plain" and receive a string (auto mode)', function (done) {
-        if (skipTests) { return this.skip() }
+    it('should send buffer with v5 media type "text/plain" and receive a string (auto mode)', function (done) {
         this.timeout = 2000;
         const options = {}
         const hooks = { done: done, beforeLoad: null, afterLoad: null, afterConnect: null }
@@ -384,8 +389,7 @@ describe('MQTT Nodes', function () {
         options.expectMsg = Object.assign({}, options.sendMsg, { payload: '{"prop":"val"}'});
         testSendRecv({ protocolVersion: 5 }, { datatype: "auto", topicType: "static" }, {}, options, hooks);
     });
-    itConditional('should send buffer with v5 media type "application/zip" and receive a buffer (auto mode)', function (done) {
-        if (skipTests) { return this.skip() }
+    it('should send buffer with v5 media type "application/zip" and receive a buffer (auto mode)', function (done) {
         this.timeout = 2000;
         const options = {}
         const hooks = { done: done, beforeLoad: null, afterLoad: null, afterConnect: null }
@@ -396,8 +400,7 @@ describe('MQTT Nodes', function () {
         testSendRecv({ protocolVersion: 5 }, { datatype: "auto", topicType: "static" }, {}, options, hooks);
     });
 
-    itConditional('should subscribe dynamically via action', function (done) {
-        if (skipTests) { return this.skip() }
+    it('should subscribe dynamically via action', function (done) {
         this.timeout = 2000;
         const options = {}
         const hooks = { done: done, beforeLoad: null, afterLoad: null, afterConnect: null }
@@ -410,8 +413,7 @@ describe('MQTT Nodes', function () {
     //#endregion  BASIC TESTS
 
     //#region ################### ADVANCED TESTS ################### #//
-    itConditional('should connect via "connect" action', function (done) {
-        if (skipTests) { return this.skip() }
+    it('should connect via "connect" action', function (done) {
         this.timeout = 2000;
         const options = {}
         const hooks = { done: null, beforeLoad: null, afterLoad: null, afterConnect: null }
@@ -427,8 +429,7 @@ describe('MQTT Nodes', function () {
         }
         testSendRecv({ protocolVersion: 5, autoConnect: false }, { datatype: "utf8", topicType: "dynamic" }, {}, options, hooks);
     });
-    itConditional('should disconnect via "disconnect" action', function (done) {
-        if (skipTests) { return this.skip() }
+    it('should disconnect via "disconnect" action', function (done) {
         this.timeout = 2000;
         const options = {}
         const hooks = { beforeLoad: null, afterLoad: null, afterConnect: null }
@@ -457,8 +458,7 @@ describe('MQTT Nodes', function () {
         }
         testSendRecv({ protocolVersion: 5 }, null, {}, options, hooks);
     });
-    itConditional('should publish birth message', function (done) {
-        if (skipTests) { return this.skip() }
+    it('should publish birth message', function (done) {
         this.timeout = 2000;
         const baseTopic = nextTopic();
         const brokerOptions = {
@@ -489,8 +489,7 @@ describe('MQTT Nodes', function () {
         }       
         testSendRecv(brokerOptions, { topic: brokerOptions.birthTopic }, {}, options, hooks);
     });
-    itConditional('should safely discard bad birth topic', function (done) {
-        if (skipTests) { return this.skip() }
+    it('should safely discard bad birth topic', function (done) {
         this.timeout = 2000;
         const baseTopic = nextTopic();
         const brokerOptions = {
@@ -499,31 +498,31 @@ describe('MQTT Nodes', function () {
             birthPayload: "broker connected",
             birthQos: 2,
         }
-        const options = {};
+        const options = { expectMsg: null };
         const hooks = { done: null, beforeLoad: null, afterLoad: null, afterConnect: null };
+        let gotMessage = false;
         hooks.afterLoad = (helperNode, mqttBroker, mqttIn, mqttOut) => {
-            helperNode.on("input", function (msg) {
-                try {
-                    msg.should.have.a.property("error").type("object");
-                    msg.error.should.have.a.property("source").type("object");
-                    msg.error.source.should.have.a.property("id", mqttIn.id);
-                    done();
-                } catch (err) {
-                    done(err)
-                }
-            });
+            // An invalid (wildcard) publish topic is discarded with a warning - it is not published and
+            // raises no catchable error - so nothing should ever reach the subscriber/helper.
+            helperNode.on("input", function () { gotMessage = true; });
             return true; //handled
         }
-        options.expectMsg = null;
-        try {
-            testSendRecv(brokerOptions, { topic: brokerOptions.birthTopic }, {}, options, hooks);
-            done()
-        } catch(err) {
-            done(e)
+        hooks.afterConnect = (helperNode, mqttBroker, mqttIn, mqttOut) => {
+            // Reaching afterConnect proves the broker connected despite the bad birth topic (it didn't crash).
+            // Give the discarded birth publish a moment, then confirm nothing was delivered downstream.
+            setTimeout(function () {
+                try {
+                    gotMessage.should.eql(false, "no message should be published from an invalid birth topic");
+                    done();
+                } catch (err) {
+                    done(err);
+                }
+            }, 300);
+            return true; //handled
         }
+        testSendRecv(brokerOptions, { topic: brokerOptions.birthTopic }, {}, options, hooks);
     });
-    itConditional('should publish close message', function (done) {
-        if (skipTests) { return this.skip() }
+    it('should publish close message', function (done) {
         this.timeout = 2000;
         const baseTopic = nextTopic();
         const broker1Options = { id: "mqtt.broker1" }//Broker 1 - stays connected to receive the close message
@@ -553,8 +552,7 @@ describe('MQTT Nodes', function () {
             .catch(done);
         });
     });
-    itConditional('should publish will message', function (done) {
-        if (skipTests) { return this.skip() }
+    it('should publish will message', function (done) {
         this.timeout = 2000;
         const baseTopic = nextTopic();
         const broker1Options = { id: "mqtt.broker1" }//Broker 1 - stays connected to receive the will message
@@ -584,8 +582,7 @@ describe('MQTT Nodes', function () {
             .catch(done);
         });
     });
-    itConditional('should publish will message with V5 properties', function (done) {
-        if (skipTests) { return this.skip() }
+    it('should publish will message with V5 properties', function (done) {
         // return this.skip(); //Issue receiving v5 props on will msg. Issue raised here: https://github.com/mqttjs/MQTT.js/issues/1455
         this.timeout = 2000;
         const baseTopic = nextTopic();
@@ -884,7 +881,7 @@ function hasProperty(obj, propName) {
     return Object.prototype.hasOwnProperty.call(obj, propName);
 }
 
-const base_topic = "nr" + Date.now().toString() + "/";
+const base_topic = "nr/" + Date.now().toString() + "/";
 let topicNo = 0;
 function nextTopic(topic) {
     topicNo++;
