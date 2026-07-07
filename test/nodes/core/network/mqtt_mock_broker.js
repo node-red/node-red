@@ -142,6 +142,7 @@ class FakeMqttServer {
     constructor() {
         this.clients = new Set();
         this._denied = new Set(); // filters whose SUBSCRIBE should be refused (to test SUBACK failures)
+        this._publishListeners = []; // observers notified of every publish (for test-driven responders)
     }
 
     connect(url, options) {
@@ -195,12 +196,26 @@ class FakeMqttServer {
                 client.emit("message", topic, buf, packet);
             });
         });
+        // Notify publish observers on a later tick (after the publisher's own publish callback has run),
+        // so a test-driven responder that injects a reply doesn't race ahead of the request node arming
+        // its timeout. Listeners receive (topic, payloadBuffer, options, fromClient).
+        if (this._publishListeners.length) {
+            const listeners = this._publishListeners.slice();
+            setImmediate(() => listeners.forEach((fn) => fn(topic, buf, options, fromClient)));
+        }
     }
+
+    /** Observe every publish routed through the broker. Handy for building a test responder. */
+    onPublish(fn) { this._publishListeners.push(fn); }
+
+    /** Publish a message into the broker from no particular client (e.g. a simulated external responder). */
+    inject(topic, payload, options) { this.publish(null, topic, payload, options || {}); }
 
     destroy() {
         this.clients.forEach((c) => { c._ended = true; });
         this.clients.clear();
         this._denied.clear();
+        this._publishListeners = [];
     }
 }
 
