@@ -57,6 +57,8 @@ class FakeMqttClient extends EventEmitter {
         this._ended = false;
         this._subs = []; // [{ filter, qos }]
         this._will = (this.options.will && this.options.will.topic) ? this.options.will : null;
+        this._outgoing = new Map(); // QoS>0 in-flight publishes awaiting ack: messageId -> { cb }
+        this._lastMessageId = 0;
         // mimic the network round-trip: connect asynchronously
         setImmediate(() => {
             if (this._ended) { return; }
@@ -104,8 +106,39 @@ class FakeMqttClient extends EventEmitter {
     publish(topic, payload, options, cb) {
         if (typeof options === "function") { cb = options; options = {}; }
         options = options || {};
+        const qos = options.qos || 0;
+        let messageId = null;
+        if (qos > 0) {
+            // allocate an id and track the publish as in-flight (mqtt.js keeps it in its outgoing store)
+            messageId = (this._lastMessageId % 65535) + 1;
+            this._lastMessageId = messageId;
+            this._outgoing.set(messageId, { cb });
+        }
+        if (this._server.acksSuspended) {
+            // simulate a half-open connection: the packet is neither delivered nor acknowledged. For QoS>0 it
+            // stays in the outgoing store (so removeOutgoingMessage can purge it); the callback never fires.
+            return this;
+        }
         this._server.publish(this, topic, payload, options);
-        if (cb) { setImmediate(() => cb(null)); }
+        if (qos > 0) {
+            setImmediate(() => {
+                const entry = this._outgoing.get(messageId);
+                if (entry) { this._outgoing.delete(messageId); if (entry.cb) { entry.cb(null); } } // PUBACK/PUBCOMP
+            });
+        } else if (cb) {
+            setImmediate(() => cb(null));
+        }
+        return this;
+    }
+
+    getLastMessageId() { return this._lastMessageId; }
+
+    removeOutgoingMessage(messageId) {
+        const entry = this._outgoing.get(messageId);
+        if (entry) {
+            this._outgoing.delete(messageId);
+            if (entry.cb) { entry.cb(new Error("Message removed")); } // matches mqtt.js behaviour
+        }
         return this;
     }
 
@@ -143,7 +176,11 @@ class FakeMqttServer {
         this.clients = new Set();
         this._denied = new Set(); // filters whose SUBSCRIBE should be refused (to test SUBACK failures)
         this._publishListeners = []; // observers notified of every publish (for test-driven responders)
+        this.acksSuspended = false; // when true, QoS>0 publishes are neither delivered nor acked (half-open)
     }
+
+    /** Simulate a half-open connection: QoS>0 publishes stay in-flight (no delivery, no PUBACK). */
+    suspendAcks(suspend = true) { this.acksSuspended = suspend; }
 
     connect(url, options) {
         const client = new FakeMqttClient(this, url, options);

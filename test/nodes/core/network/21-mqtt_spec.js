@@ -30,8 +30,9 @@ Object.defineProperty(mqttShim, "connect", {
 require.cache[require.resolve("mqtt")].exports = mqttShim;
 
 const mqttNodes = require("nr-test-utils").require("@node-red/nodes/core/network/10-mqtt.js");
-// change node is used to build a simple MQTT responder in the request-node tests (works with a real broker too)
+// change + delay nodes are used to build a simple (optionally slow) MQTT responder in the request-node tests
 const changeNode = require("nr-test-utils").require("@node-red/nodes/core/function/15-change.js");
+const delayNode = require("nr-test-utils").require("@node-red/nodes/core/function/89-delay.js");
 
 describe('MQTT Nodes', function () {
     /** @type {FakeMqttServer} */
@@ -676,7 +677,10 @@ describe('MQTT Nodes', function () {
             const flow = [broker, request, responseHelper, catchNode];
             if (opts.responder) {
                 const reply = opts.reply === undefined ? "PONG" : opts.reply;
-                const responderIn = buildMQTTInNode("responder.in", "responder_in", broker.id, requestOptions.topic, { datatype: "utf8" }, ["request.capture", "responder.change"]);
+                const delayMs = opts.responderDelay || 0; // when > 0, the reply is delayed (slow responder)
+                // mqtt in -> [capture, (delay ->) change -> mqtt out]
+                const nextAfterIn = delayMs > 0 ? "responder.delay" : "responder.change";
+                const responderIn = buildMQTTInNode("responder.in", "responder_in", broker.id, requestOptions.topic, { datatype: "utf8" }, ["request.capture", nextAfterIn]);
                 const requestCapture = buildNode("helper", "request.capture", "request_capture", {});
                 const responderChange = {
                     id: "responder.change", type: "change", name: "responder_change", wires: [["responder.out"]],
@@ -689,6 +693,15 @@ describe('MQTT Nodes', function () {
                 };
                 const responderOut = buildMQTTOutNode("responder.out", "responder_out", broker.id, "", {});
                 flow.push(responderIn, requestCapture, responderChange, responderOut);
+                if (delayMs > 0) {
+                    const responderDelay = {
+                        id: "responder.delay", type: "delay", name: "responder_delay",
+                        pauseType: "delay", timeout: delayMs / 1000, timeoutUnits: "seconds",
+                        rate: "1", nbRateUnits: "1", rateUnits: "second", randomFirst: "1", randomLast: "5",
+                        randomUnits: "seconds", drop: false, outputs: 1, wires: [["responder.change"]]
+                    };
+                    flow.push(responderDelay);
+                }
             }
             return flow;
         }
@@ -708,7 +721,7 @@ describe('MQTT Nodes', function () {
         function runRequest(requestOptions, done, ready, opts) {
             opts = opts || {};
             const flow = buildRequestFlow(requestOptions, opts);
-            helper.load([mqttNodes, changeNode], flow, function () {
+            helper.load([mqttNodes, changeNode, delayNode], flow, function () {
                 const nodes = {
                     requestNode: helper.getNode("mqtt.request"),
                     brokerNode: helper.getNode("mqtt.broker"),
@@ -852,11 +865,40 @@ describe('MQTT Nodes', function () {
                     try {
                         msg.should.have.property("error");
                         msg.error.should.have.property("message").match(/timed[- ]out/i);
+                        // outcome flag: the request was published (broker accepted it), just no response came back
+                        msg.should.have.property("mqtt");
+                        msg.mqtt.should.have.property("timedOut", true);
+                        msg.mqtt.should.have.property("delivered", true);
                         done();
                     } catch (e) { done(e); }
                 });
                 requestNode.receive({ payload: "PING" });
             });
+        });
+
+        it('should time out (delivered:true) when the responder replies slower than the timeout, and ignore the late reply', function (done) {
+            this.timeout = 4000;
+            const reqTopic = nextTopic("req");
+            const respTopic = nextTopic("resp");
+            let msgs = 0;
+            // End-to-end (works against a fake OR real broker): a real responder replies 500ms after the request,
+            // but the request timeout is 300ms. The request must time out as delivered:true (it WAS published),
+            // and the reply arriving after we've given up must NOT produce a second (Complete) output.
+            runRequest({ topic: reqTopic, responseTopic: respTopic, timeout: 0.3, datatype: "utf8" }, done, function ({ requestNode, responseHelper }) {
+                responseHelper.on("input", function (msg) {
+                    msgs++;
+                    if (msgs > 1) { return done(new Error("late response produced a second output")); }
+                    try {
+                        msg.should.have.property("error");
+                        msg.error.should.have.property("message").match(/timed[- ]out/i);
+                        msg.mqtt.should.have.property("timedOut", true);
+                        msg.mqtt.should.have.property("delivered", true); // request was delivered; only the response was late
+                    } catch (e) { return done(e); }
+                    // wait past the responder's delay to confirm the late reply is ignored (no second message)
+                    setTimeout(function () { done(); }, 500);
+                });
+                requestNode.receive({ payload: "PING" });
+            }, { responder: true, reply: "PONG", responderDelay: 500 });
         });
 
         it('should reject a second in-flight request that reuses the same correlation data', function (done) {
@@ -948,6 +990,38 @@ describe('MQTT Nodes', function () {
                     } catch (e) { done(e); }
                 });
                 requestNode.receive({ payload: "PING", responseTopic: respTopic });
+            });
+        });
+
+        it('should report delivered:false and purge the outgoing packet when it times out before publish is confirmed', function (done) {
+            if (useRealBroker) {
+                console.warn("Skipping test: cannot force a half-open (unacked) publish on a real broker");
+                return this.skip();
+            }
+            const reqTopic = nextTopic("req");
+            const respTopic = nextTopic("resp");
+            // Half-open connection: the QoS 1 publish is written but never delivered/acknowledged, so it sits
+            // in the client's outgoing store and no response can arrive -> the request times out as "not delivered",
+            // and the node should purge the stuck packet so it isn't retransmitted on reconnect.
+            runRequest({ topic: reqTopic, responseTopic: respTopic, qos: 1, timeout: 0.2, datatype: "utf8" }, done, function ({ requestNode, brokerNode, responseHelper }) {
+                const client = brokerNode.client;
+                let purgedId = null;
+                const realRemove = client.removeOutgoingMessage.bind(client);
+                client.removeOutgoingMessage = function (id) { purgedId = id; return realRemove(id); };
+                fakeBroker.suspendAcks(true); // stop delivery + PUBACK so the publish stays in-flight
+                responseHelper.on("input", function (msg) {
+                    try {
+                        msg.should.have.property("error");
+                        msg.error.should.have.property("message").match(/timed[- ]out/i);
+                        msg.should.have.property("mqtt");
+                        msg.mqtt.should.have.property("timedOut", true);
+                        msg.mqtt.should.have.property("delivered", false); // publish never confirmed
+                        should(purgedId).be.ok();                          // removeOutgoingMessage was called...
+                        client._outgoing.has(purgedId).should.be.false();  // ...and the packet is gone from the store
+                        done();
+                    } catch (e) { done(e); }
+                });
+                requestNode.receive({ payload: "PING" });
             });
         });
     });
