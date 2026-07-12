@@ -1275,6 +1275,8 @@ function waitBrokerConnect(broker, timeLimit) {
                         if(!resolved) {
                             reject("Timeout waiting broker connect")
                         }
+                        clearTimeout(timer); // stop polling - allow tests to exit!
+                        return;
                     }
                     timer = setTimeout(wait, 15);
                     return timer;
