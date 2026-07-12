@@ -29,6 +29,7 @@ Object.defineProperty(mqttShim, "connect", {
 });
 require.cache[require.resolve("mqtt")].exports = mqttShim;
 
+const RED = require("nr-test-utils").require("node-red/lib/red.js");
 const mqttNodes = require("nr-test-utils").require("@node-red/nodes/core/network/10-mqtt.js");
 // change + delay nodes are used to build a simple (optionally slow) MQTT responder in the request-node tests
 const changeNode = require("nr-test-utils").require("@node-red/nodes/core/function/15-change.js");
@@ -644,13 +645,18 @@ describe('MQTT Nodes', function () {
 
     //#region MQTT REQUEST NODE TESTS
     describe('MQTT Request node', function () {
+        let savedBufferMax;
         beforeEach(function () {
             // Set a modest in-flight cap so we can test burst handling.
-            helper.settings({ nodeMessageBufferMaxLength: 3 });
+            // NB: mutate RED.settings directly (as the other core specs do) but also
+            // keep a copy of the original value so we can restore it in afterEach.
+            savedBufferMax = RED.settings.nodeMessageBufferMaxLength;
+            RED.settings.nodeMessageBufferMaxLength = 3
         })
 
-        after(function () {
-            helper.settings({}); // restore defaults for any specs that run afterwards
+        afterEach(function () {
+            // restore the previous value so later specs (and tests) are unaffected
+            RED.settings.nodeMessageBufferMaxLength = savedBufferMax
         })
 
         /**
