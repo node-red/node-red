@@ -22,6 +22,7 @@ var fs = require("fs-extra");
 var NR_TEST_UTILS = require("nr-test-utils");
 
 var loader = NR_TEST_UTILS.require("@node-red/registry/lib/loader");
+var runtimeUtil = NR_TEST_UTILS.require("@node-red/util");
 
 var localfilesystem = NR_TEST_UTILS.require("@node-red/registry/lib/localfilesystem");
 var registry = NR_TEST_UTILS.require("@node-red/registry/lib/registry");
@@ -408,6 +409,39 @@ describe("red/nodes/registry/loader",function() {
 
                 nodes.registerType.called.should.be.false();
 
+                done();
+            }).catch(function(err) {
+                done(err);
+            });
+        });
+
+        it("reports a plugin that declares a missing runtime file", function(done) {
+            var pluginFile = path.join(resourcesDir,"doesnotexist","missing-plugin.js");
+            stubs.push(sinon.stub(localfilesystem,"getNodeFiles").callsFake(function(){
+                return {
+                    "node-red": {
+                        name: "node-red",
+                        version: "1.2.3",
+                        nodes: {},
+                        plugins: {
+                            "MissingPlugin": {
+                                file: pluginFile,
+                                module: "node-red",
+                                name: "MissingPlugin"
+                            }
+                        }
+                    }
+                };
+            }));
+
+            stubs.push(sinon.stub(registry,"saveNodeList").callsFake(function(){ return }));
+            stubs.push(sinon.stub(registry,"addModule").callsFake(function(){ return }));
+            stubs.push(sinon.stub(runtimeUtil.log,"warn"));
+            loader.init({nodes:nodes,settings:{available:function(){return true;}}});
+            loader.load().then(function() {
+                var module = registry.addModule.lastCall.args[0];
+                module.plugins.MissingPlugin.err.should.eql("Error: "+pluginFile+" does not exist");
+                runtimeUtil.log.warn.calledWith("[node-red/MissingPlugin] Error: "+pluginFile+" does not exist").should.be.true();
                 done();
             }).catch(function(err) {
                 done(err);
