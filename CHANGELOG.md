@@ -1,3 +1,7 @@
+#### 5.0.3: Maintenance Release
+
+ - Revert JSONata update due to regression in behaviour
+
 #### 5.0.2: Maintenance Release
 
  - Sanitize session messages (#5883) @knolleary
