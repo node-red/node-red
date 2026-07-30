@@ -1,3 +1,7 @@
+#### 4.1.12: Maintenance Release
+
+ - Sanitize session messages (v4 backport) (#5884) @knolleary
+
 #### 4.1.11: Maintenance Release
 
  - Add styles to prevent controls wrapping in find bar (#5779) @Steve-Mcl
