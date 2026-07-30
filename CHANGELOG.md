@@ -1,3 +1,11 @@
+#### 5.0.2: Maintenance Release
+
+ - Sanitize session messages (#5883) @knolleary
+ - fix tests for windows env (#5866) @Steve-Mcl
+ - chore: Update jsonata to latest (#5859) @Steve-Mcl
+ - added description for one letter attributes (#5853) @gorenje
+ - Fix: escape characters in mocha script commands (#5858) @Steve-Mcl
+
 #### 5.0.1: Maintenance Release
 
  - Update dependencies (#5847) @knolleary
