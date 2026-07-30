@@ -1,3 +1,7 @@
+#### 5.0.4: Maintenance Release
+
+ - Revert JSONata update further due to regression in behaviour
+
 #### 5.0.3: Maintenance Release
 
  - Revert JSONata update due to regression in behaviour
