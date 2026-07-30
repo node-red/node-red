@@ -1,3 +1,7 @@
+#### 4.1.13: Maintenance Release
+
+ - Revert JSONata update due to regression in behaviour
+
 #### 4.1.12: Maintenance Release
 
  - Sanitize session messages (v4 backport) (#5884) @knolleary
