@@ -18,10 +18,10 @@ var should = require("should");
 var sinon = require("sinon");
 
 var NR_TEST_UTILS = require("nr-test-utils");
-var gitTools = NR_TEST_UTILS.require("@node-red/runtime/lib/storage/localfilesystem/projects/git");
+var gitTools = NR_TEST_UTILS.require("@node-red/runtime/lib/projects/git/git");
 var util = NR_TEST_UTILS.require("@node-red/util");
 
-describe("storage/localfilesystem/projects/git/index", function() {
+describe("storage/projects/git/git/index", function() {
     afterEach(function() {
         sinon.restore();
     });
