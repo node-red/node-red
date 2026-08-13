@@ -68,16 +68,6 @@ Before raising a pull-request, please read our [contributing guide](https://gith
 
 This project adheres to the [Contributor Covenant 1.4](http://contributor-covenant.org/version/1/4/). By participating, you are expected to uphold this code. Please report unacceptable behavior to any of the project's core team at team@nodered.org.
 
-### Star history
-
-<a href="https://star-history.com/#node-red/node-red&Date">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=node-red/node-red&type=Date&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=node-red/node-red&type=Date" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=node-red/node-red&type=Date" width="100%" />
- </picture>
-</a>
-
 ### Contributors
 
 It is maintained by:
