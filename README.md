@@ -70,11 +70,11 @@ This project adheres to the [Contributor Covenant 1.4](http://contributor-covena
 
 ### Star history
 
-<a href="https://star-history.com/#node-red/node-red&Date">
+<a href="https://star-history.dera.page/#node-red/node-red&Date">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=node-red/node-red&type=Date&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=node-red/node-red&type=Date" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=node-red/node-red&type=Date" width="100%" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://star-history.dera.page/svg?repos=node-red/node-red&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://star-history.dera.page/svg?repos=node-red/node-red&type=Date" />
+   <img alt="Star History Chart" src="https://star-history.dera.page/svg?repos=node-red/node-red&type=Date" width="100%" />
  </picture>
 </a>
 
