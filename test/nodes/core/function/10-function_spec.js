@@ -19,6 +19,7 @@ const sinon = require("sinon");
 const functionNode = require("nr-test-utils").require("@node-red/nodes/core/function/10-function.js");
 const linkNode = require("nr-test-utils").require("@node-red/nodes/core/common/60-link.js");
 const Context = require("nr-test-utils").require("@node-red/runtime/lib/nodes/context");
+const functionLibrary = require("nr-test-utils").require("@node-red/runtime/lib/nodes/functionLibrary");
 const helper = require("node-red-node-test-helper");
 const RED = require("nr-test-utils").require("node-red/lib/red");
 describe('function node', function() {
@@ -2361,6 +2362,254 @@ describe('function node', function() {
                     }
                 })
                 f1.receive({ payload: "original", topic: "test" })
+            })
+        })
+    })
+
+    describe('library mode function node', function () {
+        it('should not expose module/exports globals in default mode', async function () {
+            const flow = [
+                { id: "f1", type: "function", wires: [["h1"]], func: "msg.hasModule = (typeof module !== 'undefined'); return msg;" },
+                { id: "h1", type: "helper" }
+            ]
+            await helper.load(functionNode, flow)
+            const f1 = helper.getNode("f1")
+            const h1 = helper.getNode("h1")
+            await new Promise((resolve, reject) => {
+                h1.on("input", function (msg) {
+                    try {
+                        msg.should.have.property("hasModule", false)
+                        should.not.exist(functionLibrary.getEntryById("f1"))
+                        resolve()
+                    } catch (err) { reject(err) }
+                })
+                f1.receive({ payload: "hello" })
+            })
+        })
+
+        it('should export functions and let another function node import them by name', async function () {
+            const flow = [
+                { id: "lib1", type: "function", mode: "library", name: "mathlib",
+                    initialize: "module.exports = { add: function(a,b) { return a+b; } };" },
+                { id: "f1", type: "function", wires: [["h1"]],
+                    func: "msg.payload = node.import('mathlib').add(1,2); return msg;" },
+                { id: "h1", type: "helper" }
+            ]
+            await helper.load(functionNode, flow)
+            const f1 = helper.getNode("f1")
+            const h1 = helper.getNode("h1")
+            functionLibrary.getEntryById("lib1").should.have.property("state", "ready")
+            await new Promise((resolve, reject) => {
+                h1.on("input", function (msg) {
+                    try {
+                        msg.should.have.property("payload", 3)
+                        resolve()
+                    } catch (err) { reject(err) }
+                })
+                f1.receive({ payload: "go" })
+            })
+        })
+
+        it('should let another function node import a library node by id', async function () {
+            const flow = [
+                { id: "lib1", type: "function", mode: "library",
+                    initialize: "module.exports = { greet: function() { return 'hi'; } };" },
+                { id: "f1", type: "function", wires: [["h1"]],
+                    func: "msg.payload = node.import('lib1').greet(); return msg;" },
+                { id: "h1", type: "helper" }
+            ]
+            await helper.load(functionNode, flow)
+            const f1 = helper.getNode("f1")
+            const h1 = helper.getNode("h1")
+            await new Promise((resolve, reject) => {
+                h1.on("input", function (msg) {
+                    try {
+                        msg.should.have.property("payload", "hi")
+                        resolve()
+                    } catch (err) { reject(err) }
+                })
+                f1.receive({ payload: "go" })
+            })
+        })
+
+        it('should throw a caught error when the target is not found', async function () {
+            const flow = [
+                { id: "f1", type: "function", wires: [["h1"]],
+                    func: "msg.payload = node.import('nope').whatever(); return msg;" },
+                { id: "c1", type: "catch", scope: ["f1"], uncaught: true, wires: [["h1"]] },
+                { id: "h1", type: "helper" }
+            ]
+            await helper.load(functionNode, flow)
+            const f1 = helper.getNode("f1")
+            const h1 = helper.getNode("h1")
+            await new Promise((resolve, reject) => {
+                h1.on("input", function (msg) {
+                    try {
+                        msg.should.have.property("error")
+                        msg.error.should.have.property("message").and.match(/not found/i)
+                        resolve()
+                    } catch (err) { reject(err) }
+                })
+                f1.receive({ payload: "go" })
+            })
+        })
+
+        it('should throw a caught error when the name is ambiguous across flows', async function () {
+            // neither library node lives on the caller's own flow, so the
+            // flow-scoped lookup misses and the flow-wide fallback finds 2
+            const flow = [
+                { id: "tab-flow-main", type: "tab", label: "Main Flow" },
+                { id: "tab-flow-2", type: "tab", label: "Flow 2" },
+                { id: "tab-flow-3", type: "tab", label: "Flow 3" },
+                { id: "lib1", type: "function", z: "tab-flow-2", mode: "library", name: "mathlib",
+                    initialize: "module.exports = { add: function(a,b) { return a+b; } };" },
+                { id: "lib2", type: "function", z: "tab-flow-3", mode: "library", name: "mathlib",
+                    initialize: "module.exports = { add: function(a,b) { return a+b; } };" },
+                { id: "f1", type: "function", z: "tab-flow-main", wires: [["h1"]],
+                    func: "msg.payload = node.import('mathlib').add(1,2); return msg;" },
+                { id: "c1", type: "catch", z: "tab-flow-main", scope: ["f1"], uncaught: true, wires: [["h1"]] },
+                { id: "h1", type: "helper", z: "tab-flow-main" }
+            ]
+            await helper.load(functionNode, flow)
+            const f1 = helper.getNode("f1")
+            const h1 = helper.getNode("h1")
+            await new Promise((resolve, reject) => {
+                h1.on("input", function (msg) {
+                    try {
+                        msg.should.have.property("error")
+                        msg.error.should.have.property("message").and.match(/multiple function library nodes named/i)
+                        resolve()
+                    } catch (err) { reject(err) }
+                })
+                f1.receive({ payload: "go" })
+            })
+        })
+
+        it('should still resolve to the flow-local library node even when a same-named one exists elsewhere', async function () {
+            const flow = [
+                { id: "tab-flow-main", type: "tab", label: "Main Flow" },
+                { id: "tab-flow-2", type: "tab", label: "Flow 2" },
+                { id: "lib1", type: "function", z: "tab-flow-main", mode: "library", name: "mathlib",
+                    initialize: "module.exports = { add: function(a,b) { return a+b+100; } };" },
+                { id: "lib2", type: "function", z: "tab-flow-2", mode: "library", name: "mathlib",
+                    initialize: "module.exports = { add: function(a,b) { return a+b; } };" },
+                { id: "f1", type: "function", z: "tab-flow-main", wires: [["h1"]],
+                    func: "msg.payload = node.import('mathlib').add(1,2); return msg;" },
+                { id: "h1", type: "helper", z: "tab-flow-main" }
+            ]
+            await helper.load(functionNode, flow)
+            const f1 = helper.getNode("f1")
+            const h1 = helper.getNode("h1")
+            await new Promise((resolve, reject) => {
+                h1.on("input", function (msg) {
+                    try {
+                        msg.should.have.property("payload", 103) // resolved to lib1, not lib2
+                        resolve()
+                    } catch (err) { reject(err) }
+                })
+                f1.receive({ payload: "go" })
+            })
+        })
+
+        it('should warn without processing when a library node receives a message directly', async function () {
+            const flow = [
+                { id: "lib1", type: "function", mode: "library", name: "mathlib",
+                    initialize: "module.exports = { add: function(a,b) { return a+b; } };" }
+            ]
+            await helper.load(functionNode, flow)
+            const lib1 = helper.getNode("lib1")
+            await new Promise((resolve, reject) => {
+                lib1.once("call:warn", function () { resolve(); })
+                lib1.receive({ payload: "go" })
+                setTimeout(() => reject(new Error("node.warn was not called")), 500)
+            })
+        })
+
+        it('should warn locally and throw "no exports" for callers when a library node exports nothing', async function () {
+            const flow = [
+                { id: "lib1", type: "function", mode: "library", name: "empty",
+                    initialize: "// nothing exported" },
+                { id: "f1", type: "function", wires: [["h1"]],
+                    func: "msg.payload = node.import('empty'); return msg;" },
+                { id: "c1", type: "catch", scope: ["f1"], uncaught: true, wires: [["h1"]] },
+                { id: "h1", type: "helper" }
+            ]
+            await helper.load(functionNode, flow)
+            const f1 = helper.getNode("f1")
+            const h1 = helper.getNode("h1")
+            functionLibrary.getEntryById("lib1").should.have.property("state", "ready")
+            functionLibrary.getEntryById("lib1").exportNames.should.have.length(0)
+            await new Promise((resolve, reject) => {
+                h1.on("input", function (msg) {
+                    try {
+                        msg.should.have.property("error")
+                        msg.error.should.have.property("message").and.match(/does not export anything/i)
+                        resolve()
+                    } catch (err) { reject(err) }
+                })
+                f1.receive({ payload: "go" })
+            })
+        })
+
+        it('should deregister a library node from the registry on unload', async function () {
+            const flow = [
+                { id: "lib1", type: "function", mode: "library", name: "mathlib",
+                    initialize: "module.exports = { add: function(a,b) { return a+b; } };" }
+            ]
+            await helper.load(functionNode, flow)
+            functionLibrary.getEntryById("lib1").should.have.property("state", "ready")
+            await helper.unload()
+            should.not.exist(functionLibrary.getEntryById("lib1"))
+        })
+
+        it('should run a synchronous node.onClose() callback when a library node is unloaded', async function () {
+            const flow = [
+                { id: "lib1", type: "function", mode: "library", name: "mathlib",
+                    initialize: "module.exports = { add: function(a,b) { return a+b; } };" +
+                        "global.set('closed', false);" +
+                        "node.onClose(function () { global.set('closed', true); });" }
+            ]
+            await helper.load(functionNode, flow)
+            const lib1 = helper.getNode("lib1")
+            lib1.context().global.get('closed').should.equal(false)
+            await helper.unload()
+            lib1.context().global.get('closed').should.equal(true)
+        })
+
+        it('should await an asynchronous node.onClose(done) callback before the node is fully closed', async function () {
+            const flow = [
+                { id: "lib1", type: "function", mode: "library", name: "mathlib",
+                    initialize: "module.exports = { add: function(a,b) { return a+b; } };" +
+                        "global.set('closed', false);" +
+                        "node.onClose(function (done) { setTimeout(function () { global.set('closed', true); done(); }, 30); });" }
+            ]
+            await helper.load(functionNode, flow)
+            const lib1 = helper.getNode("lib1")
+            lib1.context().global.get('closed').should.equal(false)
+            await helper.unload()
+            // by the time unload() resolves, the async onClose's done() must already
+            // have been called - proving the runtime waited for it
+            lib1.context().global.get('closed').should.equal(true)
+        })
+
+        it('should not expose node.onClose in a default-mode node\'s Setup (On Start) code', async function () {
+            const flow = [
+                { id: "f1", type: "function", wires: [["h1"]],
+                    initialize: "global.set('onCloseType', typeof node.onClose);",
+                    func: "msg.payload = global.get('onCloseType'); return msg;" },
+                { id: "h1", type: "helper" }
+            ]
+            await helper.load(functionNode, flow)
+            const f1 = helper.getNode("f1")
+            const h1 = helper.getNode("h1")
+            await new Promise((resolve, reject) => {
+                h1.on("input", function (msg) {
+                    try {
+                        msg.should.have.property("payload", "undefined")
+                        resolve()
+                    } catch (err) { reject(err) }
+                })
+                f1.receive({ payload: "go" })
             })
         })
     })
