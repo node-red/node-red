@@ -2561,5 +2561,56 @@ describe('function node', function() {
             await helper.unload()
             should.not.exist(functionLibrary.getEntryById("lib1"))
         })
+
+        it('should run a synchronous node.onClose() callback when a library node is unloaded', async function () {
+            const flow = [
+                { id: "lib1", type: "function", mode: "library", name: "mathlib",
+                    initialize: "module.exports = { add: function(a,b) { return a+b; } };" +
+                        "global.set('closed', false);" +
+                        "node.onClose(function () { global.set('closed', true); });" }
+            ]
+            await helper.load(functionNode, flow)
+            const lib1 = helper.getNode("lib1")
+            lib1.context().global.get('closed').should.equal(false)
+            await helper.unload()
+            lib1.context().global.get('closed').should.equal(true)
+        })
+
+        it('should await an asynchronous node.onClose(done) callback before the node is fully closed', async function () {
+            const flow = [
+                { id: "lib1", type: "function", mode: "library", name: "mathlib",
+                    initialize: "module.exports = { add: function(a,b) { return a+b; } };" +
+                        "global.set('closed', false);" +
+                        "node.onClose(function (done) { setTimeout(function () { global.set('closed', true); done(); }, 30); });" }
+            ]
+            await helper.load(functionNode, flow)
+            const lib1 = helper.getNode("lib1")
+            lib1.context().global.get('closed').should.equal(false)
+            await helper.unload()
+            // by the time unload() resolves, the async onClose's done() must already
+            // have been called - proving the runtime waited for it
+            lib1.context().global.get('closed').should.equal(true)
+        })
+
+        it('should not expose node.onClose in a default-mode node\'s Setup (On Start) code', async function () {
+            const flow = [
+                { id: "f1", type: "function", wires: [["h1"]],
+                    initialize: "global.set('onCloseType', typeof node.onClose);",
+                    func: "msg.payload = global.get('onCloseType'); return msg;" },
+                { id: "h1", type: "helper" }
+            ]
+            await helper.load(functionNode, flow)
+            const f1 = helper.getNode("f1")
+            const h1 = helper.getNode("h1")
+            await new Promise((resolve, reject) => {
+                h1.on("input", function (msg) {
+                    try {
+                        msg.should.have.property("payload", "undefined")
+                        resolve()
+                    } catch (err) { reject(err) }
+                })
+                f1.receive({ payload: "go" })
+            })
+        })
     })
 });
