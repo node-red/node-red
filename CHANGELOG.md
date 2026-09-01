@@ -1,3 +1,13 @@
+#### 5.0.5: Maintenance Release
+
+ - Update dependencies (#5916) @knolleary
+ - Fix uncaught exception in json node for malformed JSON string with schema + action=str (#5905) @karthikchundi-commits
+ - Update jsonata 2.2.2 (#5915) @knolleary
+ - Remove broken stars chart (#5900) @hardillb
+ - Fix tlsConfigDisableLocalFiles (#5904) @hardillb
+ - Ensure multiplayer event properties are valid (#5898) @knolleary
+ - Fix group default fill and fill opacity values (#5878) @bonanitech
+
 #### 5.0.4: Maintenance Release
 
  - Revert JSONata update further due to regression in behaviour
