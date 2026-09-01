@@ -1,6 +1,6 @@
 {
     "name": "node-red",
-    "version": "5.0.5",
+    "version": "5.0.6",
     "description": "Low-code programming for event-driven applications",
     "homepage": "https://nodered.org",
     "license": "Apache-2.0",
@@ -102,7 +102,7 @@
         "xml2js": "0.6.2"
     },
     "optionalDependencies": {
-        "@node-rs/bcrypt": "1.10.8"
+        "@node-rs/bcrypt": "1.10.7"
     },
     "devDependencies": {
         "archiver": "^7.0.1",
