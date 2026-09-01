@@ -1,3 +1,7 @@
+#### 5.0.6: Maintenance Release
+
+- Revert @node-rs/bcrypt update due to OS/arch compatibility issues
+
 #### 5.0.5: Maintenance Release
 
  - Update dependencies (#5916) @knolleary
