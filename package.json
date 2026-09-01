@@ -1,6 +1,6 @@
 {
     "name": "node-red",
-    "version": "4.1.13",
+    "version": "4.1.14",
     "description": "Low-code programming for event-driven applications",
     "homepage": "https://nodered.org",
     "license": "Apache-2.0",
@@ -53,9 +53,9 @@
         "i18next": "25.8.14",
         "iconv-lite": "0.7.3",
         "is-utf8": "0.2.1",
-        "js-yaml": "4.3.0",
+        "js-yaml": "4.3.2",
         "json-stringify-safe": "5.0.1",
-        "jsonata": "2.0.6",
+        "jsonata": "2.2.2",
         "lodash.clonedeep": "^4.5.0",
         "media-typer": "1.1.0",
         "memorystore": "1.6.8",
@@ -88,7 +88,7 @@
         "@node-rs/bcrypt": "1.10.7"
     },
     "devDependencies": {
-        "dompurify": "3.4.12",
+        "dompurify": "3.4.14",
         "grunt": "1.6.1",
         "grunt-chmod": "~1.1.1",
         "grunt-cli": "~1.5.0",
@@ -112,7 +112,7 @@
         "jquery-i18next": "1.2.1",
         "jsdoc-nr-template": "github:node-red/jsdoc-nr-template",
         "marked": "4.3.0",
-        "mermaid": "11.16.0",
+        "mermaid": "11.17.2",
         "minami": "1.2.3",
         "mocha": "9.2.2",
         "node-red-node-test-helper": "^0.3.3",

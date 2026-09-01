@@ -1,3 +1,11 @@
+#### 4.1.14: Maintenance Release
+
+ - Update general dependencies (#5909) @knolleary
+ - Update jsonata 2.2.2 (#5908) @knolleary
+ - Ensure multiplayer event properties are valid (#5912) @knolleary
+ - Don't throw error looking up locales for themes (#5913) @hardillb
+ - Update gen release script to properly tag v4 as maint (#5888) @knolleary
+
 #### 4.1.13: Maintenance Release
 
  - Revert JSONata update due to regression in behaviour
