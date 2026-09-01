@@ -774,6 +774,134 @@ describe("@node-red/util/util", function() {
                   done();
               });
           });
+
+          describe('null prototype results', function() {
+              // JSONata 2.2.1 builds its internal objects with Object.create(null) to
+              // harden against prototype pollution. Those objects reach the expression
+              // result, where anything calling `obj.hasOwnProperty(...)` or relying on
+              // `toString` throws. evaluateJSONataExpression must restore the standard
+              // prototype throughout the result before handing it back.
+
+              // Collect the path of every null-prototype object reachable in the result,
+              // so a failure reports where the prototype was missed rather than just
+              // that one was.
+              function findNullPrototypes(value, path, found, seen) {
+                  if (value === null || typeof value !== 'object' || seen.has(value)) {
+                      return found;
+                  }
+                  seen.add(value);
+                  if (Object.getPrototypeOf(value) === null) {
+                      found.push(path || '<result>');
+                  }
+                  if (Array.isArray(value)) {
+                      value.forEach(function(entry, i) {
+                          findNullPrototypes(entry, path + '[' + i + ']', found, seen);
+                      });
+                      return found;
+                  }
+                  Object.keys(value).forEach(function(key) {
+                      findNullPrototypes(value[key], path + '.' + key, found, seen);
+                  });
+                  return found;
+              }
+
+              var msg = {
+                  payload: { a: 1, b: 2 },
+                  items: [ { n: 1 }, { n: 2 } ]
+              };
+
+              // Each expression returns objects built by JSONata in a different shape.
+              // The array cases matter most: the result itself is an Array, so checking
+              // only the top-level prototype misses the null-prototype members.
+              [
+                  { name: 'an object', expr: '{"x": payload.a}' },
+                  { name: 'a nested object', expr: '{"outer": {"inner": payload.a}}' },
+                  { name: 'a deeply nested object', expr: '{"a":{"b":{"c":{"d":1}}}}' },
+                  { name: 'an array of objects', expr: 'items.{"v": n}' },
+                  { name: 'an array literal of objects', expr: '[{"a":1}]' },
+                  { name: 'objects from $map', expr: '$map(items, function($i) { {"v": $i.n} })' },
+                  { name: 'objects from $each', expr: '$each(payload, function($v,$k) { {$k: $v} })' },
+                  { name: 'an object from $merge', expr: '$merge([{"a":1},{"b":2}])' },
+                  { name: 'objects appended to an array', expr: '$append(items, [{"z":1}])' },
+                  { name: 'an array of objects inside an object', expr: '{"list": items.{"v": n}}' },
+                  { name: 'an object merged by the transform operator', expr: 'payload ~> |$|{"added": {"x": 1}}|' }
+              ].forEach(function(testCase) {
+                  it('restores the Object prototype on ' + testCase.name, function(done) {
+                      var expr = util.prepareJSONataExpression(testCase.expr, {});
+                      util.evaluateJSONataExpression(expr, msg, function(err, result) {
+                          try {
+                              should.not.exist(err);
+                              var missed = findNullPrototypes(result, '', [], new WeakSet());
+                              missed.should.eql([], 'null prototype left at: ' + missed.join(', '));
+                              done();
+                          } catch (error) {
+                              done(error);
+                          }
+                      });
+                  });
+              });
+
+              it('returns a result that downstream code can call hasOwnProperty on', function(done) {
+                  var expr = util.prepareJSONataExpression('{"list": items.{"v": n}}', {});
+                  util.evaluateJSONataExpression(expr, msg, function(err, result) {
+                      try {
+                          should.not.exist(err);
+                          // These are the calls that throw on a null-prototype object.
+                          result.hasOwnProperty('list').should.be.true();
+                          result.list[0].hasOwnProperty('v').should.be.true();
+                          String(result.list[0]).should.equal('[object Object]');
+                          done();
+                      } catch (error) {
+                          done(error);
+                      }
+                  });
+              });
+
+              it('leaves a Buffer in the result untouched', function(done) {
+                  var expr = util.prepareJSONataExpression('{"b": payload}', {});
+                  var buffer = Buffer.from('hello');
+                  util.evaluateJSONataExpression(expr, { payload: buffer }, function(err, result) {
+                      try {
+                          should.not.exist(err);
+                          Buffer.isBuffer(result.b).should.be.true();
+                          result.b.toString().should.equal('hello');
+                          done();
+                      } catch (error) {
+                          done(error);
+                      }
+                  });
+              });
+
+              it('handles a circular reference in the result', function(done) {
+                  // `$` returns the message itself, so a cycle in the message ends up in
+                  // the result and the prototype walk must not recurse forever.
+                  var circular = { payload: { a: 1 } };
+                  circular.payload.self = circular;
+                  var expr = util.prepareJSONataExpression('$', {});
+                  util.evaluateJSONataExpression(expr, circular, function(err, result) {
+                      try {
+                          should.not.exist(err);
+                          findNullPrototypes(result, '', [], new WeakSet()).should.eql([]);
+                          done();
+                      } catch (error) {
+                          done(error);
+                      }
+                  });
+              });
+
+              it('passes a primitive result through unchanged', function(done) {
+                  var expr = util.prepareJSONataExpression('payload.a', {});
+                  util.evaluateJSONataExpression(expr, msg, function(err, result) {
+                      try {
+                          should.not.exist(err);
+                          result.should.equal(1);
+                          done();
+                      } catch (error) {
+                          done(error);
+                      }
+                  });
+              });
+          });
       });
 
     describe('encodeObject', function () {
