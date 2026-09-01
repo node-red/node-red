@@ -2,6 +2,7 @@
 
  - Update general dependencies (#5909) @knolleary
  - Update jsonata 2.2.2 (#5908) @knolleary
+ - Ensure multiplayer event properties are valid (#5912) @knolleary
  - Update gen release script to properly tag v4 as maint (#5888) @knolleary
 
 #### 4.1.13: Maintenance Release
