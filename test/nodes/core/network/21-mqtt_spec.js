@@ -5,26 +5,65 @@
 const should = require("should");
 const helper = require("node-red-node-test-helper");
 const { doesNotThrow } = require("should");
-const mqttNodes = require("nr-test-utils").require("@node-red/nodes/core/network/10-mqtt.js");
+const { FakeMqttServer } = require("./mqtt_mock_broker.js");
 const BROKER_HOST = process.env.MQTT_BROKER_SERVER || "localhost";
 const BROKER_PORT = process.env.MQTT_BROKER_PORT || 1883;
-//By default, MQTT tests are disabled. Set ENV VAR  NR_MQTT_TESTS  to "1" or "true" to enable
-const skipTests = process.env.NR_MQTT_TESTS != "true" &&  process.env.NR_MQTT_TESTS != "1";
+// By default the broker is mocked in-process (no real broker required), so the tests below always run.
+// Set env var NR_MQTT_TESTS to "1"/"true" to instead exercise a real broker at BROKER_HOST:BROKER_PORT.
+const useRealBroker = process.env.NR_MQTT_TESTS == "true" || process.env.NR_MQTT_TESTS == "1";
+
+// -- Broker mocking ---------------------------------------------------------------------------------
+// The `mqtt` module exposes `connect` as a NON-configurable getter (transpiled ESM export), so it can't
+// be stubbed with sinon. Instead we swap the module's cached exports for a shim whose `connect` we
+// control, and require the node AFTER installing the shim so 10-mqtt.js's `require("mqtt")` captures it.
+// When `activeFakeConnect` is null (e.g. NR_MQTT_TESTS mode) the shim delegates to the real connect.
+const realMqtt = require("mqtt");
+/** @type {realMqtt.MqttClient} */
+let activeFakeConnect = null;
+const mqttShim = Object.create(realMqtt);
+Object.defineProperty(mqttShim, "connect", {
+    configurable: true, enumerable: true, writable: true,
+    value: function (url, options) {
+        return activeFakeConnect ? activeFakeConnect(url, options) : realMqtt.connect(url, options);
+    }
+});
+require.cache[require.resolve("mqtt")].exports = mqttShim;
+
+const RED = require("nr-test-utils").require("node-red/lib/red.js");
+const mqttNodes = require("nr-test-utils").require("@node-red/nodes/core/network/10-mqtt.js");
+// change + delay nodes are used to build a simple (optionally slow) MQTT responder in the request-node tests
+const changeNode = require("nr-test-utils").require("@node-red/nodes/core/function/15-change.js");
+const delayNode = require("nr-test-utils").require("@node-red/nodes/core/function/89-delay.js");
 
 describe('MQTT Nodes', function () {
+    /** @type {FakeMqttServer} */
+    let fakeBroker = null;
 
     before(function (done) {
         helper.startServer(done);
     });
 
     after(function (done) {
+        // restore the real mqtt exports for any specs that run after this file
+        require.cache[require.resolve("mqtt")].exports = realMqtt;
         helper.stopServer(done);
     });
 
-    afterEach(function () {
+    beforeEach(function () {
+        if (!useRealBroker) {
+            fakeBroker = new FakeMqttServer();
+            activeFakeConnect = (url, options) => fakeBroker.connect(url, options);
+        }
+    });
+
+    afterEach(async function () {
+        // Await full teardown so a flow's nodes/listeners are gone before the next test loads - otherwise
+        // a lingering helper "input" listener can catch a later test's message (cross-test leakage).
         try {
-            helper.unload();
+            await helper.unload();
         } catch (error) { }
+        activeFakeConnect = null;
+        if (fakeBroker) { fakeBroker.destroy(); fakeBroker = null; }
     });
 
     it('should be loaded and have default values (MQTT V4)', function (done) {
@@ -114,20 +153,9 @@ describe('MQTT Nodes', function () {
         });
     });
 
-    if (skipTests) {
-        it('skipping MQTT tests. Set env var "NR_MQTT_TESTS=true" to enable. Requires a v5 capable broker running on localhost:1883.', function (done) {
-            done();
-        });
-    }
-    // Conditional test runner (only run if skipTests=false) 
-    function itConditional(title, test) {
-        return !skipTests ? it(title, test) : it.skip(title, test);
-    }
-
     //#region ################### BASIC TESTS ################### #//
 
-    itConditional('basic send and receive tests', function (done) {
-        if (skipTests) { return this.skip() }
+    it('basic send and receive tests', function (done) {
         this.timeout = 2000;
         const options = {}
         options.sendMsg = {
@@ -139,8 +167,7 @@ describe('MQTT Nodes', function () {
         testSendRecv({}, { datatype: "auto", topicType: "static" }, {}, options, { done: done });
     });
     //Prior to V3, "auto" mode would only parse to string or buffer.
-    itConditional('should send JSON and receive string (auto mode)', function (done) {
-        if (skipTests) { return this.skip() }
+    it('should send JSON and receive string (auto mode)', function (done) {
         this.timeout = 2000;
         const options = {}
         options.sendMsg = {
@@ -152,8 +179,7 @@ describe('MQTT Nodes', function () {
         testSendRecv({}, { datatype: "auto", topicType: "static" }, {}, options, { done: done });
     })
     //In V3, "auto" mode should try to parse JSON, then string and fall back to buffer
-    itConditional('should send JSON and receive object (auto-detect mode)', function (done) {
-        if (skipTests) { return this.skip() }
+    it('should send JSON and receive object (auto-detect mode)', function (done) {
         this.timeout = 2000;
         const options = {}
         options.sendMsg = {
@@ -165,8 +191,7 @@ describe('MQTT Nodes', function () {
         options.expectMsg.payload = JSON.parse(options.sendMsg.payload);
         testSendRecv({}, { datatype: "auto-detect", topicType: "static" }, {}, options, { done: done });
     })
-    itConditional('should send invalid JSON and receive string (auto mode)', function (done) {
-        if (skipTests) { return this.skip() }
+    it('should send invalid JSON and receive string (auto mode)', function (done) {
         this.timeout = 2000;
         const options = {}
         options.sendMsg = {
@@ -176,8 +201,7 @@ describe('MQTT Nodes', function () {
         options.expectMsg = Object.assign({}, options.sendMsg);//expect same payload
         testSendRecv({}, { datatype: "auto", topicType: "static" }, {}, options, { done: done });
     });
-    itConditional('should send invalid JSON and receive string (auto-detect mode)', function (done) {
-        if (skipTests) { return this.skip() }
+    it('should send invalid JSON and receive string (auto-detect mode)', function (done) {
         this.timeout = 2000;
         const options = {}
         options.sendMsg = {
@@ -188,8 +212,7 @@ describe('MQTT Nodes', function () {
         testSendRecv({}, { datatype: "auto-detect", topicType: "static" }, {}, options, { done: done });
     });
 
-    itConditional('should send JSON and receive string (utf8 mode)', function (done) {
-        if (skipTests) { return this.skip() }
+    it('should send JSON and receive string (utf8 mode)', function (done) {
         this.timeout = 2000;
         const options = {}
         options.sendMsg = {
@@ -200,8 +223,7 @@ describe('MQTT Nodes', function () {
         options.expectMsg = Object.assign({}, options.sendMsg);
         testSendRecv({}, { datatype: "utf8", topicType: "static" }, {}, options, { done: done });
     });
-    itConditional('should send JSON and receive Object (json mode)', function (done) {
-        if (skipTests) { return this.skip() }
+    it('should send JSON and receive Object (json mode)', function (done) {
         this.timeout = 2000;
         const options = {}
         options.sendMsg = {
@@ -211,8 +233,7 @@ describe('MQTT Nodes', function () {
         options.expectMsg = Object.assign({}, options.sendMsg, { payload: { "prop": "value3", "num": 3 } });//expect an object
         testSendRecv({}, { datatype: "json", topicType: "static" }, {}, options, { done: done });
     });
-    itConditional('should send invalid JSON and raise error (json mode)', function (done) {
-        if (skipTests) { return this.skip() }
+    it('should send invalid JSON and raise error (json mode)', function (done) {
         this.timeout = 2000;
         const options = {}
         options.sendMsg = {
@@ -235,8 +256,7 @@ describe('MQTT Nodes', function () {
         }
         testSendRecv({}, { datatype: "json", topicType: "static" }, {}, options, hooks);
     });
-    itConditional('should send String and receive Buffer (buffer mode)', function (done) {
-        if (skipTests) { return this.skip() }
+    it('should send String and receive Buffer (buffer mode)', function (done) {
         this.timeout = 2000;
         const options = {}
         options.sendMsg = {
@@ -246,8 +266,7 @@ describe('MQTT Nodes', function () {
         options.expectMsg = Object.assign({}, options.sendMsg, { payload: Buffer.from(options.sendMsg.payload) });//expect Buffer.from(msg.payload)
         testSendRecv({}, { datatype: "buffer", topicType: "static" }, {}, options, { done: done });
     });
-    itConditional('should send utf8 Buffer and receive String (auto mode)', function (done) {
-        if (skipTests) { return this.skip() }
+    it('should send utf8 Buffer and receive String (auto mode)', function (done) {
         this.timeout = 2000;
         const options = {}
         options.sendMsg = {
@@ -257,8 +276,7 @@ describe('MQTT Nodes', function () {
         options.expectMsg = Object.assign({}, options.sendMsg, { payload: "x y z" });//set expected payload to "x y z"
         testSendRecv({}, { datatype: "auto", topicType: "static" }, {}, options, { done: done });
     });
-    itConditional('should send non utf8 Buffer and receive Buffer (auto mode)', function (done) {
-        if (skipTests) { return this.skip() }
+    it('should send non utf8 Buffer and receive Buffer (auto mode)', function (done) {
         this.timeout = 2000;
         const options = {}
         const hooks = { done: done, beforeLoad: null, afterLoad: null, afterConnect: null }
@@ -269,8 +287,7 @@ describe('MQTT Nodes', function () {
         options.expectMsg = Object.assign({}, options.sendMsg, {payload: Buffer.from([0xC0, 0xC1, 0xF5, 0xF6, 0xF7, 0xF8, 0xF9, 0xFA, 0xFB, 0xFC, 0xFD, 0xFE, 0xFF])});
         testSendRecv({}, { datatype: "auto", topicType: "static" }, {}, options, hooks);
     });
-    itConditional('should send/receive all v5 flags and settings', function (done) {
-        if (skipTests) { return this.skip() }
+    it('should send/receive all v5 flags and settings', function (done) {
         this.timeout = 2000;
         const t = nextTopic();
         const options = {}
@@ -293,8 +310,7 @@ describe('MQTT Nodes', function () {
         }
         testSendRecv({ protocolVersion: 5 }, inOptions, {}, options, hooks);
     });
-    itConditional('should send regular string with v5 media type "text/plain" and receive a string (auto mode)', function (done) {
-        if (skipTests) { return this.skip() }
+    it('should send regular string with v5 media type "text/plain" and receive a string (auto mode)', function (done) {
         this.timeout = 2000;
         const options = {}
         const hooks = { done: done, beforeLoad: null, afterLoad: null, afterConnect: null }
@@ -304,8 +320,7 @@ describe('MQTT Nodes', function () {
         options.expectMsg = Object.assign({}, options.sendMsg);
         testSendRecv({ protocolVersion: 5 }, { datatype: "auto", topicType: "static" }, {}, options, hooks);
     });
-    itConditional('should send JSON with v5 media type "text/plain" and receive a string (auto mode)', function (done) {
-        if (skipTests) { return this.skip() }
+    it('should send JSON with v5 media type "text/plain" and receive a string (auto mode)', function (done) {
         this.timeout = 2000;
         const options = {}
         const hooks = { done: done, beforeLoad: null, afterLoad: null, afterConnect: null }
@@ -315,8 +330,7 @@ describe('MQTT Nodes', function () {
         options.expectMsg = Object.assign({}, options.sendMsg);
         testSendRecv({ protocolVersion: 5 }, { datatype: "auto", topicType: "static" }, {}, options, hooks);
     });
-    itConditional('should send JSON with v5 media type "text/plain" and receive a string (auto-detect mode)', function (done) {
-        if (skipTests) { return this.skip() }
+    it('should send JSON with v5 media type "text/plain" and receive a string (auto-detect mode)', function (done) {
         this.timeout = 2000;
         const options = {}
         const hooks = { done: done, beforeLoad: null, afterLoad: null, afterConnect: null }
@@ -326,8 +340,7 @@ describe('MQTT Nodes', function () {
         options.expectMsg = Object.assign({}, options.sendMsg);
         testSendRecv({ protocolVersion: 5 }, { datatype: "auto-detect", topicType: "static" }, {}, options, hooks);
     });
-    itConditional('should send JSON with v5 media type "application/json" and receive an object (auto-detect mode)', function (done) {
-        if (skipTests) { return this.skip() }
+    it('should send JSON with v5 media type "application/json" and receive an object (auto-detect mode)', function (done) {
         this.timeout = 2000;
         const options = {}
         const hooks = { done: done, beforeLoad: null, afterLoad: null, afterConnect: null }
@@ -337,8 +350,7 @@ describe('MQTT Nodes', function () {
         options.expectMsg = Object.assign({}, options.sendMsg, { payload: JSON.parse(options.sendMsg.payload)});
         testSendRecv({ protocolVersion: 5 }, { datatype: "auto-detect", topicType: "static" }, {}, options, hooks);
     });
-    itConditional('should send invalid JSON with v5 media type "application/json" and raise an error (auto mode)', function (done) {
-        if (skipTests) { return this.skip() }
+    it('should send invalid JSON with v5 media type "application/json" and raise an error (auto mode)', function (done) {
         this.timeout = 2000;
         const options = {}
         options.sendMsg = {
@@ -362,8 +374,7 @@ describe('MQTT Nodes', function () {
         testSendRecv({ protocolVersion: 5 }, { datatype: "auto", topicType: "static" }, {}, options, hooks);
     });
     
-    itConditional('should send buffer with v5 media type "application/json" and receive an object (auto-detect mode)', function (done) {
-        if (skipTests) { return this.skip() }
+    it('should send buffer with v5 media type "application/json" and receive an object (auto-detect mode)', function (done) {
         this.timeout = 2000;
         const options = {}
         const hooks = { done: done, beforeLoad: null, afterLoad: null, afterConnect: null }
@@ -373,8 +384,7 @@ describe('MQTT Nodes', function () {
         options.expectMsg = Object.assign({}, options.sendMsg, { payload: {"prop":"val"}});
         testSendRecv({ protocolVersion: 5 }, { datatype: "auto-detect", topicType: "static" }, {}, options, hooks);
     });
-    itConditional('should send buffer with v5 media type "text/plain" and receive a string (auto mode)', function (done) {
-        if (skipTests) { return this.skip() }
+    it('should send buffer with v5 media type "text/plain" and receive a string (auto mode)', function (done) {
         this.timeout = 2000;
         const options = {}
         const hooks = { done: done, beforeLoad: null, afterLoad: null, afterConnect: null }
@@ -384,8 +394,7 @@ describe('MQTT Nodes', function () {
         options.expectMsg = Object.assign({}, options.sendMsg, { payload: '{"prop":"val"}'});
         testSendRecv({ protocolVersion: 5 }, { datatype: "auto", topicType: "static" }, {}, options, hooks);
     });
-    itConditional('should send buffer with v5 media type "application/zip" and receive a buffer (auto mode)', function (done) {
-        if (skipTests) { return this.skip() }
+    it('should send buffer with v5 media type "application/zip" and receive a buffer (auto mode)', function (done) {
         this.timeout = 2000;
         const options = {}
         const hooks = { done: done, beforeLoad: null, afterLoad: null, afterConnect: null }
@@ -396,8 +405,7 @@ describe('MQTT Nodes', function () {
         testSendRecv({ protocolVersion: 5 }, { datatype: "auto", topicType: "static" }, {}, options, hooks);
     });
 
-    itConditional('should subscribe dynamically via action', function (done) {
-        if (skipTests) { return this.skip() }
+    it('should subscribe dynamically via action', function (done) {
         this.timeout = 2000;
         const options = {}
         const hooks = { done: done, beforeLoad: null, afterLoad: null, afterConnect: null }
@@ -410,8 +418,7 @@ describe('MQTT Nodes', function () {
     //#endregion  BASIC TESTS
 
     //#region ################### ADVANCED TESTS ################### #//
-    itConditional('should connect via "connect" action', function (done) {
-        if (skipTests) { return this.skip() }
+    it('should connect via "connect" action', function (done) {
         this.timeout = 2000;
         const options = {}
         const hooks = { done: null, beforeLoad: null, afterLoad: null, afterConnect: null }
@@ -427,8 +434,7 @@ describe('MQTT Nodes', function () {
         }
         testSendRecv({ protocolVersion: 5, autoConnect: false }, { datatype: "utf8", topicType: "dynamic" }, {}, options, hooks);
     });
-    itConditional('should disconnect via "disconnect" action', function (done) {
-        if (skipTests) { return this.skip() }
+    it('should disconnect via "disconnect" action', function (done) {
         this.timeout = 2000;
         const options = {}
         const hooks = { beforeLoad: null, afterLoad: null, afterConnect: null }
@@ -457,8 +463,7 @@ describe('MQTT Nodes', function () {
         }
         testSendRecv({ protocolVersion: 5 }, null, {}, options, hooks);
     });
-    itConditional('should publish birth message', function (done) {
-        if (skipTests) { return this.skip() }
+    it('should publish birth message', function (done) {
         this.timeout = 2000;
         const baseTopic = nextTopic();
         const brokerOptions = {
@@ -489,8 +494,7 @@ describe('MQTT Nodes', function () {
         }       
         testSendRecv(brokerOptions, { topic: brokerOptions.birthTopic }, {}, options, hooks);
     });
-    itConditional('should safely discard bad birth topic', function (done) {
-        if (skipTests) { return this.skip() }
+    it('should safely discard bad birth topic', function (done) {
         this.timeout = 2000;
         const baseTopic = nextTopic();
         const brokerOptions = {
@@ -499,31 +503,31 @@ describe('MQTT Nodes', function () {
             birthPayload: "broker connected",
             birthQos: 2,
         }
-        const options = {};
+        const options = { expectMsg: null };
         const hooks = { done: null, beforeLoad: null, afterLoad: null, afterConnect: null };
+        let gotMessage = false;
         hooks.afterLoad = (helperNode, mqttBroker, mqttIn, mqttOut) => {
-            helperNode.on("input", function (msg) {
-                try {
-                    msg.should.have.a.property("error").type("object");
-                    msg.error.should.have.a.property("source").type("object");
-                    msg.error.source.should.have.a.property("id", mqttIn.id);
-                    done();
-                } catch (err) {
-                    done(err)
-                }
-            });
+            // An invalid (wildcard) publish topic is discarded with a warning - it is not published and
+            // raises no catchable error - so nothing should ever reach the subscriber/helper.
+            helperNode.on("input", function () { gotMessage = true; });
             return true; //handled
         }
-        options.expectMsg = null;
-        try {
-            testSendRecv(brokerOptions, { topic: brokerOptions.birthTopic }, {}, options, hooks);
-            done()
-        } catch(err) {
-            done(e)
+        hooks.afterConnect = (helperNode, mqttBroker, mqttIn, mqttOut) => {
+            // Reaching afterConnect proves the broker connected despite the bad birth topic (it didn't crash).
+            // Give the discarded birth publish a moment, then confirm nothing was delivered downstream.
+            setTimeout(function () {
+                try {
+                    gotMessage.should.eql(false, "no message should be published from an invalid birth topic");
+                    done();
+                } catch (err) {
+                    done(err);
+                }
+            }, 300);
+            return true; //handled
         }
+        testSendRecv(brokerOptions, { topic: brokerOptions.birthTopic }, {}, options, hooks);
     });
-    itConditional('should publish close message', function (done) {
-        if (skipTests) { return this.skip() }
+    it('should publish close message', function (done) {
         this.timeout = 2000;
         const baseTopic = nextTopic();
         const broker1Options = { id: "mqtt.broker1" }//Broker 1 - stays connected to receive the close message
@@ -553,8 +557,7 @@ describe('MQTT Nodes', function () {
             .catch(done);
         });
     });
-    itConditional('should publish will message', function (done) {
-        if (skipTests) { return this.skip() }
+    it('should publish will message', function (done) {
         this.timeout = 2000;
         const baseTopic = nextTopic();
         const broker1Options = { id: "mqtt.broker1" }//Broker 1 - stays connected to receive the will message
@@ -584,8 +587,7 @@ describe('MQTT Nodes', function () {
             .catch(done);
         });
     });
-    itConditional('should publish will message with V5 properties', function (done) {
-        if (skipTests) { return this.skip() }
+    it('should publish will message with V5 properties', function (done) {
         // return this.skip(); //Issue receiving v5 props on will msg. Issue raised here: https://github.com/mqttjs/MQTT.js/issues/1455
         this.timeout = 2000;
         const baseTopic = nextTopic();
@@ -640,6 +642,396 @@ describe('MQTT Nodes', function () {
         });
     });
     //#endregion  ADVANCED TESTS
+
+    //#region MQTT REQUEST NODE TESTS
+    describe('MQTT Request node', function () {
+        let savedBufferMax;
+        beforeEach(function () {
+            // Set a modest in-flight cap so we can test burst handling.
+            // NB: mutate RED.settings directly (as the other core specs do) but also
+            // keep a copy of the original value so we can restore it in afterEach.
+            savedBufferMax = RED.settings.nodeMessageBufferMaxLength;
+            RED.settings.nodeMessageBufferMaxLength = 3
+        })
+
+        afterEach(function () {
+            // restore the previous value so later specs (and tests) are unaffected
+            RED.settings.nodeMessageBufferMaxLength = savedBufferMax
+        })
+
+        /**
+         * Build a request flow with a v5 broker, mqtt-request node, and catch node.
+         * Optionally add a node-based responder (mqtt in -> capture + change -> mqtt out) that echoes each
+         * request back on its responseTopic, reusing the request's correlationData. The responder is built
+         * from ordinary nodes (no test-internal hooks) so the SAME tests pass against a fake OR a real broker.
+         * @param {Object} requestOptions - an object with properties to apply to the mqtt-request node (topic, responseTopic, correlationData, etc.)
+         * @param {Object} opts - an object with options for building the flow (broker, responder, reply, waitConnect)
+         * @param {Object} opts.broker - an object with properties to apply to the mqtt-broker node (id, name, protocolVersion, etc.)
+         * @param {boolean} opts.responder - whether to include a responder in the flow
+         * @param {string} opts.reply - the payload to send in the responder's reply (default: "PONG")
+         * @param {boolean} opts.waitConnect - whether to wait for the broker to connect before calling `ready` (default: true)
+         * @returns {Array} The flow nodes
+         */
+        function buildRequestFlow(requestOptions, opts) {
+            opts = opts || {};
+            const brokerOptions = Object.assign({ id: "mqtt.broker", name: "mqtt_broker", protocolVersion: 5 }, opts.broker || {});
+            const broker = buildMQTTBrokerNode(brokerOptions.id, brokerOptions.name, BROKER_HOST, BROKER_PORT, brokerOptions);
+            const request = buildMQTTRequestNode("mqtt.request", "mqtt_request", broker.id, requestOptions.topic, requestOptions);
+            request.wires = [["response.helper"]];
+            const responseHelper = buildNode("helper", "response.helper", "response_helper", {});
+            const catchNode = buildNode("catch", "catch.node", "catch_node", { scope: ["mqtt.request"] }, ["response.helper"]);
+            const flow = [broker, request, responseHelper, catchNode];
+            if (opts.responder) {
+                const reply = opts.reply === undefined ? "PONG" : opts.reply;
+                const delayMs = opts.responderDelay || 0; // when > 0, the reply is delayed (slow responder)
+                // mqtt in -> [capture, (delay ->) change -> mqtt out]
+                const nextAfterIn = delayMs > 0 ? "responder.delay" : "responder.change";
+                const responderIn = buildMQTTInNode("responder.in", "responder_in", broker.id, requestOptions.topic, { datatype: "utf8" }, ["request.capture", nextAfterIn]);
+                const requestCapture = buildNode("helper", "request.capture", "request_capture", {});
+                const responderChange = {
+                    id: "responder.change", type: "change", name: "responder_change", wires: [["responder.out"]],
+                    rules: [
+                        { t: "set", p: "topic", pt: "msg", to: "responseTopic", tot: "msg" }, // reply on the responseTopic
+                        { t: "delete", p: "responseTopic", pt: "msg" },                       // a reply carries no responseTopic of its own
+                        { t: "set", p: "payload", pt: "msg", to: reply, tot: "str" }
+                        // msg.correlationData is left untouched, so it is echoed back on the reply
+                    ]
+                };
+                const responderOut = buildMQTTOutNode("responder.out", "responder_out", broker.id, "", {});
+                flow.push(responderIn, requestCapture, responderChange, responderOut);
+                if (delayMs > 0) {
+                    const responderDelay = {
+                        id: "responder.delay", type: "delay", name: "responder_delay",
+                        pauseType: "delay", timeout: delayMs / 1000, timeoutUnits: "seconds",
+                        rate: "1", nbRateUnits: "1", rateUnits: "second", randomFirst: "1", randomLast: "5",
+                        randomUnits: "seconds", drop: false, outputs: 1, wires: [["responder.change"]]
+                    };
+                    flow.push(responderDelay);
+                }
+            }
+            return flow;
+        }
+
+        /**
+         * Load a request flow and (unless opts.waitConnect === false) wait for the broker to connect, then
+         * hand { requestNode, brokerNode, responseHelper, requestCapture } to the `ready` callback.
+         * @param {Object} requestOptions - an object with properties to apply to the mqtt-request node (topic, responseTopic, correlationData, etc.)
+         * @param {Function} done - the Mocha `done` callback
+         * @param {({ requestNode: Object, brokerNode: Object, responseHelper: Object, requestCapture: Object }) => void} ready - a function to call when the flow is ready, with an object containing the nodes
+         * @param {Object} opts - an object with options for building the flow (broker, responder, reply, waitConnect)
+         * @param {Object} opts.broker - an object with properties to apply to the mqtt-broker node (id, name, protocolVersion, etc.)
+         * @param {boolean} opts.responder - whether to include a responder in the flow
+         * @param {string} opts.reply - the payload to send in the responder's reply (default: "PONG")
+         * @param {boolean} opts.waitConnect - whether to wait for the broker to connect before calling `ready` (default: true)
+         */
+        function runRequest(requestOptions, done, ready, opts) {
+            opts = opts || {};
+            const flow = buildRequestFlow(requestOptions, opts);
+            helper.load([mqttNodes, changeNode, delayNode], flow, function () {
+                const nodes = {
+                    requestNode: helper.getNode("mqtt.request"),
+                    brokerNode: helper.getNode("mqtt.broker"),
+                    responseHelper: helper.getNode("response.helper"),
+                    requestCapture: helper.getNode("request.capture")
+                };
+                if (opts.waitConnect === false) { return ready(nodes); }
+                waitBrokerConnect(nodes.brokerNode).then(() => ready(nodes)).catch(done);
+            });
+        }
+
+        it('should load with request defaults on a v5 broker', function (done) {
+            runRequest({ topic: "req/topic", responseTopic: "resp/topic" }, done, function ({ requestNode }) {
+                try {
+                    requestNode.should.have.property("datatype", "auto-detect");
+                    requestNode.should.have.property("responseTopicType", "str");
+                    requestNode.should.have.property("correlationDataType", "auto");
+                    requestNode.should.have.property("timeout", 5);
+                    requestNode.should.have.property("timeoutType", "num");
+                    done();
+                } catch (e) { done(e); }
+            });
+        });
+
+        it('should reject input when the broker is not MQTT v5', function (done) {
+            // a v4 broker: the request node refuses to register, so it never connects - don't wait for it
+            runRequest({ topic: "req/topic", responseTopic: "resp/topic" }, done, function ({ requestNode, responseHelper }) {
+                responseHelper.on("input", function (msg) {
+                    try {
+                        msg.should.have.property("error");
+                        msg.error.should.have.property("message").match(/v5/i);
+                        done();
+                    } catch (e) { done(e); }
+                });
+                requestNode.receive({ payload: "hello" });
+            }, { broker: { protocolVersion: 4 }, waitConnect: false });
+        });
+
+        it('should publish a v5 request/response and emit the correlated reply (static responseTopic)', function (done) {
+            const reqTopic = nextTopic("req");
+            const respTopic = nextTopic("resp");
+            runRequest({ topic: reqTopic, responseTopic: respTopic, datatype: "utf8" }, done, function ({ requestNode, responseHelper }) {
+                responseHelper.on("input", function (msg) {
+                    try {
+                        msg.should.have.property("payload", "PONG");         // response payload -> msg.payload
+                        msg.should.have.property("topic", respTopic);        // msg.topic is the (response) arrival topic
+                        msg.should.have.property("requestTopic", reqTopic);  // original request topic preserved
+                        msg.should.have.property("correlationData");
+                        Buffer.isBuffer(msg.correlationData).should.be.true();
+                        msg.should.have.property("keep", "me");              // non-MQTT input property passed through
+                        msg.should.not.have.property("responseTopic");       // owned field cleared; reply carried none
+                        done();
+                    } catch (e) { done(e); }
+                });
+                requestNode.receive({ payload: "PING", keep: "me" });
+            }, { responder: true, reply: "PONG" });
+        });
+
+        it('should send the v5 request/response properties on the wire', function (done) {
+            const reqTopic = nextTopic("req");
+            const respTopic = nextTopic("resp");
+            // Assert on the request AS RECEIVED BY THE RESPONDER - this works with a fake or a real broker.
+            runRequest({ topic: reqTopic, responseTopic: respTopic, datatype: "utf8" }, done, function ({ requestNode, requestCapture }) {
+                requestCapture.on("input", function (msg) {
+                    try {
+                        msg.should.have.property("responseTopic", respTopic);
+                        msg.should.have.property("correlationData");
+                        Buffer.isBuffer(msg.correlationData).should.be.true();
+                        msg.should.have.property("qos", 1); // default request/response QoS
+                        if (msg.messageExpiryInterval !== undefined) {
+                            // ceil(timeout=5); a real broker may have decremented it in transit
+                            msg.messageExpiryInterval.should.be.within(1, 5);
+                        }
+                        done();
+                    } catch (e) { done(e); }
+                });
+                requestNode.receive({ payload: "PING" });
+            }, { responder: true });
+        });
+
+        it('should subscribe per-request for a dynamic responseTopic and emit the reply', function (done) {
+            const reqTopic = nextTopic("req");
+            const respTopic = nextTopic("resp");
+            runRequest({ topic: reqTopic, responseTopic: "responseTopic", responseTopicType: "msg", datatype: "utf8" }, done, function ({ requestNode, brokerNode, responseHelper }) {
+                responseHelper.on("input", function (msg) {
+                    // tear down happens as part of settling; assert on the next tick
+                    setImmediate(function () {
+                        try {
+                            msg.should.have.property("payload", "PONG");
+                            if (!useRealBroker) {
+                                // white-box (fake client): the per-request subscription is removed once settled
+                                const stillSubscribed = brokerNode.client._subs.some((s) => s.filter === respTopic);
+                                stillSubscribed.should.eql(false, "dynamic response subscription should be removed after the response");
+                            }
+                            done();
+                        } catch (e) { done(e); }
+                    });
+                });
+                requestNode.receive({ payload: "PING", responseTopic: respTopic });
+            }, { responder: true, reply: "PONG" });
+        });
+
+        it('should use msg-provided correlation data', function (done) {
+            const reqTopic = nextTopic("req");
+            const respTopic = nextTopic("resp");
+            let wireCorrelation = null;
+            runRequest({ topic: reqTopic, responseTopic: respTopic, correlationData: "correlationData", correlationDataType: "msg", datatype: "utf8" }, done, function ({ requestNode, requestCapture, responseHelper }) {
+                requestCapture.on("input", function (msg) { wireCorrelation = msg.correlationData; });
+                responseHelper.on("input", function (msg) {
+                    try {
+                        msg.should.have.property("payload", "PONG");
+                        should(wireCorrelation).be.ok();
+                        wireCorrelation.toString().should.eql("my-correlation-id");
+                        done();
+                    } catch (e) { done(e); }
+                });
+                requestNode.receive({ payload: "PING", correlationData: "my-correlation-id" });
+            }, { responder: true });
+        });
+
+        it('should publish at the configured QoS', function (done) {
+            const reqTopic = nextTopic("req");
+            const respTopic = nextTopic("resp");
+            runRequest({ topic: reqTopic, responseTopic: respTopic, qos: 2, datatype: "utf8" }, done, function ({ requestNode, requestCapture }) {
+                requestCapture.on("input", function (msg) {
+                    try {
+                        msg.should.have.property("qos", 2); // responder subscribes at QoS 2, so delivered QoS == published QoS
+                        done();
+                    } catch (e) { done(e); }
+                });
+                requestNode.receive({ payload: "PING" });
+            }, { responder: true });
+        });
+
+        it('should report an error when the request times out', function (done) {
+            const reqTopic = nextTopic("req");
+            const respTopic = nextTopic("resp");
+            // no responder -> no reply -> the request must time out
+            runRequest({ topic: reqTopic, responseTopic: respTopic, timeout: 0.2, datatype: "utf8" }, done, function ({ requestNode, responseHelper }) {
+                responseHelper.on("input", function (msg) {
+                    try {
+                        msg.should.have.property("error");
+                        msg.error.should.have.property("message").match(/timed[- ]out/i);
+                        // outcome flag: the request was published (broker accepted it), just no response came back
+                        msg.should.have.property("mqtt");
+                        msg.mqtt.should.have.property("timedOut", true);
+                        msg.mqtt.should.have.property("delivered", true);
+                        done();
+                    } catch (e) { done(e); }
+                });
+                requestNode.receive({ payload: "PING" });
+            });
+        });
+
+        it('should time out (delivered:true) when the responder replies slower than the timeout, and ignore the late reply', function (done) {
+            this.timeout = 4000;
+            const reqTopic = nextTopic("req");
+            const respTopic = nextTopic("resp");
+            let msgs = 0;
+            // End-to-end (works against a fake OR real broker): a real responder replies 500ms after the request,
+            // but the request timeout is 300ms. The request must time out as delivered:true (it WAS published),
+            // and the reply arriving after we've given up must NOT produce a second (Complete) output.
+            runRequest({ topic: reqTopic, responseTopic: respTopic, timeout: 0.3, datatype: "utf8" }, done, function ({ requestNode, responseHelper }) {
+                responseHelper.on("input", function (msg) {
+                    msgs++;
+                    if (msgs > 1) { return done(new Error("late response produced a second output")); }
+                    try {
+                        msg.should.have.property("error");
+                        msg.error.should.have.property("message").match(/timed[- ]out/i);
+                        msg.mqtt.should.have.property("timedOut", true);
+                        msg.mqtt.should.have.property("delivered", true); // request was delivered; only the response was late
+                    } catch (e) { return done(e); }
+                    // wait past the responder's delay to confirm the late reply is ignored (no second message)
+                    setTimeout(function () { done(); }, 500);
+                });
+                requestNode.receive({ payload: "PING" });
+            }, { responder: true, reply: "PONG", responderDelay: 500 });
+        });
+
+        it('should reject a second in-flight request that reuses the same correlation data', function (done) {
+            const reqTopic = nextTopic("req");
+            const respTopic = nextTopic("resp");
+            // no responder, so the first request stays in-flight while the second (duplicate) arrives
+            runRequest({ topic: reqTopic, responseTopic: respTopic, correlationData: "correlationData", correlationDataType: "msg", timeout: 5, datatype: "utf8" }, done, function ({ requestNode, responseHelper }) {
+                responseHelper.on("input", function (msg) {
+                    try {
+                        msg.should.have.property("error");
+                        msg.error.should.have.property("message").match(/collision|correlation/i);
+                        done();
+                    } catch (e) { done(e); }
+                });
+                requestNode.receive({ payload: "first", correlationData: "dup" });
+                requestNode.receive({ payload: "second", correlationData: "dup" });
+            });
+        });
+
+        it('should cap in-flight requests at nodeMessageBufferMaxLength', function (done) {
+            const reqTopic = nextTopic("req");
+            const respTopic = nextTopic("resp");
+            // no responder: requests accumulate. With the cap at 3, the 4th must be rejected.
+            // Auto-generated correlation data keeps each request unique (so the cap, not dedup, is what trips).
+            runRequest({ topic: reqTopic, responseTopic: respTopic, timeout: 5, datatype: "utf8" }, done, function ({ requestNode, responseHelper }) {
+                responseHelper.on("input", function (msg) {
+                    try {
+                        msg.should.have.property("error");
+                        msg.error.should.have.property("message").match(/too[- ]many|in-flight/i);
+                        done();
+                    } catch (e) { done(e); }
+                });
+                requestNode.receive({ payload: "1" });
+                requestNode.receive({ payload: "2" });
+                requestNode.receive({ payload: "3" });
+                requestNode.receive({ payload: "4" }); // exceeds the cap of 3
+            });
+        });
+
+        // The next 2 tests drive the transport directly (decoy reply / forced SUBACK failure), so they
+        // only run against the fake broker. We could stub/proxy the broker.client but that would
+        // stop being end-to-end and anyway. The trade off is that ALL tests run run against the fake
+        // broker and 2 do not (not the other way around - this is acceptable).
+        it('should ignore responses whose correlation data does not match', function (done) {
+            if (useRealBroker) {
+                console.warn("Skipping test: cannot force a decoy reply on a real broker");
+                return this.skip();
+            }
+            const reqTopic = nextTopic("req");
+            const respTopic = nextTopic("resp");
+            let replied = false;
+            fakeBroker.onPublish(function (topic, buf, options) {
+                const props = options.properties || {};
+                if (!props.responseTopic || replied) { return; }
+                replied = true;
+                fakeBroker.inject(props.responseTopic, "WRONG", { qos: options.qos, properties: { correlationData: Buffer.from("not-the-one") } });
+                fakeBroker.inject(props.responseTopic, "RIGHT", { qos: options.qos, properties: { correlationData: props.correlationData } });
+            });
+            runRequest({ topic: reqTopic, responseTopic: respTopic, datatype: "utf8" }, done, function ({ requestNode, responseHelper }) {
+                responseHelper.on("input", function (msg) {
+                    try {
+                        msg.should.have.property("payload", "RIGHT");
+                        done();
+                    } catch (e) { done(e); }
+                });
+                requestNode.receive({ payload: "PING" });
+            });
+        });
+
+        it('should fail the request when the response subscription is refused (dynamic responseTopic)', function (done) {
+            if (useRealBroker) {
+                console.warn("Skipping test: cannot force a SUBACK failure on a real broker");
+                return this.skip();
+            }
+            const reqTopic = nextTopic("req");
+            const respTopic = nextTopic("resp");
+            let published = false;
+            fakeBroker.onPublish(function (topic, buf, options) {
+                if ((options.properties || {}).responseTopic) { published = true; }
+            });
+            runRequest({ topic: reqTopic, responseTopic: "responseTopic", responseTopicType: "msg", datatype: "utf8" }, done, function ({ requestNode, responseHelper }) {
+                fakeBroker.denySubscribe(respTopic); // broker refuses the subscription (SUBACK 128)
+                responseHelper.on("input", function (msg) {
+                    try {
+                        msg.should.have.property("error");
+                        msg.error.should.have.property("message").match(/refus|subscri/i);
+                        published.should.eql(false, "the request must not be published if the subscription was refused");
+                        done();
+                    } catch (e) { done(e); }
+                });
+                requestNode.receive({ payload: "PING", responseTopic: respTopic });
+            });
+        });
+
+        it('should report delivered:false and purge the outgoing packet when it times out before publish is confirmed', function (done) {
+            if (useRealBroker) {
+                console.warn("Skipping test: cannot force a half-open (unacked) publish on a real broker");
+                return this.skip();
+            }
+            const reqTopic = nextTopic("req");
+            const respTopic = nextTopic("resp");
+            // Half-open connection: the QoS 1 publish is written but never delivered/acknowledged, so it sits
+            // in the client's outgoing store and no response can arrive -> the request times out as "not delivered",
+            // and the node should purge the stuck packet so it isn't retransmitted on reconnect.
+            runRequest({ topic: reqTopic, responseTopic: respTopic, qos: 1, timeout: 0.2, datatype: "utf8" }, done, function ({ requestNode, brokerNode, responseHelper }) {
+                const client = brokerNode.client;
+                let purgedId = null;
+                const realRemove = client.removeOutgoingMessage.bind(client);
+                client.removeOutgoingMessage = function (id) { purgedId = id; return realRemove(id); };
+                fakeBroker.suspendAcks(true); // stop delivery + PUBACK so the publish stays in-flight
+                responseHelper.on("input", function (msg) {
+                    try {
+                        msg.should.have.property("error");
+                        msg.error.should.have.property("message").match(/timed[- ]out/i);
+                        msg.should.have.property("mqtt");
+                        msg.mqtt.should.have.property("timedOut", true);
+                        msg.mqtt.should.have.property("delivered", false); // publish never confirmed
+                        should(purgedId).be.ok();                          // removeOutgoingMessage was called...
+                        client._outgoing.has(purgedId).should.be.false();  // ...and the packet is gone from the store
+                        done();
+                    } catch (e) { done(e); }
+                });
+                requestNode.receive({ payload: "PING" });
+            });
+        });
+    });
+    //#endregion  MQTT REQUEST NODE TESTS
 });
 
 //#region ################### HELPERS ################### #//
@@ -806,6 +1198,19 @@ function buildMQTTOutNode(id, name, brokerId, topic, options) {
     return node;
 }
 
+function buildMQTTRequestNode(id, name, brokerId, topic, options) {
+    //{ "id":"mqtt.request", "type":"mqtt request", "topic":"req/topic", "topicType":"str", "responseTopic":"resp/topic",
+    //  "responseTopicType":"str", "correlationData":"correlationData", "correlationDataType":"auto", "timeout":5,
+    //  "timeoutType":"num", "qos":"", "datatype":"auto-detect", "broker":brokerId, "wires":[["helper.node"]] }
+    options = options || {};
+    const node = buildNode("mqtt request", id || "mqtt.request", name || "mqtt_request", options);
+    node.topic = topic !== undefined ? topic : (options.topic || "");
+    node.topicType = options.topicType || "str";
+    node.broker = brokerId;
+    updateNodeOptions(node, options, options.wires || null);
+    return node;
+}
+
 function buildNode(type, id, name, options, wires) {
     //{ "id": "mqtt.in", "type": "mqtt in", "name": "mqtt_in", "topic": "test/in", "qos": "2", "datatype": "auto", "broker": "mqtt.broker", "nl": false, "rap": true, "rh": 0, "inputs": 0, "wires": [["mqtt.out"]] }
     options = options || {};
@@ -870,6 +1275,8 @@ function waitBrokerConnect(broker, timeLimit) {
                         if(!resolved) {
                             reject("Timeout waiting broker connect")
                         }
+                        clearTimeout(timer); // stop polling - allow tests to exit!
+                        return;
                     }
                     timer = setTimeout(wait, 15);
                     return timer;
@@ -884,7 +1291,7 @@ function hasProperty(obj, propName) {
     return Object.prototype.hasOwnProperty.call(obj, propName);
 }
 
-const base_topic = "nr" + Date.now().toString() + "/";
+const base_topic = "nr/" + Date.now().toString() + "/";
 let topicNo = 0;
 function nextTopic(topic) {
     topicNo++;
