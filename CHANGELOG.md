@@ -1,3 +1,12 @@
+#### 5.0.7: Maintenance Release
+
+ - Fix incorrect rendering of typedInput with a single type (#5934) @GogoVega
+ - Update body-parser (#5935) @knolleary 
+ - docs: clarify settings.js nodesDir accepts an array of paths (#5925) @Bryandero98
+ - Fix file in completion after filename evaluation error (#5931) @R0CKing666
+ - fix(editor): make disabled wires visible in dark theme (#5926) @Bryandero98
+ - Migrate to patched JSONata (#5933) @knolleary
+
 #### 5.0.6: Maintenance Release
 
 - Revert @node-rs/bcrypt update due to OS/arch compatibility issues
