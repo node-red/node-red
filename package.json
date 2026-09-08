@@ -1,6 +1,6 @@
 {
     "name": "node-red",
-    "version": "5.0.6",
+    "version": "5.0.7",
     "description": "Low-code programming for event-driven applications",
     "homepage": "https://nodered.org",
     "license": "Apache-2.0",
@@ -118,7 +118,7 @@
         "marked": "4.3.0",
         "mermaid": "11.17.2",
         "minami": "1.2.3",
-        "mocha": "11.7.6",
+        "mocha": "11.8.0",
         "node-red-node-test-helper": "^0.3.3",
         "nodemon": "3.1.14",
         "npm-run-all2": "^7.0.2",
