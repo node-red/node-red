@@ -614,7 +614,7 @@ describe("@node-red/util/util", function() {
             result.should.have.property('_legacyMode', true);
         });
     });
-    describe.only('evaluateJSONataExpression', function() {
+    describe('evaluateJSONataExpression', function() {
         const MOCK_NODE = {
             context: function() {
                 return {
