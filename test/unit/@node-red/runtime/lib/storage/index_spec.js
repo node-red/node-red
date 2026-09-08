@@ -159,6 +159,95 @@ describe("red/storage/index", function() {
         });
     });
 
+    describe('gates flow read/write on active project state', function() {
+        var saveFlowsCalled;
+        var handleFlowFileSaveCalled;
+
+        beforeEach(function() {
+            saveFlowsCalled = false;
+            handleFlowFileSaveCalled = false;
+        });
+
+        function initStorage(projects, extraSettings) {
+            var storageModule = {
+                init: function() {},
+                getFlows: function() { return Promise.resolve([{id:"1"}]); },
+                getCredentials: function() { return Promise.resolve({}); },
+                saveFlows: function() { saveFlowsCalled = true; return Promise.resolve(); },
+                saveCredentials: function() { return Promise.resolve(); }
+            };
+            var settings = Object.assign({ storageModule: storageModule }, extraSettings || {});
+            return storage.init({ settings: settings, projects: projects });
+        }
+
+        // Mirror runtime.projects: assertCanLoadFlows/assertCanSaveFlows throw a
+        // coded Error when admission is denied, and no-op otherwise.
+        function assertGate(error) {
+            return function() {
+                if (error) {
+                    var e = new Error(error.message);
+                    e.code = error.code;
+                    throw e;
+                }
+            };
+        }
+        var mergeConflict = { code: "git_merge_conflict", message: "Project has unmerged changes. Cannot load flows" };
+
+        it('rejects getFlows when the active project cannot load flows', function() {
+            initStorage({
+                assertCanLoadFlows: assertGate(mergeConflict),
+                assertCanSaveFlows: assertGate(null)
+            });
+            return storage.getFlows().then(function() {
+                throw new Error("getFlows should have rejected");
+            }, function(err) {
+                err.code.should.eql("git_merge_conflict");
+                err.message.should.match(/Cannot load flows/);
+            });
+        });
+
+        it('rejects saveFlows when the active project cannot save flows', function() {
+            initStorage({
+                assertCanLoadFlows: assertGate(null),
+                assertCanSaveFlows: assertGate(mergeConflict),
+                handleFlowFileSave: function() { handleFlowFileSaveCalled = true; return Promise.resolve(); }
+            });
+            return storage.saveFlows({flows:[], credentials:{}}).then(function() {
+                throw new Error("saveFlows should have rejected");
+            }, function(err) {
+                err.code.should.eql("git_merge_conflict");
+                saveFlowsCalled.should.be.false();
+                handleFlowFileSaveCalled.should.be.false();
+            });
+        });
+
+        it('does not gate saveFlows when the runtime is read-only', function() {
+            initStorage({
+                assertCanLoadFlows: assertGate(null),
+                assertCanSaveFlows: assertGate(mergeConflict),
+                handleFlowFileSave: function() { handleFlowFileSaveCalled = true; return Promise.resolve(); }
+            }, { readOnly: true });
+            return storage.saveFlows({flows:[], credentials:{}}).then(function() {
+                saveFlowsCalled.should.be.true();
+            });
+        });
+
+        it('allows reads and writes when admission passes', function() {
+            initStorage({
+                assertCanLoadFlows: assertGate(null),
+                assertCanSaveFlows: assertGate(null),
+                handleFlowFileSave: function() { handleFlowFileSaveCalled = true; return Promise.resolve(); }
+            });
+            return Promise.all([
+                storage.getFlows().then(function(res) { res.flows.should.eql([{id:"1"}]); }),
+                storage.saveFlows({flows:[], credentials:{}}).then(function() {
+                    saveFlowsCalled.should.be.true();
+                    handleFlowFileSaveCalled.should.be.true();
+                })
+            ]);
+        });
+    });
+
     describe('respects deprecated flow library functions', function() {
 
         var savePath;

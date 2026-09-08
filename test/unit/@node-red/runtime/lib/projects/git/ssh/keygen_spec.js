@@ -20,9 +20,9 @@ var child_process = require('child_process');
 var EventEmitter = require("events");
 
 var NR_TEST_UTILS = require("nr-test-utils");
-var keygen = NR_TEST_UTILS.require("@node-red/runtime/lib/storage/localfilesystem/projects/ssh/keygen")
+var keygen = NR_TEST_UTILS.require("@node-red/runtime/lib/projects/git/ssh/keygen")
 
-describe("localfilesystem/projects/ssh/keygen", function() {
+describe("projects/git/ssh/keygen", function() {
 
     afterEach(function() {
         if (child_process.spawn.restore) {

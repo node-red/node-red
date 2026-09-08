@@ -14,7 +14,7 @@ const DIST = path.join(ROOT, ".dist");
 const CHMOD_TARGETS = {
     "0755": [
         "packages/node_modules/@node-red/nodes/core/hardware/nrgpio",
-        "packages/node_modules/@node-red/runtime/lib/storage/localfilesystem/projects/git/node-red-*sh"
+        "packages/node_modules/@node-red/runtime/lib/projects/git/git/node-red-*sh"
     ]
 };
 
