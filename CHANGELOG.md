@@ -1,3 +1,7 @@
+#### 4.1.15: Maintenance Release
+
+ - Migrate to patched JSONata (4.1.x backport) (#5939)0 @knolleary
+
 #### 4.1.14: Maintenance Release
 
  - Update general dependencies (#5909) @knolleary
