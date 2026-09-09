@@ -598,311 +598,327 @@ describe("@node-red/util/util", function() {
         it('pass _a_b_1_',function() { normalise("_a_b_1_", "aB1") });
         it('pass http request',function() { normalise("http request", "httpRequest") });
         it('pass HttpRequest',function() { normalise("HttpRequest", "httpRequest") });
-      });
+    });
 
-      describe('prepareJSONataExpression', function() {
-          it('prepares an expression', function() {
-              var result = util.prepareJSONataExpression('payload',{});
-              result.should.have.property('evaluate');
-              result.should.have.property('assign');
-              result.should.have.property('_legacyMode', false);
-          });
-          it('prepares a legacyMode expression', function() {
-              var result = util.prepareJSONataExpression('msg.payload',{});
-              result.should.have.property('evaluate');
-              result.should.have.property('assign');
-              result.should.have.property('_legacyMode', true);
-          });
-      });
-      describe('evaluateJSONataExpression', function() {
-          it('evaluates an expression', function(done) {
-              var expr = util.prepareJSONataExpression('payload',{});
-              util.evaluateJSONataExpression(expr,{payload:"hello"}, (err, result) => {
-                try {
-                    result.should.eql("hello");
-                    done()
-                } catch (error) {
-                    done(error)
+    describe('prepareJSONataExpression', function() {
+        it('prepares an expression', function() {
+            var result = util.prepareJSONataExpression('payload',{});
+            result.should.have.property('evaluate');
+            result.should.have.property('assign');
+            result.should.have.property('_legacyMode', false);
+        });
+        it('prepares a legacyMode expression', function() {
+            var result = util.prepareJSONataExpression('msg.payload',{});
+            result.should.have.property('evaluate');
+            result.should.have.property('assign');
+            result.should.have.property('_legacyMode', true);
+        });
+    });
+    describe('evaluateJSONataExpression', function() {
+        const MOCK_NODE = {
+            context: function() {
+                return {
+                    flow: {
+                        get: function(key, store, cb) { 
+                            if (cb) {
+                                cb(null, {'foo':'bar'}[key]);
+                            } else {
+                                return {'foo':'bar'}[key];
+                            }
+                        }
+                    }
                 }
-              });
-          });
-          it('evaluates a legacyMode expression', function() {
-              var expr = util.prepareJSONataExpression('msg.payload',{});
-              util.evaluateJSONataExpression(expr,{payload:"hello"}, (err, result) => {
-                try {
-                    result.should.eql("hello");
-                    done()
-                } catch (error) {
-                    done(error)
-                }
-              });
-          });
-          it('accesses flow context from an expression', function() {
-              var expr = util.prepareJSONataExpression('$flowContext("foo")',{context:function() { return {flow:{get: function(key) { return {'foo':'bar'}[key]}}}}});
-              util.evaluateJSONataExpression(expr,{payload:"hello"}, (err, result) => {
-                try {
-                    result.should.eql("bar");
-                    done()
-                } catch (error) {
-                    done(error)
-                }
-              });
-          });
-          it('accesses undefined environment variable from an expression', function() {
-              var expr = util.prepareJSONataExpression('$env("UTIL_ENV")',{});
-              util.evaluateJSONataExpression(expr,{}, (err, result) => {
-                try {
-                    result.should.eql("");
-                    done()
-                } catch (error) {
-                    done(error)
-                }
-              });
+            }
+        }
+        it('evaluates an expression', function(done) {
+            var expr = util.prepareJSONataExpression('payload',{});
+            util.evaluateJSONataExpression(expr,{payload:"hello"}, (err, result) => {
+            try {
+                result.should.eql("hello");
+                done()
+            } catch (error) {
+                done(error)
+            }
             });
-          it('accesses environment variable from an expression', function() {
-              process.env.UTIL_ENV = 'foo';
-              var expr = util.prepareJSONataExpression('$env("UTIL_ENV")',{});
-              util.evaluateJSONataExpression(expr,{}, (err, result) => {
-                try {
-                    result.should.eql("foo");
-                    done()
-                } catch (error) {
-                    done(error)
-                }
-              });
+        });
+        it('evaluates a legacyMode expression', function() {
+            var expr = util.prepareJSONataExpression('msg.payload',{});
+            util.evaluateJSONataExpression(expr,{payload:"hello"}, (err, result) => {
+            try {
+                result.should.eql("hello");
+                done()
+            } catch (error) {
+                done(error)
+            }
             });
-          it('accesses moment from an expression', function() {
-              var expr = util.prepareJSONataExpression('$moment("2020-05-27", "YYYY-MM-DD").add(7, "days").add(1, "months").format("YYYY-MM-DD")',{});
-              util.evaluateJSONataExpression(expr,{}, (err, result) => {
-                try {
-                    result.should.eql("2020-07-03");
-                    done()
-                } catch (error) {
-                    done(error)
-                }
-              });
-          });
-          it('accesses moment-timezone from an expression', function() {
-              var expr = util.prepareJSONataExpression('$moment("2013-11-18 11:55Z").tz("Asia/Taipei").format()',{});
-              util.evaluateJSONataExpression(expr,{}, (err, result) => {
-                try {
-                    result.should.eql("2013-11-18T19:55:00+08:00");
-                    done()
-                } catch (error) {
-                    done(error)
-                }
-              });
-          });
-          it('handles non-existant flow context variable', function() {
-              var expr = util.prepareJSONataExpression('$flowContext("nonExistant")',{context:function() { return {flow:{get: function(key) { return {'foo':'bar'}[key]}}}}});
-              util.evaluateJSONataExpression(expr,{payload:"hello"}, (err, result) => {
-                try {
-                    should.not.exist(result);
-                    done()
-                } catch (error) {
-                    done(error)
-                }
-              });
+        });
+        it('accesses flow context from an expression', function(done) {
+            var expr = util.prepareJSONataExpression('$flowContext("foo")',MOCK_NODE);
+            util.evaluateJSONataExpression(expr,{payload:"hello"}, (err, result) => {
+            console.log(err)
+            try {
+                result.should.eql("bar");
+                done()
+            } catch (error) {
+                done(error)
+            }
             });
-          it('handles non-existant global context variable', function() {
-              var expr = util.prepareJSONataExpression('$globalContext("nonExistant")',{context:function() { return {global:{get: function(key) { return {'foo':'bar'}[key]}}}}});
-              util.evaluateJSONataExpression(expr,{payload:"hello"}, (err, result) => {
+        });
+        it('accesses undefined environment variable from an expression', function(done) {
+            var expr = util.prepareJSONataExpression('$env("UTIL_ENV")',{});
+            util.evaluateJSONataExpression(expr,{}, (err, result) => {
+            try {
+                result.should.eql("");
+                done()
+            } catch (error) {
+                done(error)
+            }
+            });
+        });
+        it('accesses environment variable from an expression', function(done) {
+            process.env.UTIL_ENV = 'foo';
+            var expr = util.prepareJSONataExpression('$env("UTIL_ENV")',{});
+            util.evaluateJSONataExpression(expr,{}, (err, result) => {
+            try {
+                result.should.eql("foo");
+                done()
+            } catch (error) {
+                done(error)
+            }
+            });
+        });
+        it('accesses moment from an expression', function(done) {
+            var expr = util.prepareJSONataExpression('$moment("2020-05-27", "YYYY-MM-DD").add(7, "days").add(1, "months").format("YYYY-MM-DD")',{});
+            util.evaluateJSONataExpression(expr,{}, (err, result) => {
+            try {
+                result.should.eql("2020-07-03");
+                done()
+            } catch (error) {
+                done(error)
+            }
+            });
+        });
+        it('accesses moment-timezone from an expression', function(done) {
+            var expr = util.prepareJSONataExpression('$moment("2013-11-18 11:55Z").tz("Asia/Taipei").format()',{});
+            util.evaluateJSONataExpression(expr,{}, (err, result) => {
+            try {
+                result.should.eql("2013-11-18T19:55:00+08:00");
+                done()
+            } catch (error) {
+                done(error)
+            }
+            });
+        });
+        it('handles non-existant flow context variable', function(done) {
+            var expr = util.prepareJSONataExpression('$flowContext("nonExistant")', MOCK_NODE)
+            util.evaluateJSONataExpression(expr,{payload:"hello"}, (err, result) => {
+            try {
+                should.not.exist(result);
+                done()
+            } catch (error) {
+                done(error)
+            }
+            });
+        });
+        it('handles non-existant global context variable', function(done) {
+            var expr = util.prepareJSONataExpression('$globalContext("nonExistant")', MOCK_NODE);
+            util.evaluateJSONataExpression(expr,{payload:"hello"}, (err, result) => {
+            try {
+                should.not.exist(result);
+                done()
+            } catch (error) {
+                done(error)
+            }
+            });
+        });
+        it('handles async flow context access', function(done) {
+            var expr = util.prepareJSONataExpression('$flowContext("foo")', {context:function() { return {flow:{get: function(key,store,callback) { setTimeout(()=>{callback(null,{'foo':'bar'}[key])},10)}}}}});
+            util.evaluateJSONataExpression(expr,{payload:"hello"},function(err,value) {
                 try {
-                    should.not.exist(result);
-                    done()
-                } catch (error) {
-                    done(error)
+                    should.not.exist(err);
+                    value.should.eql("bar");
+                    done();
+                } catch(err2) {
+                    done(err2);
                 }
-              });
-          });
-          it('handles async flow context access', function(done) {
-              var expr = util.prepareJSONataExpression('$flowContext("foo")',{context:function() { return {flow:{get: function(key,store,callback) { setTimeout(()=>{callback(null,{'foo':'bar'}[key])},10)}}}}});
-              util.evaluateJSONataExpression(expr,{payload:"hello"},function(err,value) {
-                  try {
-                      should.not.exist(err);
-                      value.should.eql("bar");
-                      done();
-                  } catch(err2) {
-                      done(err2);
-                  }
-              });
-          })
-          it('handles async global context access', function(done) {
-              var expr = util.prepareJSONataExpression('$globalContext("foo")',{context:function() { return {global:{get: function(key,store,callback) { setTimeout(()=>{callback(null,{'foo':'bar'}[key])},10)}}}}});
-              util.evaluateJSONataExpression(expr,{payload:"hello"},function(err,value) {
-                  try {
-                      should.not.exist(err);
-                      value.should.eql("bar");
-                      done();
-                  } catch(err2) {
-                      done(err2);
-                  }
-              });
-          })
-          it('handles persistable store in flow context access', function(done) {
-              var storeName;
-              var expr = util.prepareJSONataExpression('$flowContext("foo", "flowStoreName")',{context:function() { return {flow:{get: function(key,store,callback) { storeName = store;setTimeout(()=>{callback(null,{'foo':'bar'}[key])},10)}}}}});
-              util.evaluateJSONataExpression(expr,{payload:"hello"},function(err,value) {
-                  try {
-                      should.not.exist(err);
-                      value.should.eql("bar");
-                      storeName.should.equal("flowStoreName");
-                      done();
-                  } catch(err2) {
-                      done(err2);
-                  }
-              });
-          })
-          it('handles persistable store in global context access', function(done) {
-              var storeName;
-              var expr = util.prepareJSONataExpression('$globalContext("foo", "globalStoreName")',{context:function() { return {global:{get: function(key,store,callback) { storeName = store;setTimeout(()=>{callback(null,{'foo':'bar'}[key])},10)}}}}});
-              util.evaluateJSONataExpression(expr,{payload:"hello"},function(err,value) {
-                  try {
-                      should.not.exist(err);
-                      value.should.eql("bar");
-                      storeName.should.equal("globalStoreName");
-                      done();
-                  } catch(err2) {
-                      done(err2);
-                  }
-              });
-          })
-          it('callbacks with error when invalid expression was specified', function (done) {
-              var expr = util.prepareJSONataExpression('$abc(1)',{});
-              var result = util.evaluateJSONataExpression(expr,{payload:"hello"},function(err,value){
-                  should.exist(err);
-                  done();
-              });
-          });
+            });
+        });
+        it('handles async global context access', function(done) {
+            var expr = util.prepareJSONataExpression('$globalContext("foo")',{context:function() { return {global:{get: function(key,store,callback) { setTimeout(()=>{callback(null,{'foo':'bar'}[key])},10)}}}}});
+            util.evaluateJSONataExpression(expr,{payload:"hello"},function(err,value) {
+                try {
+                    should.not.exist(err);
+                    value.should.eql("bar");
+                    done();
+                } catch(err2) {
+                    done(err2);
+                }
+            });
+        })
+        it('handles persistable store in flow context access', function(done) {
+            var storeName;
+            var expr = util.prepareJSONataExpression('$flowContext("foo", "flowStoreName")',{context:function() { return {flow:{get: function(key,store,callback) { storeName = store;setTimeout(()=>{callback(null,{'foo':'bar'}[key])},10)}}}}});
+            util.evaluateJSONataExpression(expr,{payload:"hello"},function(err,value) {
+                try {
+                    should.not.exist(err);
+                    value.should.eql("bar");
+                    storeName.should.equal("flowStoreName");
+                    done();
+                } catch(err2) {
+                    done(err2);
+                }
+            });
+        })
+        it('handles persistable store in global context access', function(done) {
+            var storeName;
+            var expr = util.prepareJSONataExpression('$globalContext("foo", "globalStoreName")',{context:function() { return {global:{get: function(key,store,callback) { storeName = store;setTimeout(()=>{callback(null,{'foo':'bar'}[key])},10)}}}}});
+            util.evaluateJSONataExpression(expr,{payload:"hello"},function(err,value) {
+                try {
+                    should.not.exist(err);
+                    value.should.eql("bar");
+                    storeName.should.equal("globalStoreName");
+                    done();
+                } catch(err2) {
+                    done(err2);
+                }
+            });
+        })
+        it('callbacks with error when invalid expression was specified', function (done) {
+            var expr = util.prepareJSONataExpression('$abc(1)',{});
+            var result = util.evaluateJSONataExpression(expr,{payload:"hello"},function(err,value){
+                should.exist(err);
+                done();
+            });
+        });
 
-          describe('null prototype results', function() {
-              // JSONata 2.2.1 builds its internal objects with Object.create(null) to
-              // harden against prototype pollution. Those objects reach the expression
-              // result, where anything calling `obj.hasOwnProperty(...)` or relying on
-              // `toString` throws. evaluateJSONataExpression must restore the standard
-              // prototype throughout the result before handing it back.
+        describe('null prototype results', function() {
+            // JSONata 2.2.1 builds its internal objects with Object.create(null) to
+            // harden against prototype pollution. Those objects reach the expression
+            // result, where anything calling `obj.hasOwnProperty(...)` or relying on
+            // `toString` throws. evaluateJSONataExpression must restore the standard
+            // prototype throughout the result before handing it back.
 
-              // Collect the path of every null-prototype object reachable in the result,
-              // so a failure reports where the prototype was missed rather than just
-              // that one was.
-              function findNullPrototypes(value, path, found, seen) {
-                  if (value === null || typeof value !== 'object' || seen.has(value)) {
-                      return found;
-                  }
-                  seen.add(value);
-                  if (Object.getPrototypeOf(value) === null) {
-                      found.push(path || '<result>');
-                  }
-                  if (Array.isArray(value)) {
-                      value.forEach(function(entry, i) {
-                          findNullPrototypes(entry, path + '[' + i + ']', found, seen);
-                      });
-                      return found;
-                  }
-                  Object.keys(value).forEach(function(key) {
-                      findNullPrototypes(value[key], path + '.' + key, found, seen);
-                  });
-                  return found;
-              }
+            // Collect the path of every null-prototype object reachable in the result,
+            // so a failure reports where the prototype was missed rather than just
+            // that one was.
+            function findNullPrototypes(value, path, found, seen) {
+                if (value === null || typeof value !== 'object' || seen.has(value)) {
+                    return found;
+                }
+                seen.add(value);
+                if (Object.getPrototypeOf(value) === null) {
+                    found.push(path || '<result>');
+                }
+                if (Array.isArray(value)) {
+                    value.forEach(function(entry, i) {
+                        findNullPrototypes(entry, path + '[' + i + ']', found, seen);
+                    });
+                    return found;
+                }
+                Object.keys(value).forEach(function(key) {
+                    findNullPrototypes(value[key], path + '.' + key, found, seen);
+                });
+                return found;
+            }
 
-              var msg = {
-                  payload: { a: 1, b: 2 },
-                  items: [ { n: 1 }, { n: 2 } ]
-              };
+            var msg = {
+                payload: { a: 1, b: 2 },
+                items: [ { n: 1 }, { n: 2 } ]
+            };
 
-              // Each expression returns objects built by JSONata in a different shape.
-              // The array cases matter most: the result itself is an Array, so checking
-              // only the top-level prototype misses the null-prototype members.
-              [
-                  { name: 'an object', expr: '{"x": payload.a}' },
-                  { name: 'a nested object', expr: '{"outer": {"inner": payload.a}}' },
-                  { name: 'a deeply nested object', expr: '{"a":{"b":{"c":{"d":1}}}}' },
-                  { name: 'an array of objects', expr: 'items.{"v": n}' },
-                  { name: 'an array literal of objects', expr: '[{"a":1}]' },
-                  { name: 'objects from $map', expr: '$map(items, function($i) { {"v": $i.n} })' },
-                  { name: 'objects from $each', expr: '$each(payload, function($v,$k) { {$k: $v} })' },
-                  { name: 'an object from $merge', expr: '$merge([{"a":1},{"b":2}])' },
-                  { name: 'objects appended to an array', expr: '$append(items, [{"z":1}])' },
-                  { name: 'an array of objects inside an object', expr: '{"list": items.{"v": n}}' },
-                  { name: 'an object merged by the transform operator', expr: 'payload ~> |$|{"added": {"x": 1}}|' }
-              ].forEach(function(testCase) {
-                  it('restores the Object prototype on ' + testCase.name, function(done) {
-                      var expr = util.prepareJSONataExpression(testCase.expr, {});
-                      util.evaluateJSONataExpression(expr, msg, function(err, result) {
-                          try {
-                              should.not.exist(err);
-                              var missed = findNullPrototypes(result, '', [], new WeakSet());
-                              missed.should.eql([], 'null prototype left at: ' + missed.join(', '));
-                              done();
-                          } catch (error) {
-                              done(error);
-                          }
-                      });
-                  });
-              });
+            // Each expression returns objects built by JSONata in a different shape.
+            // The array cases matter most: the result itself is an Array, so checking
+            // only the top-level prototype misses the null-prototype members.
+            [
+                { name: 'an object', expr: '{"x": payload.a}' },
+                { name: 'a nested object', expr: '{"outer": {"inner": payload.a}}' },
+                { name: 'a deeply nested object', expr: '{"a":{"b":{"c":{"d":1}}}}' },
+                { name: 'an array of objects', expr: 'items.{"v": n}' },
+                { name: 'an array literal of objects', expr: '[{"a":1}]' },
+                { name: 'objects from $map', expr: '$map(items, function($i) { {"v": $i.n} })' },
+                { name: 'objects from $each', expr: '$each(payload, function($v,$k) { {$k: $v} })' },
+                { name: 'an object from $merge', expr: '$merge([{"a":1},{"b":2}])' },
+                { name: 'objects appended to an array', expr: '$append(items, [{"z":1}])' },
+                { name: 'an array of objects inside an object', expr: '{"list": items.{"v": n}}' },
+                { name: 'an object merged by the transform operator', expr: 'payload ~> |$|{"added": {"x": 1}}|' }
+            ].forEach(function(testCase) {
+                it('restores the Object prototype on ' + testCase.name, function(done) {
+                    var expr = util.prepareJSONataExpression(testCase.expr, {});
+                    util.evaluateJSONataExpression(expr, msg, function(err, result) {
+                        try {
+                            should.not.exist(err);
+                            var missed = findNullPrototypes(result, '', [], new WeakSet());
+                            missed.should.eql([], 'null prototype left at: ' + missed.join(', '));
+                            done();
+                        } catch (error) {
+                            done(error);
+                        }
+                    });
+                });
+            });
 
-              it('returns a result that downstream code can call hasOwnProperty on', function(done) {
-                  var expr = util.prepareJSONataExpression('{"list": items.{"v": n}}', {});
-                  util.evaluateJSONataExpression(expr, msg, function(err, result) {
-                      try {
-                          should.not.exist(err);
-                          // These are the calls that throw on a null-prototype object.
-                          result.hasOwnProperty('list').should.be.true();
-                          result.list[0].hasOwnProperty('v').should.be.true();
-                          String(result.list[0]).should.equal('[object Object]');
-                          done();
-                      } catch (error) {
-                          done(error);
-                      }
-                  });
-              });
+            it('returns a result that downstream code can call hasOwnProperty on', function(done) {
+                var expr = util.prepareJSONataExpression('{"list": items.{"v": n}}', {});
+                util.evaluateJSONataExpression(expr, msg, function(err, result) {
+                    try {
+                        should.not.exist(err);
+                        // These are the calls that throw on a null-prototype object.
+                        result.hasOwnProperty('list').should.be.true();
+                        result.list[0].hasOwnProperty('v').should.be.true();
+                        String(result.list[0]).should.equal('[object Object]');
+                        done();
+                    } catch (error) {
+                        done(error);
+                    }
+                });
+            });
 
-              it('leaves a Buffer in the result untouched', function(done) {
-                  var expr = util.prepareJSONataExpression('{"b": payload}', {});
-                  var buffer = Buffer.from('hello');
-                  util.evaluateJSONataExpression(expr, { payload: buffer }, function(err, result) {
-                      try {
-                          should.not.exist(err);
-                          Buffer.isBuffer(result.b).should.be.true();
-                          result.b.toString().should.equal('hello');
-                          done();
-                      } catch (error) {
-                          done(error);
-                      }
-                  });
-              });
+            it('leaves a Buffer in the result untouched', function(done) {
+                var expr = util.prepareJSONataExpression('{"b": payload}', {});
+                var buffer = Buffer.from('hello');
+                util.evaluateJSONataExpression(expr, { payload: buffer }, function(err, result) {
+                    try {
+                        should.not.exist(err);
+                        Buffer.isBuffer(result.b).should.be.true();
+                        result.b.toString().should.equal('hello');
+                        done();
+                    } catch (error) {
+                        done(error);
+                    }
+                });
+            });
 
-              it('handles a circular reference in the result', function(done) {
-                  // `$` returns the message itself, so a cycle in the message ends up in
-                  // the result and the prototype walk must not recurse forever.
-                  var circular = { payload: { a: 1 } };
-                  circular.payload.self = circular;
-                  var expr = util.prepareJSONataExpression('$', {});
-                  util.evaluateJSONataExpression(expr, circular, function(err, result) {
-                      try {
-                          should.not.exist(err);
-                          findNullPrototypes(result, '', [], new WeakSet()).should.eql([]);
-                          done();
-                      } catch (error) {
-                          done(error);
-                      }
-                  });
-              });
+            it('handles a circular reference in the result', function(done) {
+                // `$` returns the message itself, so a cycle in the message ends up in
+                // the result and the prototype walk must not recurse forever.
+                var circular = { payload: { a: 1 } };
+                circular.payload.self = circular;
+                var expr = util.prepareJSONataExpression('$', {});
+                util.evaluateJSONataExpression(expr, circular, function(err, result) {
+                    try {
+                        should.not.exist(err);
+                        findNullPrototypes(result, '', [], new WeakSet()).should.eql([]);
+                        done();
+                    } catch (error) {
+                        done(error);
+                    }
+                });
+            });
 
-              it('passes a primitive result through unchanged', function(done) {
-                  var expr = util.prepareJSONataExpression('payload.a', {});
-                  util.evaluateJSONataExpression(expr, msg, function(err, result) {
-                      try {
-                          should.not.exist(err);
-                          result.should.equal(1);
-                          done();
-                      } catch (error) {
-                          done(error);
-                      }
-                  });
-              });
-          });
-      });
+            it('passes a primitive result through unchanged', function(done) {
+                var expr = util.prepareJSONataExpression('payload.a', {});
+                util.evaluateJSONataExpression(expr, msg, function(err, result) {
+                    try {
+                        should.not.exist(err);
+                        result.should.equal(1);
+                        done();
+                    } catch (error) {
+                        done(error);
+                    }
+                });
+            });
+        });
+    });
 
     describe('encodeObject', function () {
         it('encodes Error with message', function() {

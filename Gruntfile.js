@@ -224,7 +224,7 @@ module.exports = function(grunt) {
                             "node_modules/i18next/i18next.min.js",
                             "node_modules/i18next-http-backend/i18nextHttpBackend.min.js",
                             "node_modules/jquery-i18next/jquery-i18next.min.js",
-                            "node_modules/jsonata/jsonata-es5.min.js",
+                            "packages/node_modules/@node-red/editor-client/src/vendor/jsonata/jsonata-es5.min.js",
                             "packages/node_modules/@node-red/editor-client/src/vendor/jsonata/formatter.js",
                             "packages/node_modules/@node-red/editor-client/src/vendor/ace/ace.js",
                             "packages/node_modules/@node-red/editor-client/src/vendor/ace/ext-language_tools.js"
@@ -241,7 +241,7 @@ module.exports = function(grunt) {
                     // },
                     {
                         src: [
-                            "node_modules/jsonata/jsonata-es5.min.js",
+                            "packages/node_modules/@node-red/editor-client/src/vendor/jsonata/jsonata-es5.min.js",
                             "packages/node_modules/@node-red/editor-client/src/vendor/jsonata/worker-jsonata.js"
                         ],
                         nonull: true,
