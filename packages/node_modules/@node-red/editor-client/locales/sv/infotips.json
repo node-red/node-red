@@ -1,0 +1,23 @@
+{
+    "info": {
+        "tip0": "Du kan ta bort de markerade noderna eller länkarna med {{core:delete-selection}}",
+        "tip1": "Sök efter noder med {{core:search}}",
+        "tip2": "{{core:toggle-sidebar}} växlar visningen av denna sidopanel",
+        "tip3": "Du kan hantera din nodpalett med {{core:manage-palette}}",
+        "tip4": "Dina flödeskonfigurationsnoder visas i sidopanelen. Du når den från menyn eller med {{core:show-config-tab}}",
+        "tip5": "Aktivera eller inaktivera dessa tips med alternativet i inställningarna",
+        "tip6": "Flytta de markerade noderna med tangenterna [vänster], [upp], [ned] och [höger] medan du håller ned [ctrl]. Håll ned [shift] för att flytta dem längre",
+        "tip7": "Om du drar en nod till en ledning fogas den in i länken",
+        "tip8": "Exportera de markerade noderna eller den aktuella fliken med {{core:show-export-dialog}}",
+        "tip9": "Importera ett flöde genom att dra dess JSON till editorn eller med {{core:show-import-dialog}}",
+        "tip10": "Håll ned [shift], [klicka] och dra på en nodport för att flytta alla anslutna ledningar eller bara den markerade",
+        "tip11": "Visa fliken Info med {{core:show-info-tab}} eller fliken Felsökning med {{core:show-debug-tab}}",
+        "tip12": "[ctrl] + [klick] i arbetsytan öppnar dialogrutan för snabb tilläggning",
+        "tip13": "Håll ned [ctrl] när du [klickar] på en nodport för att aktivera snabbkoppling",
+        "tip14": "Håll ned [shift] när du [klickar] på en nod för att även markera alla anslutna noder",
+        "tip15": "Håll ned [ctrl] när du [klickar] på en nod för att lägga till eller ta bort den från den aktuella markeringen",
+        "tip16": "Växla flödesflikar med {{core:show-previous-tab}} och {{core:show-next-tab}}",
+        "tip17": "Bekräfta ändringarna i nodens redigeringspanel med {{core:confirm-edit-tray}} eller avbryt dem med {{core:cancel-edit-tray}}",
+        "tip18": "{{core:edit-selected-node}} redigerar den första noden i den aktuella markeringen"
+    }
+}
