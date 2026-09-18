@@ -792,6 +792,43 @@ describe('Flow', function() {
             await flow.stop()
         });
 
+        it("group catch-all ignores handled errors regardless of catch node order", async function() {
+            // receive an error that the node-scoped catch already handled.
+            var config = flowUtils.parseConfig([
+                {id:"t1",type:"tab"},
+                {id:"g1", type:"group", z:"t1"},
+                {id:"g2", type:"group", z:"t1"},
+                {id:"1",x:10,y:10,z:"t1",g:"g1",type:"test",name:"a",wires:[]},
+                {id:"3",x:10,y:10,z:"t1",g:"g1",type:"test",name:"c",wires:[]},
+                {id:"c1-scoped",x:10,y:10,z:"t1",g:"g1",type:"catch",scope:["1"],wires:[]},
+                {id:"c1-all",x:10,y:10,z:"t1",g:"g1",type:"catch",scope:"group",uncaught:true,wires:[]},
+                {id:"2",x:10,y:10,z:"t1",g:"g2",type:"test",name:"b",wires:[]},
+                {id:"c2-all",x:10,y:10,z:"t1",g:"g2",type:"catch",scope:"group",uncaught:true,wires:[]},
+                {id:"c2-scoped",x:10,y:10,z:"t1",g:"g2",type:"catch",scope:["2"],wires:[]}
+            ]);
+            var flow = Flow.create({},config,config.flows["t1"]);
+            await flow.start();
+
+            flow.handleError(config.flows["t1"].nodes["1"],"my-error",{a:"foo"});
+            flow.handleError(config.flows["t1"].nodes["2"],"my-error",{a:"foo"});
+            await NR_TEST_UTILS.sleep(50)
+
+            // node-scoped catch handles the error in both groups
+            currentNodes["c1-scoped"].should.have.a.property("handled",1);
+            currentNodes["c2-scoped"].should.have.a.property("handled",1);
+            // catch-all must ignore it in both groups, order notwithstanding
+            currentNodes["c1-all"].should.have.a.property("handled",0);
+            currentNodes["c2-all"].should.have.a.property("handled",0);
+
+            // regression guard: catch-all still fires when nothing else handles it
+            flow.handleError(config.flows["t1"].nodes["3"],"unhandled-error",{a:"bar"});
+            await NR_TEST_UTILS.sleep(50)
+            currentNodes["c1-all"].should.have.a.property("handled",1);
+            currentNodes["c1-scoped"].should.have.a.property("handled",1);
+
+            await flow.stop()
+        });
+
         it("moves any existing error object sideways", async function() {
             var config = flowUtils.parseConfig([
                 {id:"t1",type:"tab"},
