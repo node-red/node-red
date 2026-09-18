@@ -200,7 +200,25 @@ describe("@node-red/util/util", function() {
             result.should.be.true();
             obj.should.have.property("msg");
             obj.msg.should.have.property("a","bar");
-        })
+        });
+        it('does not set a property beneath a null array element', function() {
+            var obj = {a:[null]};
+            var result = util.setObjectProperty(obj,"a[0].b.c","bar");
+            result.should.be.false();
+            obj.should.eql({a:[null]});
+        });
+        it('does not set a property beneath a primitive array element', function() {
+            var obj = {a:[123]};
+            var result = util.setObjectProperty(obj,"a[0].b.c","bar");
+            result.should.be.false();
+            obj.should.eql({a:[123]});
+        });
+        it('does not delete a property beneath a null array element', function() {
+            var obj = {a:[null]};
+            var result = util.setObjectProperty(obj,"a[0].b",undefined);
+            result.should.be.false();
+            obj.should.eql({a:[null]});
+        });
     });
     describe('setMessageProperty', function() {
         it('sets a property', function() {
