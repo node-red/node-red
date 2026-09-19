@@ -168,6 +168,7 @@ describe("api/auth/index",function() {
 
         it('passes for valid user permission', function(done) {
             sinon.stub(passport,"authenticate").callsFake(function(scopes,opts) {
+                scopes.should.eql(['tokens','bearer','anon']);
                 return function(req,res,next) {
                     next();
                 }
