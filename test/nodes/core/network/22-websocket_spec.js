@@ -17,7 +17,8 @@
 var ws = require("ws");
 var should = require("should");
 var helper = require("node-red-node-test-helper");
-var websocketNode = require("nr-test-utils").require("@node-red/nodes/core/network/22-websocket.js");
+var NR_TEST_UTILS = require("nr-test-utils");
+var websocketNode = NR_TEST_UTILS.require("@node-red/nodes/core/network/22-websocket.js");
 
 var sockets = [];
 
@@ -389,6 +390,38 @@ describe('websocket Node', function() {
                     done();
                 });
 
+            });
+        });
+
+        it('should use the client path when resolving a proxy', function(done) {
+            var proxyHelper = NR_TEST_UTILS.require("@node-red/nodes/core/network/lib/proxyHelper");
+            var originalGetProxyForUrl = proxyHelper.getProxyForUrl;
+            var websocketNodePath = NR_TEST_UTILS.resolve("@node-red/nodes/core/network/22-websocket.js");
+            var clientPath = getWsUrl("/ws");
+            var proxyTarget;
+
+            proxyHelper.getProxyForUrl = function(target) {
+                proxyTarget = target;
+                return "";
+            };
+            delete require.cache[websocketNodePath];
+            var websocketNodeWithProxySpy = require(websocketNodePath);
+
+            var flow = [
+                { id: "server", type: "websocket-listener", path: "/ws" },
+                { id: "client", type: "websocket-client", path: clientPath },
+                { id: "out", type: "websocket out", client: "client" }
+            ];
+            helper.load(websocketNodeWithProxySpy, flow, function() {
+                try {
+                    proxyTarget.should.equal(clientPath);
+                    done();
+                } catch(err) {
+                    done(err);
+                } finally {
+                    proxyHelper.getProxyForUrl = originalGetProxyForUrl;
+                    delete require.cache[websocketNodePath];
+                }
             });
         });
 
