@@ -232,12 +232,12 @@ describe('range Node', function() {
         nonNumberDroppedTest(null, done);
     });
 
-    it('drops and reports true rather than scaling it as 1', function(done) {
-        nonNumberDroppedTest(true, done);
+    it('still scales true as 1 (existing flows rely on it)', function(done) {
+        genericRangeTest("scale", 0, 1, 0, 100, false, true, 100, done);
     });
 
-    it('drops and reports false rather than scaling it as 0', function(done) {
-        nonNumberDroppedTest(false, done);
+    it('still scales false as 0 (existing flows rely on it)', function(done) {
+        genericRangeTest("scale", 0, 1, 0, 100, false, false, 0, done);
     });
 
     it('drops and reports an empty string rather than scaling it as 0', function(done) {
