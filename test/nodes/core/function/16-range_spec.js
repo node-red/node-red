@@ -122,6 +122,14 @@ describe('range Node', function() {
         genericRangeTest("scale", 100, 0, -100, 0, false, 10, -10, done);
     });
 
+    it('scales numbers given as strings', function(done) {
+        genericRangeTest("scale", 0, 100, 0, 1000, false, "50", 500, done);
+    });
+
+    it('scales numeric strings with surrounding whitespace', function(done) {
+        genericRangeTest("scale", 0, 100, 0, 1000, false, " 50 ", 500, done);
+    });
+
     it('drops msg if in drop mode and input outside range', function(done) {
         var flow = [{"id":"rangeNode1","type":"range","minin":2,"maxin":8,"minout":20,"maxout":80,"action":"drop","round":true,"name":"rangeNode","wires":[["helperNode1"]]},
                     {id:"helperNode1", type:"helper", wires:[]}];
@@ -185,5 +193,62 @@ describe('range Node', function() {
 
             rangeNode1.receive({payload:"NOT A NUMBER"});
         });
+    });
+
+    /**
+     * Send a value that Number() would coerce to a number but which is not one,
+     * and check it is reported as not-a-number and not passed on.
+     */
+    function nonNumberDroppedTest(aPayload, done) {
+        var flow = [{"id":"rangeNode1","type":"range","minin":-5,"maxin":45,"minout":-5,"maxout":45,"action":"drop","round":false,"name":"rangeNode","wires":[["helperNode1"]]},
+                    {id:"helperNode1", type:"helper", wires:[]}];
+        helper.load(rangeNode, flow, function() {
+            var rangeNode1 = helper.getNode("rangeNode1");
+            var helperNode1 = helper.getNode("helperNode1");
+            var reported = false;
+            helperNode1.on("input", function(msg) {
+                rangeNode1.log.restore();
+                done(new Error("non-number input " + JSON.stringify(aPayload) + " was passed on as " + JSON.stringify(msg.payload)));
+            });
+            rangeNode1.on("call:log", function(args) {
+                if (args.args[0].indexOf("notnumber") > -1) {
+                    reported = true;
+                }
+            });
+            rangeNode1.receive({payload:aPayload});
+            setTimeout(function() {
+                rangeNode1.log.restore();
+                try {
+                    reported.should.be.true();
+                    done();
+                } catch(err) {
+                    done(err);
+                }
+            }, 50);
+        });
+    }
+
+    it('drops and reports null rather than scaling it as 0', function(done) {
+        nonNumberDroppedTest(null, done);
+    });
+
+    it('drops and reports true rather than scaling it as 1', function(done) {
+        nonNumberDroppedTest(true, done);
+    });
+
+    it('drops and reports false rather than scaling it as 0', function(done) {
+        nonNumberDroppedTest(false, done);
+    });
+
+    it('drops and reports an empty string rather than scaling it as 0', function(done) {
+        nonNumberDroppedTest("", done);
+    });
+
+    it('drops and reports a whitespace-only string rather than scaling it as 0', function(done) {
+        nonNumberDroppedTest("   ", done);
+    });
+
+    it('drops and reports an empty array rather than scaling it as 0', function(done) {
+        nonNumberDroppedTest([], done);
     });
 });
