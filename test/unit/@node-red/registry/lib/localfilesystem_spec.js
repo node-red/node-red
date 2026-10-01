@@ -75,7 +75,8 @@ describe("red/nodes/registry/localfilesystem",function() {
             nm.should.have.a.property('name','node-red');
             nm.should.have.a.property("nodes");
             var nodes = nm.nodes;
-            checkNodes(nm.nodes,['TestNode1','MultipleNodes1','NestedNode','TestNode2','TestNode3','TestNode4'],['TestNodeModule']);
+            checkNodes(nm.nodes,['TestNode1','MultipleNodes1','NestedNode','TestNode2','TestNode3','TestNode4','TestNodeMjs'],['TestNodeModule']);
+            nm.nodes.TestNodeMjs.file.should.match(/TestNodeMjs\.mjs$/);
             i18n.registerMessageCatalog.called.should.be.true();
             i18n.registerMessageCatalog.lastCall.args[0].should.eql('node-red');
             i18n.registerMessageCatalog.lastCall.args[1].should.eql(path.resolve(path.join(resourcesDir,"locales")));
