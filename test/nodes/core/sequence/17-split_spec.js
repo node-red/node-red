@@ -684,6 +684,44 @@ describe('JOIN node', function() {
         });
     });
 
+    it('should release overwritten object message callbacks', function(done) {
+        var completeNode = require("nr-test-utils").require("@node-red/nodes/core/common/24-complete.js");
+        var flow = [{id:"n1", type:"join", wires:[["n2"]], count:2, build:"object", mode:"custom"},
+                    {id:"n2", type:"helper"},
+                    {id:"n3", type:"complete", scope:["n1"], uncaught:false, wires:[["n4"]]},
+                    {id:"n4", type:"helper"}];
+        helper.load([joinNode, completeNode], flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            var n4 = helper.getNode("n4");
+            var completedPayloads = [];
+            n4.on("input", function(msg) {
+                completedPayloads.push(msg.payload);
+                if (completedPayloads.length === 1) {
+                    completedPayloads.should.deepEqual([1]);
+                    setImmediate(function() {
+                        n1.receive({payload:3, topic:"rare"});
+                    });
+                }
+            });
+            n2.on("input", function(msg) {
+                try {
+                    msg.payload.should.deepEqual({frequent:2, rare:3});
+                }
+                catch(e) { done(e); }
+                setImmediate(function() {
+                    try {
+                        completedPayloads.should.deepEqual([1, 2, 3]);
+                        done();
+                    }
+                    catch(e) { done(e); }
+                });
+            });
+            n1.receive({payload:1, topic:"frequent"});
+            n1.receive({payload:2, topic:"frequent"});
+        });
+    });
+
     it('should merge objects', function(done) {
         var flow = [{id:"n1", type:"join", wires:[["n2"]], count:5, build:"merged", mode:"custom"},
                     {id:"n2", type:"helper"}];
