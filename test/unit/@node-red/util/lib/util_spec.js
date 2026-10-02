@@ -147,6 +147,78 @@ describe("@node-red/util/util", function() {
             var result = util.cloneMessage(undefined);
             should.not.exist(result);
         })
+        it('gives a cloned Buffer its own memory', function() {
+            var msg = {payload: Buffer.from([1,2,3,4])};
+
+            var cloned = util.cloneMessage(msg);
+
+            Buffer.isBuffer(cloned.payload).should.be.true();
+            cloned.payload.should.eql(msg.payload);
+            cloned.payload.buffer.should.not.equal(msg.payload.buffer);
+
+            cloned.payload[0] = 99;
+            msg.payload[0].should.equal(1);
+        });
+        it('gives a nested Buffer its own memory', function() {
+            var msg = {a:{b:{buf: Buffer.from([1,2,3])}}};
+
+            var cloned = util.cloneMessage(msg);
+
+            cloned.a.b.buf[0] = 99;
+            msg.a.b.buf[0].should.equal(1);
+        });
+        it('gives a Buffer inside an array its own memory', function() {
+            var msg = {parts:[Buffer.from([1,2]), Buffer.from([3,4])]};
+
+            var cloned = util.cloneMessage(msg);
+
+            cloned.parts[1][0] = 99;
+            msg.parts[1][0].should.equal(3);
+        });
+        it('gives a Buffer inside a Map or Set its own memory', function() {
+            var inMap = Buffer.from([1,2]);
+            var inSet = Buffer.from([3,4]);
+            var msg = {map: new Map([["k", inMap]]), set: new Set([inSet])};
+
+            var cloned = util.cloneMessage(msg);
+
+            cloned.map.get("k")[0] = 99;
+            Array.from(cloned.set)[0][0] = 99;
+
+            inMap[0].should.equal(1);
+            inSet[0].should.equal(3);
+        });
+        it('clones a cyclic message containing a Buffer without hanging', function() {
+            var msg = {payload: Buffer.from([1,2,3])};
+            msg.self = msg;
+
+            var cloned = util.cloneMessage(msg);
+
+            cloned.self.should.equal(cloned);
+            cloned.payload[0] = 99;
+            msg.payload[0].should.equal(1);
+        });
+        it('clones Date, RegExp, Map and Set values independently', function() {
+            var msg = {d: new Date(1000), r: /ab+c/gi, m: new Map([["k",{v:1}]]), s: new Set([{v:2}])};
+
+            var cloned = util.cloneMessage(msg);
+
+            cloned.d.should.be.instanceof(Date);
+            cloned.d.getTime().should.equal(1000);
+            cloned.d.should.not.equal(msg.d);
+            cloned.r.source.should.equal("ab+c");
+            cloned.r.flags.should.equal("gi");
+            cloned.m.get("k").should.not.equal(msg.m.get("k"));
+            Array.from(cloned.s)[0].should.not.equal(Array.from(msg.s)[0]);
+        });
+        it('does not throw on a message containing a function', function() {
+            var msg = {payload: Buffer.from([1]), fn: function() { return 1; }};
+
+            var cloned = util.cloneMessage(msg);
+
+            cloned.payload[0] = 99;
+            msg.payload[0].should.equal(1);
+        });
     });
     describe('getObjectProperty', function() {
         it('gets a property beginning with "msg."', function() {
