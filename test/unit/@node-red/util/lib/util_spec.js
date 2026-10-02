@@ -14,6 +14,8 @@
  * limitations under the License.
  **/
 var should = require("should");
+var sinon = require("sinon");
+var vm = require("vm");
 
 var NR_TEST_UTILS = require("nr-test-utils");
 
@@ -960,6 +962,14 @@ describe("@node-red/util/util", function() {
             result.msg[2].should.eql('6');
             result.msg[3].should.eql('2');
         });
+        it('encodes long Buffer without converting all of it', function() {
+            var buffer = Buffer.alloc(100, 0xab);
+            var toString = sinon.spy(buffer, 'toString');
+            var result = util.encodeObject({msg:buffer},{maxLength:5});
+            result.format.should.eql("buffer[100]");
+            result.msg.should.eql("ababa");
+            toString.calledOnceWithExactly('hex', 0, 3).should.be.true();
+        });
         it('encodes function', function() {
             var msg = {msg:function(){}};
             var result = util.encodeObject(msg);
@@ -1383,6 +1393,51 @@ describe("@node-red/util/util", function() {
                 resultJson.buffer.length.should.eql(4);
                 resultJson.buffer.data[0].should.eql(1);
                 resultJson.buffer.data[1].should.eql(2);
+            });
+            it('long Buffer in msg is not converted in full', function() {
+                var buffer = Buffer.alloc(100, 7);
+                var bufferToJSON = sinon.spy(Buffer.prototype, 'toJSON');
+                try {
+                    var result = util.encodeObject({ msg:{ file:{ buffer:buffer } } },{maxLength:10});
+                    // The debug sidebar only shows maxLength bytes, so the
+                    // other 90 must not be copied into an array first
+                    bufferToJSON.calledOn(buffer).should.be.false();
+                } finally {
+                    bufferToJSON.restore();
+                }
+                result.format.should.eql("Object");
+                var resultJson = JSON.parse(result.msg);
+                resultJson.file.buffer.should.eql({ type:"Buffer", data:[7,7,7,7,7,7,7,7,7,7], __enc__:true, length:100 });
+            });
+            it('restores Buffer toJSON after encoding', function() {
+                var bufferToJSON = Buffer.prototype.toJSON;
+                var msg = { msg:{ buffer:Buffer.alloc(100) } };
+                Object.defineProperty(msg.msg, 'broken', {
+                    enumerable: true,
+                    get: function() { throw new Error("broken getter"); }
+                });
+                var result = util.encodeObject(msg,{maxLength:2});
+                result.format.should.eql("error");
+                Buffer.prototype.toJSON.should.equal(bufferToJSON);
+                JSON.stringify(Buffer.alloc(3)).should.eql('{"type":"Buffer","data":[0,0,0]}');
+            });
+            it('restores Buffer toJSON when encoding is terminated', function(done) {
+                // A Function node with a timeout can have its execution terminated
+                // while node.warn encodes a message, which skips finally blocks
+                var bufferToJSON = Buffer.prototype.toJSON;
+                var msg = { msg:{ buffer:Buffer.alloc(100) } };
+                Object.defineProperty(msg.msg, 'slow', {
+                    enumerable: true,
+                    get: function() { while (true) {} }
+                });
+                var context = vm.createContext({ util:util, msg:msg });
+                (function() {
+                    vm.runInContext('util.encodeObject(msg,{maxLength:2})', context, { timeout:50 });
+                }).should.throw(/timed out/);
+                process.nextTick(function() {
+                    Buffer.prototype.toJSON.should.equal(bufferToJSON);
+                    done();
+                });
             });
             it('constructor of ServerResponse', function() {
                 function ServerResponse(){};
