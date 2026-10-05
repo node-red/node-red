@@ -140,13 +140,11 @@ describe("runtime-api/settings", function() {
                     getCredentialKeyType: () => "test-key-type"
                 },
                 library: {getLibraries: () => { ["lib1"]} },
-                storage: {
-                    projects: {
-                        getActiveProject: () => 'test-active-project',
-                        getFlowFilename:  () => 'test-flow-file',
-                        getCredentialsFilename:  () => 'test-creds-file',
-                        getGlobalGitUser: () => {return {name:'foo',email:'foo@example.com'}}
-                    }
+                storage: {},
+                projects: {
+                    available: () => true,
+                    getActiveProject: () => 'test-active-project',
+                    getGlobalGitUser: () => {return {name:'foo',email:'foo@example.com'}}
                 },
                 telemetry: { isEnabled: () => true }
             })
@@ -198,13 +196,11 @@ describe("runtime-api/settings", function() {
                     getCredentialKeyType: () => "test-key-type"
                 },
                 library: {getLibraries: () => { ["lib1"]} },
-                storage: {
-                    projects: {
-                        getActiveProject: () => 'test-active-project',
-                        getFlowFilename:  () => 'test-flow-file',
-                        getCredentialsFilename:  () => 'test-creds-file',
-                        getGlobalGitUser: () => {return {name:'foo',email:'foo@example.com'}}
-                    }
+                storage: {},
+                projects: {
+                    available: () => true,
+                    getActiveProject: () => 'test-active-project',
+                    getGlobalGitUser: () => {return {name:'foo',email:'foo@example.com'}}
                 },
                 telemetry: { isEnabled: () => true }
             })
@@ -246,14 +242,13 @@ describe("runtime-api/settings", function() {
                     getCredentialKeyType: () => "test-key-type"
                 },
                 library: {getLibraries: () => { ["lib1"]} },
-                storage: {
-                    projects: {
-                        flowFileExists: () => true,
-                        getActiveProject: () => false,
-                        getFlowFilename:  () => 'test-flow-file',
-                        getCredentialsFilename:  () => 'test-creds-file',
-                        getGlobalGitUser: () => {return {name:'foo',email:'foo@example.com'}}
-                    }
+                storage: {},
+                projects: {
+                    available: () => true,
+                    getActiveProject: () => false,
+                    flowFileExists: () => true,
+                    getDefaultProjectFilesForEditor: () => ({flow:'test-flow-file', credentials:'test-creds-file'}),
+                    getGlobalGitUser: () => {return {name:'foo',email:'foo@example.com'}}
                 },
                 telemetry: { isEnabled: () => true }
             })
@@ -298,14 +293,12 @@ describe("runtime-api/settings", function() {
                     getCredentialKeyType: () => "test-key-type"
                 },
                 library: {getLibraries: () => { ["lib1"]} },
-                storage: {
-                    projects: {
-                        flowFileExists: () => false,
-                        getActiveProject: () => false,
-                        getFlowFilename:  () => 'test-flow-file',
-                        getCredentialsFilename:  () => 'test-creds-file',
-                        getGlobalGitUser: () => {return {name:'foo',email:'foo@example.com'}}
-                    }
+                storage: {},
+                projects: {
+                    available: () => true,
+                    getActiveProject: () => false,
+                    flowFileExists: () => false,
+                    getGlobalGitUser: () => {return {name:'foo',email:'foo@example.com'}}
                 },
                 telemetry: { isEnabled: () => true }
             })
@@ -420,17 +413,15 @@ describe("runtime-api/settings", function() {
     describe("getUserKeys", function() {
         before(function() {
             settings.init({
-                storage: {
-                    projects: {
-                        ssh: {
-                            listSSHKeys: username => {
-                                if (username === 'error') {
-                                    var p = Promise.reject(new Error("unknown user"));
-                                    p.catch(()=>{});
-                                    return p;
-                                }
-                                return Promise.resolve([username])
+                projects: {
+                    ssh: {
+                        listSSHKeys: username => {
+                            if (username === 'error') {
+                                var p = Promise.reject(new Error("unknown user"));
+                                p.catch(()=>{});
+                                return p;
                             }
+                            return Promise.resolve([username])
                         }
                     }
                 }
@@ -464,19 +455,17 @@ describe("runtime-api/settings", function() {
     describe("getUserKey", function() {
         before(function() {
             settings.init({
-                storage: {
-                    projects: {
-                        ssh: {
-                            getSSHKey: (username, id) => {
-                                if (username === 'error') {
-                                    var p = Promise.reject(new Error("unknown user"));
-                                    p.catch(()=>{});
-                                    return p;
-                                } else if (username === '404') {
-                                    return Promise.resolve(null);
-                                }
-                                return Promise.resolve({username,id})
+                projects: {
+                    ssh: {
+                        getSSHKey: (username, id) => {
+                            if (username === 'error') {
+                                var p = Promise.reject(new Error("unknown user"));
+                                p.catch(()=>{});
+                                return p;
+                            } else if (username === '404') {
+                                return Promise.resolve(null);
                             }
+                            return Promise.resolve({username,id})
                         }
                     }
                 }
@@ -518,17 +507,15 @@ describe("runtime-api/settings", function() {
     describe("generateUserKey", function() {
         before(function() {
             settings.init({
-                storage: {
-                    projects: {
-                        ssh: {
-                            generateSSHKey: (username, opts) => {
-                                if (username === 'error') {
-                                    var p = Promise.reject(new Error("unknown user"));
-                                    p.catch(()=>{});
-                                    return p;
-                                }
-                                return Promise.resolve(JSON.stringify({username,opts}))
+                projects: {
+                    ssh: {
+                        generateSSHKey: (username, opts) => {
+                            if (username === 'error') {
+                                var p = Promise.reject(new Error("unknown user"));
+                                p.catch(()=>{});
+                                return p;
                             }
+                            return Promise.resolve(JSON.stringify({username,opts}))
                         }
                     }
                 }
@@ -566,19 +553,17 @@ describe("runtime-api/settings", function() {
         var received = {};
         before(function() {
             settings.init({
-                storage: {
-                    projects: {
-                        ssh: {
-                            deleteSSHKey: (username, id) => {
-                                if (username === 'error') {
-                                    var p = Promise.reject(new Error("unknown user"));
-                                    p.catch(()=>{});
-                                    return p;
-                                }
-                                received.username = username;
-                                received.id = id;
-                                return Promise.resolve();
+                projects: {
+                    ssh: {
+                        deleteSSHKey: (username, id) => {
+                            if (username === 'error') {
+                                var p = Promise.reject(new Error("unknown user"));
+                                p.catch(()=>{});
+                                return p;
                             }
+                            received.username = username;
+                            received.id = id;
+                            return Promise.resolve();
                         }
                     }
                 }

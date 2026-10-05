@@ -24,7 +24,7 @@ var fs = require("fs-extra");
 
 var NR_TEST_UTILS = require("nr-test-utils");
 
-var authServer = NR_TEST_UTILS.require("@node-red/runtime/lib/storage/localfilesystem/projects/git/authServer");
+var authServer = NR_TEST_UTILS.require("@node-red/runtime/lib/projects/git/git/authServer");
 
 
 var sendPrompt = function(localPath, prompt) {
@@ -43,7 +43,7 @@ var sendPrompt = function(localPath, prompt) {
 }
 
 
-describe("localfilesystem/projects/git/authServer", function() {
+describe("projects/git/git/authServer", function() {
     it("listens for user/pass prompts and returns provided auth", function(done) {
         authServer.ResponseServer({username: "TEST_USER", password: "TEST_PASS"}).then(function(rs) {
             sendPrompt(rs.path,"Username").then(function(response) {
