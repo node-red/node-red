@@ -22,18 +22,51 @@ describe("editor-client/ui/search", function() {
         // Clear require cache to get fresh module instance
         delete require.cache[searchModulePath];
         search = require(searchModulePath);
-
-        // Reset the index for each test
-        search._index = {};
     });
 
     afterEach(function() {
         sinon.restore();
         delete global.RED;
         delete require.cache[searchModulePath];
+        delete Object.prototype["prototype-search-node"];
     });
 
     describe("indexNode", function() {
+        it("finds __proto__ in node labels without changing Object.prototype", function() {
+            const node = {
+                id: "prototype-search-node",
+                type: "comment",
+                name: "__proto__",
+                _def: { category: "common" }
+            };
+            mockRED.utils.getNodeLabel.returns(node.name);
+
+            search._indexNode(node);
+
+            Object.prototype.hasOwnProperty.call(Object.prototype, node.id).should.be.false();
+            const results = search.search("__proto__");
+            results.length.should.equal(1);
+            results[0].node.should.equal(node);
+            results[0].label.should.equal("__proto__");
+        });
+
+        it("finds __proto__ in node properties without changing Object.prototype", function() {
+            const node = {
+                id: "prototype-search-node",
+                type: "comment",
+                name: "__proto__",
+                _def: { category: "common" }
+            };
+            mockRED.utils.getNodeLabel.returns(null);
+
+            search._indexNode(node);
+
+            Object.prototype.hasOwnProperty.call(Object.prototype, node.id).should.be.false();
+            const results = search.search("__proto__");
+            results.length.should.equal(1);
+            results[0].node.should.equal(node);
+            results[0].label.should.equal("__proto__");
+        });
         it("preserves original label casing in search results", function() {
             const node = {
                 id: "node1",
