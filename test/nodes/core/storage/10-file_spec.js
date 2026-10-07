@@ -1308,6 +1308,30 @@ describe('file Nodes', function() {
             });
         });
 
+        it('should handle a filename JSONata evaluation error and call done', function(done) {
+            const completeNode = require("nr-test-utils").require("@node-red/nodes/core/common/24-complete.js");
+            var flow = [{id:"fileInNode1", type:"file in", name: "fileInNode", "filename":"$nonExistentFunction()", "filenameType":"jsonata", "format":"utf8", wires:[[]]},
+                        {id:"completeNode1", type:"complete", scope:["fileInNode1"], uncaught:false, wires:[["helperNode1"]]},
+                        {id:"helperNode1", type:"helper", wires:[[]]}];
+            helper.load([fileNode, completeNode], flow, function() {
+                var n1 = helper.getNode("fileInNode1");
+                var helperNode1 = helper.getNode("helperNode1");
+                helperNode1.on("input", function(msg) {
+                    try {
+                        n1.error.called.should.be.true();
+                        n1.error.lastCall.args[0].should.have.property("code", "T1006");
+                        n1.error.lastCall.args[0].should.have.property("message", "Attempted to invoke a non-function");
+                        n1.error.lastCall.args[1].should.have.property("payload", "trigger");
+                        msg.should.have.property("payload", "trigger");
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                n1.receive({payload:"trigger"});
+            });
+        });
+
         it('should read in a file using fileWorkingDirectory to set cwd', function(done) {
             var flow = [{id:"fileInNode1", type:"file in", name: "fileInNode", "filename":relativePathToFile, "format":"utf8", wires:[["n2"]]},
                         {id:"n2", type:"helper"}];

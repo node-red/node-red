@@ -112,7 +112,7 @@ const concatVendor = [
             path.join(NODE_MODULES, "i18next/i18next.min.js"),
             path.join(NODE_MODULES, "i18next-http-backend/i18nextHttpBackend.min.js"),
             path.join(NODE_MODULES, "jquery-i18next/jquery-i18next.min.js"),
-            path.join(NODE_MODULES, "jsonata/jsonata-es5.min.js"),
+            path.join(EDITOR_VENDOR_SRC, "jsonata/jsonata-es5.min.js"),
             path.join(EDITOR_VENDOR_SRC, "jsonata/formatter.js")
         ]
     },
@@ -120,7 +120,7 @@ const concatVendor = [
         dest: path.join(EDITOR_PUBLIC, "vendor/ace/worker-jsonata.js"),
         separator: ";",
         src: [
-            path.join(NODE_MODULES, "jsonata/jsonata-es5.min.js"),
+            path.join(EDITOR_VENDOR_SRC, "jsonata/jsonata-es5.min.js"),
             path.join(EDITOR_VENDOR_SRC, "jsonata/worker-jsonata.js")
         ]
     },
