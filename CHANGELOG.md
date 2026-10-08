@@ -1,3 +1,24 @@
+#### 5.0.8: Maintenance Release
+
+ - Docs: document msg.reset behaviour for tcp out/request nodes (#5968)
+ - Fix legacy CSV parsing of leading empty columns (#5961)
+ - Fix validation of Subflow (#5957) @GogoVega
+ - Support .mjs node files in template derivation (#5920) @sankalpsthakur
+ - Clear trigger overrideDelay when saved as wait to be reset (#5972) @dlwhdgus0810
+ - Avoid converting whole Buffers when encoding debug messages (#5973) @Juice-de-Orange
+ - Fix the behavior of `showLabel` (node definition) (#5952) @GogoVega
+ - Exclude doc generated from the name by the Comment node (#5948) @GogoVega
+ - Add `data-sync` support for sequential script loading (#5945) @GogoVega
+ - fix: catch-all-in-group scope depends on node add order (#5944) @sathyanarayanan-v
+ - Fix setObjectProperty with invalid array paths (#5943) @R0CKing666
+ - Fix group default fill colors (#5942) @bonanitech
+ - Count each conflicting node once in the resolve conflicts header (#5958) @Yash121l
+ - Do not focus first context menu item when the menu opens (#5960) @Yash121l
+ - Fix editor search indexing of `__proto__` node names (#5980) @this-caroline
+ - Update dependencies (#5982) @knolleary
+ - Fix websocket client leaking a connection on every deploy (#5971) @yuanzhiqing
+ - Wait for a library entry to be written before resolving the save (#5975) @dlwhdgus0810
+
 #### 5.0.7: Maintenance Release
 
  - Fix incorrect rendering of typedInput with a single type (#5934) @GogoVega
