@@ -1,0 +1,1 @@
+{"name":"governed-parent-acceptance-worker","version":"1.0.0","private":true,"scripts":{"build":"node --check smoke.test.cjs","test":"node --test smoke.test.cjs"},"engines":{"node":">=22"},"dependencies":{"npm":"10.9.6"}}

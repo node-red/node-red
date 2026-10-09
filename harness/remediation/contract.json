@@ -1,0 +1,94 @@
+{
+  "allowedPaths": [
+    "acceptance/parent-worker/package.json",
+    "acceptance/parent-worker/package-lock.json"
+  ],
+  "baseSha": "3ebe4d946db19b88549ccbf0223c11d92fe5bba6",
+  "conflictDomain": {
+    "ecosystem": "npm",
+    "id": "1416b7bb7e9d8832-major-8141cf4d",
+    "lockArtifacts": [
+      "acceptance/parent-worker/package-lock.json"
+    ],
+    "proofClass": "LOCK_EXACT",
+    "rootManifest": "acceptance/parent-worker/package-lock.json"
+  },
+  "limits": {
+    "maxChangedFiles": 2,
+    "maxChangedLines": 10000
+  },
+  "npmLockDomains": [
+    "",
+    "acceptance/parent-worker"
+  ],
+  "parentUpgrade": {
+    "archiveDigest": "sha256:b1c2611848c63c1092c313d2cd42953bc11e4e076e3bc2857ca7e2bf083ee068",
+    "declaringManifest": "acceptance/parent-worker/package.json",
+    "fromVersion": "10.9.0",
+    "functionalRecipe": "node-parent-v2",
+    "inputDigests": {
+      "acceptance/parent-worker/package-lock.json": "sha256:e310d6630fe353b3995a9aa79ee48988f5fb54b7ed0d574068d3a8597b2acf33",
+      "acceptance/parent-worker/package.json": "sha256:f1462145cd8ea139de69e8a74234fd2649bc11d7bdaadff8b19ccd5d2d72c758",
+      "package-lock.json": "sha256:5f6c99cb56db9a13ba2d36ffd16c1b90379a1ae7beacf08441b5a98bb6374ce7",
+      "package.json": "sha256:5520070432a1fa2035e656e4ea67b4584454a1c6106b8ed8147c359effef1c6a",
+      "packages/node_modules/@node-red/editor-api/package.json": "sha256:f03932e9ed009e2366b6372fe6a2f06552692d3809861de09e32a39f7477bd62",
+      "packages/node_modules/@node-red/editor-client/package.json": "sha256:ff76727e5bb92b093f2860514dc0a11493ee4f6411947b67d93e0a35e28109e2",
+      "packages/node_modules/@node-red/nodes/package.json": "sha256:631a06ae4322dab1119f3ba6c631ab6d51054ed26c9608d0dd3e4f206cb8d935",
+      "packages/node_modules/@node-red/registry/package.json": "sha256:d414c7fbba7174d26faf6258dcd2b1554663df6913c659ec19e8c42a12a583b5",
+      "packages/node_modules/@node-red/runtime/package.json": "sha256:343f332d2b727c72ca735682049c4faf1fec50de4be7bdf28a7442843d7c8915",
+      "packages/node_modules/@node-red/util/package.json": "sha256:747e24992be695e974d1519999f748d00573d4cdeb3e2aa2f574d59875ac6879",
+      "packages/node_modules/node-red/package.json": "sha256:47b2a25d58c49c45d1b44b00570a5c7eafc773615e960facdc875b708c5435af",
+      "test/node_modules/nr-test-utils/package.json": "sha256:e0e1e96f0ac5eff459de804ed44e097ff03986cd346a02cfd61e179701b313fb",
+      "test/resources/plugin/test-plugin/package.json": "sha256:5ac47913f29baf50f2bc1ad0163101e6457b3b94c0af90d094fb790561c5d1d6",
+      "test/resources/subflow/package/package.json": "sha256:0286c8e7aa289366540529f414cc4fef2a4595aa0fc68cd98ba03b1151431fac",
+      "test/unit/@node-red/registry/lib/resources/local/TestNodeModule/node_modules/TestNodeModule/package.json": "sha256:f1df09db5408862580e5961dcf4b8447ae4ff0087032b7a2f25d40c6c29a24d5",
+      "test/unit/@node-red/registry/lib/resources/local/TestNodeModule/node_modules/VersionMismatchModule/package.json": "sha256:7576deb3dfd1e2faefa8bdf4d6fae134e73ce6faa5fa37b56606b20a3cda06c7",
+      "test/unit/@node-red/registry/lib/resources/nodesDir1/node-red-node-testnode/package.json": "sha256:484b99eb813033bc25fc8b2375fb4407aa8086f0e211101f68cf10316bd2d460",
+      "test/unit/@node-red/registry/lib/resources/nodesDir1/regular_module/package.json": "sha256:fa4f8012cee5ea023ac0fefdf0b61446ccd85c0509c71a4fdd1540d3714c9273",
+      "test/unit/@node-red/registry/lib/resources/nodesDir2/@lower-case2/package.json": "sha256:70cbb2b2e7447a63c806a4451d0ddbe4047cef7a98b2c6dfcd8aa167714d5234",
+      "test/unit/@node-red/registry/lib/resources/nodesDir2/@test/testnode/package.json": "sha256:8a9f4010177fdbe34c4594495cebf07688d50e42328705cff148979312342ec5",
+      "test/unit/@node-red/registry/lib/resources/nodesDir2/lower-case/package.json": "sha256:43868db6f237204d51f288fdb2d40d89a7682b513da519683e760872191d459a",
+      "test/unit/@node-red/registry/lib/resources/nodesDir2/testnode2/package.json": "sha256:b34c87880f7cd870aaab3d54c10ec4900848d0df84d1ec32b9264ff3b5be3f38",
+      "test/unit/@node-red/registry/lib/resources/nodesDir2/theme-plugin2/package.json": "sha256:ca38dce714ccb329a601f8f4daa283dd7f81a7b4f784482678fd4539783e018d",
+      "test/unit/@node-red/registry/lib/resources/nodesDir3/node_modules/@test/testnode/package.json": "sha256:8a9f4010177fdbe34c4594495cebf07688d50e42328705cff148979312342ec5",
+      "test/unit/@node-red/registry/lib/resources/nodesDir3/node_modules/@test/theme-plugin3/package.json": "sha256:19d608f5a793e7d332e3e4b333052f6f4cf7da807285d2e4dcc608795836cb2b",
+      "test/unit/@node-red/registry/lib/resources/nodesDir3/node_modules/testnode3/package.json": "sha256:db1903986d7ebc128058ad902574f606fa97ce8d8ff9e37d1a33e1f78f751281"
+    },
+    "integrity": "sha512-EHxr81fXY1K9yyLklI2gc9WuhMSh2e4PXuVG/VXJoHSrH4Lbrv01V/Nhkqu+mvm+58UMh59YBtvHU2wb4ikCUw==",
+    "name": "npm",
+    "nodeEngine": "^18.17.0 || >=20.5.0",
+    "tarball": "https://registry.npmjs.org/npm/-/npm-10.9.6.tgz",
+    "toVersion": "10.9.6"
+  },
+  "remediationKey": "f245d0a1db4b0c1ebb3373eb9285ae71706e346593d83aa6e6ad4f2b507b98a6",
+  "repository": "https://github.com/gregkroon/node-red",
+  "rules": {
+    "lockfileTextPatchForbidden": true,
+    "nativePackageManagerRequired": true,
+    "scmWritesByAgentForbidden": true,
+    "securityControlModificationForbidden": true,
+    "testModificationForbidden": true
+  },
+  "scanSha": "3ebe4d946db19b88549ccbf0223c11d92fe5bba6",
+  "schema": "harness.remediation/parent-contract.v1",
+  "stoExecutionId": "YzICayW2RdK5f87xNq_4Rw",
+  "stoTargetId": "EHS7zul3m_uuVbZj64E0cM",
+  "targetBranch": "acceptance/node-parent-generic",
+  "units": [
+    {
+      "candidateVersions": [
+        "7.5.7"
+      ],
+      "coordinate": {
+        "normalisedName": "tar",
+        "purl": "pkg:npm/tar@6.2.1"
+      },
+      "fromVersion": "6.2.1",
+      "issueIds": [
+        "1KU0uEcRgo9jYyhtBlrwZA"
+      ],
+      "minimumFixedVersion": "7.5.7",
+      "package": "tar"
+    }
+  ]
+}
