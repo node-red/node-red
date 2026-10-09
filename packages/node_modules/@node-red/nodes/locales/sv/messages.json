@@ -1,0 +1,617 @@
+{
+    "common": {
+        "label": {
+            "payload": "Nyttolast",
+            "topic": "Ämne",
+            "name": "Namn",
+            "username": "Användarnamn",
+            "password": "Lösenord",
+            "property": "Egenskap",
+            "selectNodes": "Välj noder ...",
+            "expand": "Expandera"
+        },
+        "status": {
+            "connected": "ansluten",
+            "not-connected": "inte ansluten",
+            "disconnected": "frånkopplad",
+            "connecting": "ansluter",
+            "error": "fel",
+            "ok": "OK"
+        },
+        "notification": {
+            "error": "<strong>Fel</strong>: __message__",
+            "errors": {
+                "not-deployed": "noden har inte distribuerats",
+                "no-response": "inget svar från servern",
+                "unexpected": "oväntat fel (__status__) __message__"
+            }
+        },
+        "errors": {
+            "nooverride": "Varning: meddelandeegenskaper kan inte längre åsidosätta angivna nodegenskaper. Se bit.ly/nr-override-msg-props"
+        }
+    },
+    "inject": {
+        "inject": "injicera",
+        "injectNow": "injicera nu",
+        "repeat": "upprepa = __repeat__",
+        "crontab": "crontab = __crontab__",
+        "stopped": "stoppad",
+        "failed": "Injicering misslyckades: __error__",
+        "label": {
+            "properties": "Egenskaper",
+            "repeat": "Upprepa",
+            "flow": "flödeskontext",
+            "global": "global kontext",
+            "str": "sträng",
+            "num": "tal",
+            "bool": "booleskt värde",
+            "json": "objekt",
+            "bin": "buffert",
+            "date": "tidsstämpel",
+            "env": "miljövariabel",
+            "object": "objekt",
+            "string": "sträng",
+            "boolean": "booleskt värde",
+            "number": "tal",
+            "Array": "matris",
+            "invalid": "Ogiltigt JSON-objekt"
+        },
+        "timestamp": "tidsstämpel",
+        "none": "ingen",
+        "interval": "intervall",
+        "interval-time": "intervall mellan tider",
+        "time": "vid en viss tidpunkt",
+        "seconds": "sekunder",
+        "minutes": "minuter",
+        "hours": "timmar",
+        "between": "mellan",
+        "previous": "föregående värde",
+        "at": "vid",
+        "and": "och",
+        "every": "varje",
+        "days": {
+            "0": "måndag",
+            "1": "tisdag",
+            "2": "onsdag",
+            "3": "torsdag",
+            "4": "fredag",
+            "5": "lördag",
+            "6": "söndag"
+        },
+        "on": "på",
+        "onstart": "Injicera en gång efter",
+        "onceDelay": "sekunder, sedan",
+        "success": "Injicerades: __label__",
+        "errors": {
+            "failed": "injicering misslyckades, se loggen för information",
+            "toolong": "Intervallet är för stort",
+            "invalid-expr": "Ogiltigt JSONata-uttryck: __error__",
+            "invalid-jsonata": "__prop__: ogiltigt egenskapsuttryck: __error__",
+            "invalid-prop": "__prop__: ogiltigt egenskapsuttryck: __error__",
+            "invalid-json": "__prop__: ogiltiga JSON-data: __error__",
+            "invalid-repeat": "Ogiltigt upprepningsvärde"
+        }
+    },
+    "catch": {
+        "catch": "fånga: alla",
+        "catchGroup": "fånga: grupp",
+        "catchNodes": "fånga: __number__",
+        "catchUncaught": "fånga: ohanterat",
+        "label": {
+            "source": "Fånga fel från",
+            "selectAll": "markera alla",
+            "uncaught": "Ignorera fel som hanteras av andra Fånga-noder"
+        },
+        "scope": {
+            "all": "alla noder",
+            "group": "i samma grupp",
+            "selected": "valda noder"
+        }
+    },
+    "status": {
+        "status": "status: alla",
+        "statusGroup": "status: grupp",
+        "statusNodes": "status: __number__",
+        "label": {
+            "source": "Rapportera status från",
+            "sortByType": "sortera efter typ"
+        },
+        "scope": {
+            "all": "alla noder",
+            "group": "i samma grupp",
+            "selected": "valda noder"
+        }
+    },
+    "complete": {
+        "completeNodes": "klar: __number__",
+        "errors": {
+            "scopeUndefined": "omfattning är odefinierad"
+        }
+    },
+    "debug": {
+        "output": "Utdata",
+        "status": "status",
+        "none": "Ingen",
+        "invalid-exp": "Ogiltigt JSONata-uttryck: __error__",
+        "msgprop": "meddelandeegenskap",
+        "msgobj": "fullständigt meddelandeobjekt",
+        "autostatus": "samma som felsökningsutdata",
+        "messageCount": "antal meddelanden",
+        "to": "Till",
+        "debtab": "felsökningsflik",
+        "tabcon": "felsökningsflik och konsol",
+        "toSidebar": "felsökningsfönster",
+        "toConsole": "systemkonsol",
+        "toStatus": "nodstatus (32 tecken)",
+        "severity": "Nivå",
+        "node": "nod",
+        "notification": {
+            "activated": "Aktiverades: __label__",
+            "deactivated": "Inaktiverades: __label__"
+        },
+        "sidebar": {
+            "label": "felsökning",
+            "name": "Felsökningsmeddelanden",
+            "filterAll": "alla noder",
+            "filterSelected": "valda noder",
+            "filterCurrent": "aktuellt flöde",
+            "debugNodes": "Felsökningsnoder",
+            "clearLog": "Rensa meddelanden",
+            "clearFilteredLog": "Rensa filtrerade meddelanden",
+            "clearLogOptions": "Alternativ för rensning av meddelanden",
+            "filterLog": "Filtrera meddelanden",
+            "openWindow": "Öppna i nytt fönster",
+            "copyPath": "Kopiera sökväg",
+            "copyPayload": "Kopiera värde",
+            "pinPath": "Fäst öppna",
+            "selectAll": "markera alla",
+            "selectNone": "avmarkera alla",
+            "all": "alla",
+            "filtered": "filtrerade",
+            "pause": "pausa",
+            "paused": "Pausad",
+            "resume": "återuppta",
+            "messagesDropped": "__count__ meddelande tappades",
+            "messagesDropped_plural": "__count__ meddelanden tappades"
+        },
+        "messageMenu": {
+            "collapseAll": "Fäll ihop alla sökvägar",
+            "clearPinned": "Rensa fästa sökvägar",
+            "filterNode": "Filtrera denna nod",
+            "clearFilter": "Rensa filter"
+        }
+    },
+    "link": {
+        "linkIn": "länk in",
+        "linkOut": "länk ut",
+        "linkCall": "länkanrop",
+        "linkOutReturn": "länkretur",
+        "outMode": "Läge",
+        "sendToAll": "Skicka till alla anslutna länknoder",
+        "returnToCaller": "Återvänd till anropande länknod",
+        "timeout": "tidsgräns",
+        "linkCallType": "Länktyp",
+        "staticLinkCall": "Fast mål",
+        "dynamicLinkCall": "Dynamiskt mål (msg.target)",
+        "dynamicLinkLabel": "Dynamisk",
+        "errors": {
+            "missingReturn": "Information om returlänk saknas",
+            "linkUndefined": "länk är odefinierad",
+            "linkCallMultipleTargetsFound": "Flera 'länk in'-noder med namnet '__target__' hittades",
+            "linkCallTargetNotFound": "Målnoden 'länk in' med namnet '__target__' hittades inte"
+        }
+    },
+    "tls": {
+        "tls": "TLS-konfiguration",
+        "label": {
+            "use-local-files": "Använd nyckel och certifikat från lokala filer",
+            "upload": "Ladda upp",
+            "cert": "Certifikat",
+            "key": "Privat nyckel",
+            "passphrase": "Lösenfras",
+            "ca": "CA-certifikat",
+            "verify-server-cert": "Verifiera servercertifikat",
+            "servername": "Servernamn",
+            "alpnprotocol": "ALPN-protokoll",
+            "certtype": "Certifikattyp",
+            "files": "Enskilda filer",
+            "p12": "pfx eller p12",
+            "pfx": "pfx- eller p12-fil",
+            "env": "Miljövariabel"
+        },
+        "placeholder": {
+            "cert": "sökväg till certifikat (PEM-format)",
+            "key": "sökväg till privat nyckel (PEM-format)",
+            "p12": "sökväg till .pfx eller .p12 (PKCS12-format)",
+            "ca": "sökväg till CA-certifikat (PEM-format)",
+            "passphrase": "lösenord eller lösenfras (valfritt)",
+            "servername": "för användning med SNI",
+            "alpnprotocol": "för användning med ALPN"
+        },
+        "error": {
+            "missing-file": "Ingen certifikat- eller nyckelfil har angetts",
+            "invalid-cert": "Certifikat har inte angetts",
+            "invalid-p12": "pfx/p12 har inte angetts",
+            "invalid-key": "Privat nyckel har inte angetts"
+        }
+    },
+    "function": {
+        "function": "funktion",
+        "label": {
+            "setup": "Konfiguration",
+            "function": "Vid meddelande",
+            "initialize": "Vid start",
+            "finalize": "Vid stopp",
+            "outputs": "Utdata",
+            "modules": "Moduler",
+            "timeout": "Tidsgräns"
+        },
+        "text": {
+            "initialize": "// Kod som läggs till här körs en gång\n// när noden startas.\n",
+            "finalize": "// Kod som läggs till här körs när\n// noden stoppas eller distribueras på nytt.\n"
+        },
+        "require": {
+            "var": "variabel",
+            "module": "modul",
+            "moduleName": "Modulnamn",
+            "importAs": "Importera som"
+        },
+        "error": {
+            "externalModuleNotAllowed": "Funktionsnoden får inte läsa in externa moduler",
+            "moduleNotAllowed": "Modulen __module__ är inte tillåten",
+            "externalModuleLoadError": "Funktionsnoden kunde inte läsa in externa moduler",
+            "moduleLoadError": "Det gick inte att läsa in modulen __module__: __error__",
+            "moduleNameError": "Ogiltigt namn på modulvariabel: __name__",
+            "moduleNameReserved": "Reserverat variabelnamn: __name__",
+            "inputListener": "Det går inte att lägga till en lyssnare för händelsen 'input' i Function",
+            "non-message-returned": "Funktionen försökte skicka ett meddelande av typen __type__",
+            "invalid-js": "Fel i JavaScript-koden",
+            "missing-module": "Modulen __module__ saknas",
+            "linkcallTargetInvalid": "Parametern för målet för länkanrop är ogiltig; en sträng förväntades",
+            "linkcallMsgInvalid": "Meddelandeparametern för länkanrop är ogiltig; ett objekt förväntades",
+            "linkcallTargetNotFound": "Målnoden 'länk in' hittades inte"
+        }
+    },
+    "template": {
+        "template": "mall",
+        "label": {
+            "template": "Mall",
+            "property": "Egenskap",
+            "format": "Syntaxmarkering",
+            "syntax": "Format",
+            "output": "Utdata som",
+            "mustache": "Mustache-mall",
+            "plain": "Oformaterad text",
+            "json": "Tolkad JSON",
+            "yaml": "Tolkad YAML",
+            "none": "ingen"
+        },
+        "templatevalue": "Detta är nyttolasten: {{payload}} !"
+    },
+    "delay": {
+        "action": "Åtgärd",
+        "for": "Under",
+        "delaymsg": "Fördröj varje meddelande",
+        "delayfixed": "Fast fördröjning",
+        "delayvarmsg": "Åsidosätt fördröjningen med msg.delay",
+        "randomdelay": "Slumpmässig fördröjning",
+        "limitrate": "Begränsa takt",
+        "limitall": "Alla meddelanden – jämnt fördelade",
+        "limitburst": "Alla meddelanden – burstläge",
+        "limittopic": "För varje msg.topic",
+        "fairqueue": "Skicka varje ämne i turordning",
+        "timedqueue": "Skicka alla ämnen",
+        "milisecs": "Millisekunder",
+        "secs": "Sekunder",
+        "sec": "Sekund",
+        "mins": "Minuter",
+        "min": "Minut",
+        "hours": "Timmar",
+        "hour": "Timme",
+        "days": "Dagar",
+        "day": "Dag",
+        "between": "Mellan",
+        "and": "&",
+        "rate": "Takt",
+        "msgper": "meddelande(n) per",
+        "queuemsg": "Köa mellanliggande meddelanden",
+        "dropmsg": "Släpp mellanliggande meddelanden",
+        "sendmsg": "Skicka mellanliggande meddelanden på andra utgången",
+        "allowrate": "tillåt att msg.rate (i ms) åsidosätter takten",
+        "label": {
+            "delay": "fördröjning",
+            "variable": "variabel",
+            "burst": "burst",
+            "limit": "gräns",
+            "limitTopic": "begränsa ämne",
+            "random": "slumpmässig",
+            "rate": "takt",
+            "random-first": "första slumpvärde",
+            "random-last": "sista slumpvärde",
+            "units": {
+                "second": { "plural": "Sekunder", "singular": "Sekund" },
+                "minute": { "plural": "Minuter", "singular": "Minut" },
+                "hour": { "plural": "Timmar", "singular": "Timme" },
+                "day": { "plural": "Dagar", "singular": "Dag" }
+            }
+        },
+        "errors": {
+            "too-many": "för många väntande meddelanden i fördröjningsnoden",
+            "invalid-timeout": "Ogiltigt fördröjningsvärde",
+            "invalid-rate": "Ogiltigt taktvärde",
+            "invalid-rate-unit": "Ogiltigt värde för taktenhet",
+            "invalid-random-first": "Ogiltigt första slumpvärde",
+            "invalid-random-last": "Ogiltigt sista slumpvärde"
+        }
+    },
+    "unknown": {
+        "label": { "unknown": "okänd" },
+        "manageModules": "Hantera moduler",
+        "tip": "<p>Den här noden är av en typ som är okänd för din Node-RED-installation.</p><p><i>Om du distribuerar med noden i detta tillstånd bevaras dess konfiguration, men flödet startar inte förrän den saknade typen har installerats.</i></p><p>Se informationssidofältet för mer hjälp.</p>"
+    },
+    "mqtt": {
+        "label": {
+            "broker": "Server",
+            "example": "t.ex. localhost",
+            "output": "Utdata",
+            "qos": "QoS",
+            "retain": "Behåll",
+            "clientid": "Klient-ID",
+            "port": "Port",
+            "keepalive": "Håll vid liv",
+            "cleansession": "Använd ren session",
+            "autoUnsubscribe": "Avprenumerera automatiskt vid frånkoppling",
+            "cleanstart": "Använd ren start",
+            "use-tls": "Använd TLS",
+            "tls-config": "TLS-konfiguration",
+            "verify-server-cert": "Verifiera servercertifikat",
+            "compatmode": "Använd äldre MQTT 3.1-stöd",
+            "userProperties": "Användaregenskaper",
+            "subscriptionIdentifier": "Prenumerations-ID",
+            "flags": "Flaggor",
+            "nl": "Ta inte emot meddelanden som publiceras av den här klienten",
+            "rap": "Behåll ursprungligt publiceringsmeddelandes behåll-flagga",
+            "rh": "Hantering av behållna meddelanden",
+            "rh0": "Skicka behållna meddelanden",
+            "rh1": "Skicka endast för nya prenumerationer",
+            "rh2": "Skicka inte",
+            "responseTopic": "Svarsämne",
+            "contentType": "Innehållstyp",
+            "correlationData": "Korrelationsdata",
+            "expiry": "Upphör (sek)",
+            "sessionExpiry": "Session upphör (sek)",
+            "topicAlias": "Alias",
+            "payloadFormatIndicator": "Format",
+            "payloadFormatIndicatorFalse": "ospecificerade byte (standard)",
+            "payloadFormatIndicatorTrue": "UTF-8-kodad nyttolast",
+            "protocolVersion": "Protokoll",
+            "protocolVersion3": "MQTT V3.1 (äldre)",
+            "protocolVersion4": "MQTT V3.1.1",
+            "protocolVersion5": "MQTT V5",
+            "topicAliasMaximum": "Max alias",
+            "maximumPacketSize": "Max paketstorlek",
+            "receiveMaximum": "Max antal mottagna",
+            "session": "Session",
+            "delay": "Fördröjning",
+            "action": "Åtgärd",
+            "staticTopic": "Prenumerera på ett ämne",
+            "dynamicTopic": "Dynamisk prenumeration",
+            "auto-connect": "Anslut automatiskt",
+            "auto-mode-depreciated": "Detta alternativ är föråldrat. Använd det nya läget för automatisk identifiering.",
+            "none": "ingen",
+            "other": "annan"
+        },
+        "sections-label": {
+            "birth-message": "Meddelande som skickas vid anslutning (startmeddelande)",
+            "will-message": "Meddelande som skickas vid oväntad frånkoppling (will-meddelande)",
+            "close-message": "Meddelande som skickas före frånkoppling (stängningsmeddelande)"
+        },
+        "tabs-label": { "connection": "Anslutning", "security": "Säkerhet", "messages": "Meddelanden" },
+        "placeholder": {
+            "clientid": "Lämna tomt för automatiskt genererat",
+            "clientid-nonclean": "Måste anges för sessioner som inte är rena",
+            "will-topic": "Lämna tomt för att inaktivera will-meddelande",
+            "birth-topic": "Lämna tomt för att inaktivera startmeddelande",
+            "close-topic": "Lämna tomt för att inaktivera stängningsmeddelande"
+        },
+        "state": {
+            "connected": "Ansluten till broker: __broker__",
+            "disconnected": "Frånkopplad från broker: __broker__",
+            "connect-failed": "Anslutning till broker misslyckades: __broker__",
+            "broker-disconnected": "Broker __broker__ kopplade från klienten: __reasonCode__ __reasonString__"
+        },
+        "retain": "Behåll",
+        "output": {
+            "buffer": "en buffert",
+            "string": "en sträng",
+            "base64": "en Base64-kodad sträng",
+            "auto": "identifiera automatiskt (sträng eller buffert)",
+            "auto-detect": "identifiera automatiskt (tolkat JSON-objekt, sträng eller buffert)",
+            "json": "ett tolkat JSON-objekt"
+        },
+        "true": "sant",
+        "false": "falskt",
+        "tip": "Tips: Lämna ämne, qos eller behåll tomt om du vill ange dem via msg-egenskaper.",
+        "errors": {
+            "not-defined": "ämne har inte angetts",
+            "missing-config": "broker-konfiguration saknas",
+            "invalid-topic": "Ogiltigt ämne har angetts",
+            "nonclean-missingclientid": "Inget klient-ID har angetts; använder ren session",
+            "invalid-json-string": "Ogiltig JSON-sträng",
+            "invalid-json-parse": "Det gick inte att tolka JSON-strängen",
+            "invalid-action-action": "Ogiltig åtgärd har angetts",
+            "invalid-action-alreadyconnected": "Koppla från broker innan anslutning",
+            "invalid-action-badsubscription": "msg.topic saknas eller är ogiltig",
+            "invalid-client-id": "Klient-ID saknas"
+        }
+    },
+    "httpin": {
+        "label": {
+            "method": "Metod", "url": "URL", "doc": "Dokumentation", "return": "Returnera", "upload": "Acceptera filuppladdningar", "parsing": "Tolka inte begärandetext", "status": "Statuskod", "headers": "Rubriker", "other": "annan", "paytoqs": { "ignore": "Ignorera", "query": "Lägg till i frågesträngsparametrar", "body": "Skicka som begärandetext" }, "utf8String": "UTF8-sträng", "binaryBuffer": "binär buffert", "jsonObject": "tolkat JSON-objekt", "authType": "Typ", "bearerToken": "Token"
+        },
+        "setby": "- anges av msg.method -",
+        "basicauth": "Använd autentisering",
+        "use-tls": "Använd anpassad SSL/TLS-konfiguration",
+        "tls-config": "TLS-konfiguration",
+        "basic": "grundläggande autentisering",
+        "digest": "digestautentisering",
+        "bearer": "bearer-autentisering",
+        "use-proxy": "Använd proxy",
+        "persist": "Aktivera keep-alive för anslutning",
+        "proxy-config": "Proxykonfiguration",
+        "use-proxyauth": "Använd proxyautentisering",
+        "noproxy-hosts": "Ignorera värdar",
+        "senderr": "Skicka endast svar som inte är 2xx till Fånga-noden",
+        "utf8": "en UTF-8-sträng",
+        "binary": "en binär buffert",
+        "json": "ett tolkat JSON-objekt",
+        "tip": { "in": "URL:en kommer att vara relativ till ", "res": "Meddelanden som skickas till denna nod <b>måste</b> komma från en <i>http input</i>-nod", "req": "Tips: Om JSON-tolkningen misslyckas returneras den hämtade strängen som den är." },
+        "httpreq": "HTTP-begäran",
+        "errors": {
+            "not-created": "Det går inte att skapa http-in-nod när httpNodeRoot är satt till false", "missing-path": "sökväg saknas", "no-response": "Inget svarsobjekt", "json-error": "JSON-tolkningsfel", "no-url": "Ingen URL har angetts", "deprecated-call": "Föråldrat anrop till __method__", "invalid-transport": "icke-HTTP-transport begärdes", "timeout-isnan": "Tidsgränsvärdet är inte ett giltigt tal och ignoreras", "timeout-isnegative": "Tidsgränsvärdet är negativt och ignoreras", "invalid-payload": "Ogiltig nyttolast", "invalid-url": "Ogiltig URL", "rejectunauthorized-invalid": "msg.rejectUnauthorized ska vara ett booleskt värde"
+        },
+        "status": { "requesting": "begär" },
+        "insecureHTTPParser": "Inaktivera strikt HTTP-tolkning"
+    },
+    "websocket": {
+        "label": { "type": "Typ", "path": "Sökväg", "url": "URL", "subprotocol": "Underprotokoll" },
+        "listenon": "Lyssna på", "connectto": "Anslut till", "sendrec": "Skicka/ta emot", "payload": "nyttolast", "message": "hela meddelandet", "sendheartbeat": "Skicka hjärtslag",
+        "tip": {
+            "path1": "Som standard innehåller <code>payload</code> data som ska skickas över eller tas emot från en websocket. Lyssnaren kan konfigureras för att skicka eller ta emot hela meddelandeobjektet som en JSON-formaterad sträng.",
+            "path2": "Denna sökväg kommer att vara relativ till <code>__path__</code>.",
+            "url1": "URL:en ska använda schemat ws:&#47;&#47; eller wss:&#47;&#47; och peka på en befintlig websocket-lyssnare.",
+            "url2": "Som standard innehåller <code>payload</code> data som ska skickas över eller tas emot från en websocket. Klienten kan konfigureras för att skicka eller ta emot hela meddelandeobjektet som en JSON-formaterad sträng.",
+            "headers": "Rubriker skickas endast under protokolluppgraderingen från HTTP till WS/WSS-protokollet."
+        },
+        "status": { "connected": "ansluten __count__", "connected_plural": "anslutna __count__" },
+        "errors": { "connect-error": "Ett fel uppstod vid ws-anslutningen: ", "send-error": "Ett fel uppstod vid sändning: ", "missing-conf": "Serverkonfiguration saknas", "duplicate-path": "Det går inte att ha två WebSocket-lyssnare på samma sökväg: __path__", "missing-server": "Serverkonfiguration saknas", "missing-client": "Klientkonfiguration saknas" }
+    },
+    "watch": {
+        "watch": "bevaka",
+        "label": { "files": "Fil(er)", "recursive": "Bevaka underkataloger rekursivt" },
+        "placeholder": { "files": "Kommaseparerad lista med filer och/eller kataloger" },
+        "tip": "I Windows måste du använda dubbla omvända snedstreck \\ i katalognamn."
+    },
+    "tcpin": {
+        "label": { "type": "Typ", "output": "Utdata", "port": "port", "host": "på värd", "payload": "nyttolast(er)", "delimited": "avgränsad med", "close-connection": "Stäng anslutningen efter att varje meddelande har skickats?", "decode-base64": "Avkoda Base64-meddelande?", "server": "Server", "return": "Returnera", "ms": "ms", "chars": "tecken", "close": "Stäng", "optional": "(valfritt)", "reattach": "återanslut avgränsare" },
+        "type": { "listen": "Lyssna på", "connect": "Anslut till", "reply": "Svara till TCP" },
+        "output": { "stream": "ström av", "single": "enskild", "buffer": "Buffert", "string": "Sträng", "base64": "Base64-sträng" },
+        "return": { "timeout": "efter en fast tidsgräns på", "character": "när mottaget tecken är", "number": "efter ett fast antal tecken", "never": "aldrig – håll anslutningen öppen", "immed": "omedelbart – vänta inte på svar" },
+        "status": { "connecting": "ansluter till __host__:__port__", "connected": "ansluten till __host__:__port__", "listening-port": "lyssnar på port __port__", "stopped-listening": "slutade lyssna på port", "connection-from": "anslutning från __host__:__port__", "connection-closed": "anslutning stängdes från __host__:__port__", "connections": "__count__ anslutning", "connections_plural": "__count__ anslutningar" },
+        "errors": { "connection-lost": "anslutningen till __host__:__port__ gick förlorad", "timeout": "tidsgränsen stängde socketport __port__", "cannot-listen": "kan inte lyssna på port __port__, fel: __error__", "error": "fel: __error__", "socket-error": "socketfel från __host__:__port__", "no-host": "Värd och/eller port har inte angetts", "connect-timeout": "tidsgräns för anslutning", "connect-fail": "anslutning misslyckades", "bad-string": "det gick inte att konvertera till sträng", "invalid-host": "Ogiltig värd", "invalid-port": "Ogiltig port" }
+    },
+    "udp": {
+        "label": { "listen": "Lyssna efter", "onport": "på port", "using": "med", "output": "Utdata", "group": "Grupp", "interface": "Lokalt gränssnitt", "send": "Skicka ett", "toport": "till port", "address": "Adress", "decode-base64": "Avkoda Base64-kodad nyttolast?", "port": "port" },
+        "placeholder": { "interface": "(valfritt) lokalt gränssnitt eller adress att binda till", "interfaceprompt": "(valfritt) lokalt gränssnitt eller adress att binda till", "address": "mål-IP" },
+        "udpmsgs": "UDP-meddelanden", "mcmsgs": "multicastmeddelanden", "udpmsg": "UDP-meddelande", "bcmsg": "broadcastmeddelande", "mcmsg": "multicastmeddelande",
+        "output": { "buffer": "en buffert", "string": "en sträng", "base64": "en Base64-kodad sträng" },
+        "bind": { "random": "bind till slumpmässig lokal port", "local": "bind till lokal port", "target": "bind till målport" },
+        "tip": { "in": "Tips: Kontrollera att brandväggen tillåter data in.", "out": "Tips: Lämna adress och port tomma om du vill ange dem med <code>msg.ip</code> och <code>msg.port</code>.", "port": "Portar som redan används: " },
+        "status": { "listener-at": "UDP-lyssnare på __host__:__port__", "mc-group": "UDP-multicastgrupp __group__", "listener-stopped": "UDP-lyssnare stoppad", "output-stopped": "UDP-utdata stoppad", "mc-ready": "UDP-multicast klar: __iface__:__outport__ -> __host__:__port__", "bc-ready": "UDP-broadcast klar: __outport__ -> __host__:__port__", "ready": "UDP klar: __outport__ -> __host__:__port__", "ready-nolocal": "UDP klar: __host__:__port__", "re-use": "UDP återanvänder socket: __outport__ -> __host__:__port__" },
+        "errors": { "access-error": "UDP-åtkomstfel; du kan behöva root-åtkomst för portar under 1024", "error": "fel: __error__", "bad-mcaddress": "Felaktig multicastadress", "interface": "Måste vara IP-adress för det nödvändiga gränssnittet", "ip-notset": "UDP: IP-adress har inte angetts", "port-notset": "UDP: port har inte angetts", "port-invalid": "UDP: portnumret är inte giltigt", "alreadyused": "UDP: port __port__ används redan", "ifnotfound": "UDP: gränssnittet __iface__ hittades inte", "invalid-group": "ogiltig multicastgrupp" }
+    },
+    "switch": {
+        "switch": "switch",
+        "label": { "property": "Egenskap", "rule": "regel", "repair": "återskapa meddelandesekvenser", "value-rules": "värderegler", "sequence-rules": "sekvensregler" },
+        "previous": "föregående värde", "and": "och", "checkall": "kontrollerar alla regler", "stopfirst": "stoppar efter första träff", "ignorecase": "ignorera skiftläge",
+        "rules": { "btwn": "är mellan", "cont": "innehåller", "regex": "matchar reguljärt uttryck", "true": "är sant", "false": "är falskt", "null": "är null", "nnull": "är inte null", "istype": "är av typen", "empty": "är tomt", "nempty": "är inte tomt", "head": "huvud", "tail": "svans", "index": "index mellan", "exp": "JSONata-uttr", "else": "annars", "hask": "har nyckel" },
+        "errors": { "invalid-expr": "Ogiltigt JSONata-uttryck: __error__", "too-many": "för många väntande meddelanden i switch-noden" }
+    },
+    "change": {
+        "label": { "rules": "Regler", "rule": "regel", "set": "ange __property__", "change": "ändra __property__", "delete": "ta bort __property__", "move": "flytta __property__", "changeCount": "ändra: __count__ regler", "regex": "Använd reguljära uttryck", "deepCopy": "Djupkopiera värde" },
+        "action": { "set": "Ange", "change": "Ändra", "delete": "Ta bort", "move": "Flytta", "toValue": "till värdet", "to": "till", "search": "Sök efter", "replace": "Ersätt med" },
+        "errors": { "invalid-from": "Ogiltig 'from'-egenskap: __error__", "invalid-json": "Ogiltig JSON-egenskap för 'to'", "invalid-expr": "Ogiltigt JSONata-uttryck: __error__", "no-override": "Det går inte att ange egenskap för en typ som inte är ett objekt: __property__", "invalid-prop": "Ogiltigt egenskapsuttryck: __property__", "invalid-json-data": "Ogiltiga JSON-data: __error__" }
+    },
+    "range": {
+        "range": "intervall",
+        "label": { "action": "Åtgärd", "inputrange": "Mappa indataintervallet", "resultrange": "till målintervallet", "from": "från", "to": "till", "roundresult": "Avrunda resultatet till närmaste heltal?", "minin": "indata från", "maxin": "indata till", "minout": "mål från", "maxout": "mål till" },
+        "placeholder": { "min": "t.ex. 0", "maxin": "t.ex. 99", "maxout": "t.ex. 255" },
+        "scale": { "payload": "Skala meddelandeegenskapen", "limit": "Skala och begränsa till målintervallet", "wrap": "Skala och radbryt inom målintervallet", "drop": "Skala, men släpp msg om den ligger utanför indataintervallet" },
+        "tip": "Tips: Den här noden fungerar ENDAST med tal.",
+        "errors": { "notnumber": "Inte ett tal" }
+    },
+    "csv": {
+        "label": { "columns": "Kolumner", "separator": "Avgränsare", "c2o": "Alternativ för CSV till objekt", "o2c": "Alternativ för objekt till CSV", "input": "Indata", "skip-s": "Hoppa över första", "skip-e": "rader", "firstrow": "första raden innehåller kolumnnamn", "output": "Utdata", "includerow": "inkludera rad med kolumnnamn", "newline": "Ny rad", "usestrings": "tolka numeriska värden", "include_empty_strings": "inkludera tomma strängar", "include_null_values": "inkludera null-värden", "spec": "Tolkare" },
+        "spec": { "rfc": "RFC4180", "legacy": "Äldre", "legacy_warning": "Det äldre läget kommer att tas bort i en framtida version." },
+        "placeholder": { "columns": "kommaseparerade kolumnnamn" },
+        "separator": { "comma": "komma", "tab": "tabb", "space": "blanksteg", "semicolon": "semikolon", "colon": "kolon", "hashtag": "hashtag", "other": "annan ..." },
+        "output": { "row": "ett meddelande per rad", "array": "ett enda meddelande [matris]" },
+        "newline": { "linux": "Linux (\\n)", "mac": "Mac (\\r)", "windows": "Windows (\\r\\n)" },
+        "hdrout": { "none": "skicka aldrig kolumnrubriker", "all": "skicka alltid kolumnrubriker", "once": "skicka rubriker en gång, tills msg.reset" },
+        "errors": { "bad_template": "Felaktig kolumnmall.", "csv_js": "Denna nod hanterar endast CSV-strängar eller js-objekt.", "obj_csv": "Ingen kolumnmall angavs för objekt -> CSV.", "bad_csv": "Felaktiga CSV-data – utdata är sannolikt skadade." }
+    },
+    "html": {
+        "label": { "select": "Väljare", "output": "Utdata", "in": "i", "prefix": "Egenskapsnamn för HTML-innehåll" },
+        "output": { "html": "elementens HTML-innehåll", "text": "endast elementens textinnehåll", "attr": "ett objekt med alla attribut för elementen", "compl": "ett objekt med alla attribut och HTML-innehåll för elementen" },
+        "format": { "single": "som ett enda meddelande som innehåller en matris", "multi": "som flera meddelanden, ett för varje element" }
+    },
+    "json": {
+        "errors": { "dropped-object": "Ignorerade nyttolast som inte är ett objekt", "dropped": "Ignorerade nyttolasttyp som inte stöds", "dropped-error": "Det gick inte att konvertera nyttolasten", "schema-error": "JSON Schema-fel", "schema-error-compile": "JSON Schema-fel: det gick inte att kompilera schema" },
+        "label": { "o2j": "Alternativ för objekt till JSON", "pretty": "Formatera JSON-sträng", "action": "Åtgärd", "property": "Egenskap", "actions": { "toggle": "Konvertera mellan JSON-sträng och objekt", "str": "Konvertera alltid till JSON-sträng", "obj": "Konvertera alltid till JavaScript-objekt" } }
+    },
+    "yaml": {
+        "errors": { "dropped-object": "Ignorerade nyttolast som inte är ett objekt", "dropped": "Ignorerade nyttolasttyp som inte stöds", "dropped-error": "Det gick inte att konvertera nyttolasten" }
+    },
+    "xml": {
+        "label": { "represent": "Egenskapsnamn för XML-taggattribut", "prefix": "Egenskapsnamn för taggtextinnehåll", "advanced": "Avancerade alternativ", "x2o": "Alternativ för XML till objekt" },
+        "errors": { "xml_js": "Denna nod hanterar endast XML-strängar eller js-objekt." }
+    },
+    "file": {
+        "label": { "write": "skriv fil", "read": "läs fil", "filename": "Filnamn", "path": "sökväg", "action": "Åtgärd", "addnewline": "Lägg till ny rad (\\n) i varje nyttolast?", "createdir": "Skapa katalog om den inte finns?", "outputas": "Utdata", "breakchunks": "Dela upp i block", "breaklines": "Dela upp i rader", "sendError": "Skicka meddelande vid fel (äldre läge)", "encoding": "Kodning", "deletelabel": "ta bort __file__", "utf8String": "UTF8-sträng", "utf8String_plural": "UTF8-strängar", "binaryBuffer": "binär buffert", "binaryBuffer_plural": "binära buffertar", "allProps": "inkludera alla befintliga egenskaper i varje msg" },
+        "action": { "append": "lägg till i fil", "overwrite": "skriv över fil", "delete": "ta bort fil" },
+        "output": { "utf8": "en enda utf8-sträng", "buffer": "ett enda buffertobjekt", "lines": "ett msg per rad", "stream": "en ström av buffertar" },
+        "status": { "wrotefile": "skrev till fil: __file__", "deletedfile": "tog bort fil: __file__", "appendedfile": "lade till i fil: __file__" },
+        "encoding": { "none": "standard", "setbymsg": "anges av msg.encoding", "native": "Nationell", "unicode": "Unicode", "japanese": "Japanska", "chinese": "Kinesiska", "korean": "Koreanska", "taiwan": "Taiwan/Hongkong", "windows": "Windows-kodsidor", "iso": "ISO-kodsidor", "ibm": "IBM-kodsidor", "mac": "Mac-kodsidor", "koi8": "KOI8-kodsidor", "misc": "Diverse" },
+        "errors": { "nofilename": "Inget filnamn har angetts", "invaliddelete": "Varning: Ogiltig borttagning. Använd det särskilda borttagningsalternativet i konfigurationsdialogen.", "deletefail": "det gick inte att ta bort fil: __error__", "writefail": "det gick inte att skriva till fil: __error__", "appendfail": "det gick inte att lägga till i fil: __error__", "createfail": "det gick inte att skapa fil: __error__" },
+        "tip": "Tips: Filnamnet ska vara en absolut sökväg, annars blir det relativt till arbetskatalogen för Node-RED-processen."
+    },
+    "split": {
+        "split": "dela",
+        "intro": "Dela <code>msg.payload</code> baserat på typ:",
+        "object": "<b>Objekt</b>", "objectSend": "Skicka ett meddelande för varje nyckel/värde-par", "strBuff": "<b>Sträng</b> / <b>Buffert</b>", "array": "<b>Matris</b>",
+        "splitThe": "Dela egenskap", "splitUsing": "Dela med", "splitLength": "Fast längd på", "stream": "Hantera som en ström av meddelanden", "addname": " Kopiera nyckel till "
+    },
+    "join": {
+        "join": "sammanfoga",
+        "mode": { "mode": "Läge", "auto": "automatiskt", "merge": "sammanfoga sekvenser", "reduce": "reducera sekvens", "custom": "manuellt" },
+        "combine": "Kombinera varje", "completeMessage": "fullständigt meddelande", "create": "för att skapa", "type": { "string": "en sträng", "array": "en matris", "buffer": "en buffert", "object": "ett nyckel/värde-objekt", "merged": "ett sammanfogat objekt" },
+        "using": "med värdet för", "key": "som nyckel", "joinedUsing": "sammanfogad med", "send": "Skicka meddelandet:", "afterCount": "Efter ett antal meddelandedelar", "useparts": "Använd befintlig msg.parts-egenskap", "count": "antal", "subsequent": "och varje efterföljande meddelande.", "afterTimeout": "Efter en tidsgräns efter första meddelandet", "seconds": "sekunder", "complete": "Efter ett meddelande med egenskapen <code>msg.complete</code> angiven",
+        "tip": "Detta läge förutsätter att noden antingen paras med en <i>split</i>-nod eller att mottagna meddelanden har en korrekt konfigurerad <code>msg.parts</code>-egenskap.",
+        "too-many": "för många väntande meddelanden i join-noden", "message-prop": "meddelandeegenskap",
+        "merge": { "topics-label": "Sammanfogade ämnen", "topics": "ämnen", "topic": "ämne", "on-change": "Skicka sammanfogat meddelande när ett nytt ämne anländer" },
+        "reduce": { "exp": "Reduceringsuttr", "exp-value": "uttr", "init": "Startvärde", "right": "Utvärdera i omvänd ordning (sist till först)", "fixup": "Korrigeringsuttr" },
+        "errors": { "invalid-expr": "Ogiltigt JSONata-uttryck: __error__", "invalid-type": "Det går inte att sammanfoga __error__ med buffert" }
+    },
+    "sort": {
+        "sort": "sortera", "target": "Sortera", "seq": "meddelandesekvens", "key": "Nyckel", "elem": "elementvärde", "order": "Ordning", "ascending": "stigande", "descending": "fallande", "as-number": "som tal", "invalid-exp": "Ogiltigt JSONata-uttryck i sorteringsnoden: __message__", "too-many": "För många väntande meddelanden i sorteringsnoden", "clear": "rensa väntande meddelande i sorteringsnoden"
+    },
+    "batch": {
+        "batch": "batch", "mode": { "label": "Läge", "num-msgs": "Gruppera efter antal meddelanden", "interval": "Gruppera efter tidsintervall", "concat": "Sammanfoga sekvenser" },
+        "count": { "label": "Antal meddelanden", "overlap": "Överlappning", "count": "antal", "invalid": "Ogiltigt antal och överlappning" },
+        "interval": { "label": "Intervall", "seconds": "sekunder", "empty": "skicka tomt meddelande när inget meddelande anländer" },
+        "concat": { "topics-label": "Ämnen", "topic": "ämne" },
+        "too-many": "för många väntande meddelanden i batchnoden", "unexpected": "oväntat läge", "no-parts": "ingen parts-egenskap i meddelandet", "honourParts": "Tillåt att msg.parts också slutför batchåtgärden.",
+        "error": { "invalid-count": "Ogiltigt antal", "invalid-overlap": "Ogiltig överlappning", "invalid-interval": "Ogiltigt intervall" }
+    },
+    "rbe": {
+        "rbe": "filter", "label": { "func": "Läge", "init": "Skicka initialt värde", "start": "Startvärde", "name": "Namn", "septopics": "Tillämpa läge separat för varje ", "gap": "värdeförändring", "property": "egenskap", "topic": "ämne" },
+        "placeholder": { "bandgap": "t.ex. 10 eller 5 %", "start": "lämna tomt för att använda första mottagna data" },
+        "opts": { "rbe": "blockera om inte värdet ändras", "rbei": "blockera om inte värdet ändras (ignorera initialt värde)", "deadband": "blockera om inte värdeförändringen är större än", "deadbandEq": "blockera om inte värdeförändringen är större än eller lika med", "narrowband": "blockera om värdeförändringen är större än", "narrowbandEq": "blockera om värdeförändringen är större än eller lika med", "in": "jämfört med senaste indatavärde", "out": "jämfört med senaste giltiga utdatavärde" },
+        "warn": { "nonumber": "inget tal hittades i nyttolasten" }
+    },
+    "global-config": { "label": { "open-conf": "Öppna konfiguration" } }
+    ,
+    "exec": {
+        "exec": "exec", "spawn": "spawn",
+        "label": { "command": "Kommando", "append": "Lägg till", "timeout": "Tidsgräns", "timeoutplace": "valfritt", "return": "Utdata", "seconds": "sekunder", "stdout": "stdout", "stderr": "stderr", "retcode": "returkod", "winHide": "Dölj konsol" },
+        "placeholder": { "extraparams": "extra indataparametrar" },
+        "opt": { "exec": "när kommandot är klart – exec-läge", "spawn": "medan kommandot körs – spawn-läge" },
+        "oldrc": "Använd utdata i gammal stil (kompatibilitetsläge)"
+    },
+    "trigger": {
+        "send": "Skicka", "then": "sedan", "then-send": "skicka sedan", "output": { "string": "strängen", "number": "talet", "existing": "det befintliga msg-objektet", "original": "det ursprungliga msg-objektet", "latest": "det senaste msg-objektet", "nothing": "ingenting" },
+        "wait-reset": "vänta på återställning", "wait-for": "vänta i", "wait-loop": "skicka igen var", "for": "Hantering", "bytopics": "varje", "alltopics": "alla meddelanden", "duration": { "ms": "Millisekunder", "s": "Sekunder", "m": "Minuter", "h": "Timmar" }, "extend": " förläng fördröjningen om ett nytt meddelande anländer", "override": "åsidosätt fördröjningen med msg.delay", "second": " skicka andra meddelandet till separat utgång",
+        "label": { "trigger": "trigger", "trigger-block": "trigger och blockera", "trigger-loop": "skicka igen varje", "reset": "Återställ triggern om:", "resetMessage": "msg.reset är angiven", "resetPayload": "msg.payload är lika med", "resetprompt": "valfritt", "duration": "varaktighet", "topic": "ämne" }
+    },
+    "comment": { "comment": "kommentar" }
+}
