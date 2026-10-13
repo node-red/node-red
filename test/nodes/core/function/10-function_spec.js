@@ -2592,6 +2592,41 @@ describe('function node', function() {
             lib1.context().global.get('closed').should.equal(true)
         })
 
+        it('should report an error thrown by a synchronous node.onClose() callback', async function () {
+            const flow = [
+                { id: "lib1", type: "function", mode: "library", name: "mathlib",
+                    initialize: "module.exports = { add: function(a,b) { return a+b; } };" +
+                        "node.onClose(function () { throw new Error('onClose failed'); });" }
+            ]
+            await helper.load(functionNode, flow)
+            const lib1 = helper.getNode("lib1")
+            // the test helper restores its node.error spy before closing nodes, so record calls directly
+            const errors = []
+            const nodeError = lib1.error
+            lib1.error = function (err) { errors.push(err); return nodeError.apply(lib1, arguments) }
+            await helper.unload()
+            errors.should.have.length(1)
+            // the error is created in the sandbox realm, so use should(...) rather than .should
+            should(errors[0]).have.property("message", "onClose failed")
+        })
+
+        it('should report an error thrown by an asynchronous node.onClose(done) callback and still close', async function () {
+            const flow = [
+                { id: "lib1", type: "function", mode: "library", name: "mathlib",
+                    initialize: "module.exports = { add: function(a,b) { return a+b; } };" +
+                        "node.onClose(function (removed, done) { throw new Error('onClose failed'); });" }
+            ]
+            await helper.load(functionNode, flow)
+            const lib1 = helper.getNode("lib1")
+            const errors = []
+            const nodeError = lib1.error
+            lib1.error = function (err) { errors.push(err); return nodeError.apply(lib1, arguments) }
+            // done() is never called, so this must not hang until the close timeout
+            await helper.unload()
+            errors.should.have.length(1)
+            should(errors[0]).have.property("message", "onClose failed")
+        })
+
         it('should not expose node.onClose in a default-mode node\'s Setup (On Start) code', async function () {
             const flow = [
                 { id: "f1", type: "function", wires: [["h1"]],
