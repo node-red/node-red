@@ -2464,6 +2464,100 @@ describe('function node', function() {
             })
         })
 
+        describe('node.import() in On Start', function () {
+            // Setup stores the import result (or error) and On Message returns it. Messages
+            // are queued until Setup completes, so receiving straight after load is safe.
+            const importer = (id, z, initialize) => ({ id: id, type: "function", z: z, wires: [["h1"]],
+                initialize: initialize || "try { context.set('r', node.import('mathlib').add(1,2)) } catch (e) { context.set('r', e.message) }",
+                func: "msg.payload = context.get('r'); return msg;" })
+            const lib = (z, initialize) => ({ id: "lib1", type: "function", z: z, mode: "library", name: "mathlib",
+                initialize: initialize || "module.exports = { add: function(a,b) { return a+b; } };" })
+            async function expectResult(flow, expected) {
+                await helper.load(functionNode, flow)
+                const f1 = helper.getNode("f1")
+                const h1 = helper.getNode("h1")
+                await new Promise((resolve, reject) => {
+                    h1.on("input", function (msg) {
+                        try {
+                            msg.should.have.property("payload", expected)
+                            resolve()
+                        } catch (err) { reject(err) }
+                    })
+                    f1.receive({ payload: "go" })
+                })
+            }
+
+            it('should import a library node placed later on the same flow', async function () {
+                await expectResult([
+                    { id: "t1", type: "tab" },
+                    importer("f1", "t1"),
+                    lib("t1"),
+                    { id: "h1", type: "helper", z: "t1" }
+                ], 3)
+            })
+
+            it('should import a library node on a flow that starts later', async function () {
+                await expectResult([
+                    { id: "t1", type: "tab" },
+                    { id: "t2", type: "tab" },
+                    importer("f1", "t1"),
+                    { id: "h1", type: "helper", z: "t1" },
+                    lib("t2")
+                ], 3)
+            })
+
+            it('should wait when import is reached by destructuring', async function () {
+                await expectResult([
+                    { id: "t1", type: "tab" },
+                    importer("f1", "t1", "const { import: imp } = node; try { context.set('r', imp('mathlib').add(1,2)) } catch (e) { context.set('r', e.message) }"),
+                    lib("t1"),
+                    { id: "h1", type: "helper", z: "t1" }
+                ], 3)
+            })
+
+            it('should not wait for a library node with an asynchronous On Start', async function () {
+                // waiting could hang on a setup that never resolves; a clear error is preferred
+                await expectResult([
+                    { id: "t1", type: "tab" },
+                    importer("f1", "t1"),
+                    lib("t1", "await new Promise(r => setTimeout(r, 50)); module.exports = { add: function(a,b) { return a+b; } };"),
+                    { id: "h1", type: "helper", z: "t1" }
+                ], "Function library 'mathlib' has not finished initialising. Call node.import() where it is used (eg in On Message, or inside an exported function) rather than at the top of On Start.")
+            })
+
+            it('should let a library node import another lazily, inside an exported function', async function () {
+                await expectResult([
+                    { id: "t1", type: "tab" },
+                    importer("f1", "t1", "try { context.set('r', node.import('outer').add3(1,2)) } catch (e) { context.set('r', e.message) }"),
+                    { id: "lib2", type: "function", z: "t1", mode: "library", name: "outer",
+                        initialize: "module.exports = { add3: function(a,b) { return node.import('mathlib').add(a,b) + 3; } };" },
+                    lib("t1"),
+                    { id: "h1", type: "helper", z: "t1" }
+                ], 6)
+            })
+
+            it('should import a library node whose own On Start imports another', async function () {
+                // libraries are released before other Function nodes, so `outer` has
+                // its exports by the time f1's On Start runs, whatever the order
+                await expectResult([
+                    { id: "t1", type: "tab" },
+                    importer("f1", "t1", "try { context.set('r', node.import('outer').add3(1,2)) } catch (e) { context.set('r', e.message) }"),
+                    { id: "lib2", type: "function", z: "t1", mode: "library", name: "outer",
+                        initialize: "const add = node.import('mathlib').add; module.exports = { add3: function(a,b) { return add(a,b) + 3; } };" },
+                    lib("t1"),
+                    { id: "h1", type: "helper", z: "t1" }
+                ], 6)
+            })
+
+            it('should still report a missing library node', async function () {
+                await expectResult([
+                    { id: "t1", type: "tab" },
+                    importer("f1", "t1"),
+                    { id: "h1", type: "helper", z: "t1" }
+                ], "Function library 'mathlib' not found. Check the node exists, is enabled, and is set to library mode.")
+            })
+        })
+
         it('should throw a caught error when the name is ambiguous across flows', async function () {
             // neither library node lives on the caller's own flow, so the
             // flow-scoped lookup misses and the flow-wide fallback finds 2
