@@ -1570,6 +1570,16 @@ describe('function node', function() {
             });
         });
 
+        it('should cancel timers created in the finalize function', async function () {
+            const flow = [{id:"n1",type:"function",wires:[],func:"return msg;",
+                finalize:"global.set('fired', false); setTimeout(function () { global.set('fired', true); }, 20);"}];
+            await helper.load(functionNode, flow);
+            const ctx = helper.getNode("n1").context().global;
+            await helper.unload();
+            await new Promise(resolve => setTimeout(resolve, 60));
+            ctx.get('fired').should.equal(false);
+        });
+
     })
 
     describe('externalModules', function() {
