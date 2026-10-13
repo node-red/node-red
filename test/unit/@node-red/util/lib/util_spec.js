@@ -65,6 +65,13 @@ describe("@node-red/util/util", function() {
             util.compareObjects(Buffer.from("hello"),Buffer.from("hello ")).should.equal(false);
             util.compareObjects(Buffer.from("hello"),"hello").should.equal(false);
         });
+        it('Date', function() {
+            util.compareObjects(new Date(1000),new Date(1000)).should.equal(true);
+            util.compareObjects(new Date(1000),new Date(2000)).should.equal(false);
+            util.compareObjects(new Date(1000),{}).should.equal(false);
+            util.compareObjects({},new Date(1000)).should.equal(false);
+            util.compareObjects({a:new Date(1000)},{a:new Date(2000)}).should.equal(false);
+        });
 
     });
 
