@@ -325,10 +325,8 @@ describe("externalModules api", function() {
             externalModules.init({userDir: homeDir, get:()=>{}, set:()=>{}});
             const result = externalModules.require("node:fs")
             result.should.eql(require("node:fs"));
-            if (require("module").builtinModules.includes("node:test")) {
-                const testResult = externalModules.require("node:test");
-                testResult.should.eql(require("node:test"));
-            }
+            const testResult = externalModules.require("node:test");
+            testResult.should.eql(require("node:test"));
         })
         it("rejects unknown modules", async function() {
             externalModules.init({userDir: homeDir, get:()=>{}, set:()=>{}});
