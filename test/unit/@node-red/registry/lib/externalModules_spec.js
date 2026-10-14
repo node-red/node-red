@@ -390,6 +390,91 @@ describe("externalModules api", function() {
             const normalizedValue = importedValue && importedValue.default !== undefined ? importedValue.default : importedValue;
             normalizedValue.should.equal(42);
         })
+        describe("ESM packages with only an 'import' export condition", function() {
+            let externalModulesDir;
+            async function createEsmPackage(name, exportsField, files) {
+                externalModulesDir = path.join(homeDir,"externalModules-esm");
+                await fs.ensureDir(externalModulesDir);
+                externalModules.init({userDir: externalModulesDir, get:()=>{}, set:()=>{}});
+                await fs.writeFile(path.join(externalModulesDir,"package.json"),JSON.stringify({
+                    name: "Node-RED-External-Modules",
+                    version: "1.0.0",
+                    private: true,
+                    dependencies: {[name]: "1.0.0"}
+                }));
+                const packageDir = path.join(externalModulesDir,"node_modules",name);
+                await fs.ensureDir(packageDir);
+                await fs.writeFile(path.join(packageDir,"package.json"),JSON.stringify({
+                    name, version: "1.0.0", type: "module", exports: exportsField
+                }));
+                for (const [file, content] of Object.entries(files)) {
+                    await fs.outputFile(path.join(packageDir, file), content);
+                }
+                await externalModules.checkFlowDependencies([]);
+            }
+            afterEach(async function() {
+                await fs.remove(externalModulesDir);
+            })
+            it("imports the main export", async function() {
+                await createEsmPackage("esm-pkg", { ".": { "types": "./index.d.ts", "import": "./index.js" } }, {
+                    "index.js": "export const hello = 'world'; export default 42;\n"
+                });
+                const result = await externalModules.import("esm-pkg");
+                result.default.should.equal(42);
+                result.hello.should.equal("world");
+            })
+            it("imports a scoped package main export", async function() {
+                await createEsmPackage("@esm/scoped", { "import": "./lib/main.js" }, {
+                    "lib/main.js": "export default 'scoped';\n"
+                });
+                const result = await externalModules.import("@esm/scoped");
+                result.default.should.equal("scoped");
+            })
+            it("imports a subpath export using nested conditions", async function() {
+                await createEsmPackage("esm-pkg", {
+                    ".": { "import": "./index.js" },
+                    "./extra": { "node": { "import": "./extra.js" } }
+                }, {
+                    "index.js": "export default 1;\n",
+                    "extra.js": "export default 'extra';\n"
+                });
+                const result = await externalModules.import("esm-pkg/extra");
+                result.default.should.equal("extra");
+            })
+            it("imports a subpath pattern export", async function() {
+                await createEsmPackage("esm-pkg", {
+                    ".": { "import": "./index.js" },
+                    "./*.js": { "import": "./dist/*.js" }
+                }, {
+                    "index.js": "export default 1;\n",
+                    "dist/feature.js": "export default 'feature';\n"
+                });
+                const result = await externalModules.import("esm-pkg/feature.js");
+                result.default.should.equal("feature");
+            })
+            it("rejects an unexported subpath", async function() {
+                await createEsmPackage("esm-pkg", { ".": { "import": "./index.js" } }, {
+                    "index.js": "export default 1;\n",
+                    "secret.js": "export default 'secret';\n"
+                });
+                try {
+                    await externalModules.import("esm-pkg/secret.js");
+                    throw new Error("import did not reject after fail");
+                } catch(err) {
+                    err.should.have.property("code","ERR_PACKAGE_PATH_NOT_EXPORTED");
+                }
+            })
+            it("rejects export targets outside of the package", async function() {
+                await createEsmPackage("esm-pkg", { ".": { "import": "./../../escape.js" } }, {});
+                await fs.writeFile(path.join(externalModulesDir,"escape.js"), "export default 'escaped';\n");
+                try {
+                    await externalModules.import("esm-pkg");
+                    throw new Error("import did not reject after fail");
+                } catch(err) {
+                    err.should.have.property("code","ERR_PACKAGE_PATH_NOT_EXPORTED");
+                }
+            })
+        })
         it("rejects unknown modules", async function() {
             externalModules.init({userDir: homeDir, get:()=>{}, set:()=>{}});
             try {
