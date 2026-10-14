@@ -101,6 +101,33 @@ describe('rbe node', function() {
         });
     });
 
+    it('should only send output if a Date payload changes (rbe)', function(done) {
+        var flow = [{"id":"n1", "type":"rbe", func:"rbe", gap:"0", wires:[["n2"]] },
+            {id:"n2", type:"helper"} ];
+        helper.load(testNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            var c = 0;
+            n2.on("input", function(msg) {
+                try {
+                    if (c === 0) {
+                        msg.payload.getTime().should.equal(1000);
+                    }
+                    else {
+                        msg.payload.getTime().should.equal(2000);
+                        done();
+                    }
+                    c += 1;
+                } catch(err) {
+                    done(err);
+                }
+            });
+            n1.emit("input", {payload:new Date(1000)});
+            n1.emit("input", {payload:new Date(1000)});
+            n1.emit("input", {payload:new Date(2000)});
+        });
+    });
+
     it('should ignore multiple topics if told to (rbe)', function(done) {
         var flow = [{id:"n1", type:"rbe", func:"rbe", gap:"0", septopics:false, wires:[["n2"]] },
             {id:"n2", type:"helper"} ];

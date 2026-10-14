@@ -125,6 +125,56 @@ describe("red/nodes/registry/loader",function() {
             });
         });
 
+        it("derives html template for .mjs node files", function(done) {
+            stubs.push(sinon.stub(localfilesystem,"getNodeFiles").callsFake(function(){
+                var result = {};
+                result["node-red"] = {
+                    "name": "node-red",
+                    "version": "1.2.3",
+                    "nodes": {
+                        "TestNodeMjs": {
+                            "file": path.join(resourcesDir,"TestNodeMjs","TestNodeMjs.mjs"),
+                            "module": "node-red",
+                            "name": "TestNodeMjs"
+                        }
+                    }
+                };
+                return result;
+            }));
+
+            stubs.push(sinon.stub(registry,"saveNodeList").callsFake(function(){ return }));
+            stubs.push(sinon.stub(registry,"addModule").callsFake(function(){ return }));
+            stubs.push(sinon.stub(registry,"getNodeInfo").callsFake(function(){ return null; }));
+
+            stubs.push(sinon.stub(nodes,"registerType"));
+            loader.init({nodes:nodes,log:{info:function(){},_:function(){}},settings:{available:function(){return true;}}});
+            loader.load().then(function(result) {
+                registry.addModule.called.should.be.true();
+                var module = registry.addModule.lastCall.args[0];
+                module.nodes.should.have.property("TestNodeMjs");
+                module.nodes.TestNodeMjs.should.have.property("file");
+                module.nodes.TestNodeMjs.file.should.eql(path.join(resourcesDir,"TestNodeMjs","TestNodeMjs.mjs"));
+                module.nodes.TestNodeMjs.should.have.property("template");
+                module.nodes.TestNodeMjs.template.should.eql(path.join(resourcesDir,"TestNodeMjs","TestNodeMjs.html"));
+                module.nodes.TestNodeMjs.should.have.property("loaded",true);
+                module.nodes.TestNodeMjs.should.have.property("types");
+                module.nodes.TestNodeMjs.types.should.have.a.length(1);
+                module.nodes.TestNodeMjs.types[0].should.eql('test-node-mjs');
+                module.nodes.TestNodeMjs.should.have.property("config");
+                module.nodes.TestNodeMjs.config.should.not.eql("");
+                module.nodes.TestNodeMjs.should.have.property("help");
+                module.nodes.TestNodeMjs.help.should.have.property("en-US");
+
+                nodes.registerType.calledOnce.should.be.true();
+                nodes.registerType.lastCall.args[0].should.eql('node-red/TestNodeMjs');
+                nodes.registerType.lastCall.args[1].should.eql('test-node-mjs');
+
+                done();
+            }).catch(function(err) {
+                done(err);
+            });
+        });
+
         it("load core node files scanned by lfs - ignore html if disableEditor true", function(done) {
             stubs.push(sinon.stub(localfilesystem,"getNodeFiles").callsFake(function(){
                 var result = {};
