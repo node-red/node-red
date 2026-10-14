@@ -180,6 +180,14 @@ describe('storage/localfilesystem/library', function() {
         });
     });
 
+    it('should finish writing a library entry before the save resolves', async function() {
+        await localfilesystemLibrary.init({userDir:userDir});
+        await localfilesystemLibrary.saveLibraryEntry('functions','file4.js',{mno:'pqr'},"Hi");
+        var fn = path.join(userDir,"lib","functions","file4.js");
+        fs.existsSync(fn).should.be.true();
+        fs.existsSync(fn+".$$$").should.be.false();
+    });
+
     it('should return a newly saved library flow',function(done) {
         localfilesystemLibrary.init({userDir:userDir}).then(function() {
             createObjectLibrary("flows");

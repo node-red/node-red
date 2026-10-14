@@ -93,6 +93,15 @@ describe("externalModules api", function() {
             exec.run.called.should.be.false();
         })
 
+        it("skips install for node: prefixed built-in modules", async function() {
+            externalModules.init({userDir: homeDir, get:()=>{}, set:()=>{}});
+            externalModules.register("function", "libs");
+            await externalModules.checkFlowDependencies([
+                {type: "function", libs:[{module: "node:fs"}, {module: "node:test"}]}
+            ])
+            exec.run.called.should.be.false();
+        })
+
         it("installs missing modules", async function() {
             externalModules.init({userDir: homeDir, get:()=>{}, set:()=>{}});
             externalModules.register("function", "libs");
@@ -311,6 +320,13 @@ describe("externalModules api", function() {
             externalModules.init({userDir: homeDir, get:()=>{}, set:()=>{}});
             const result = externalModules.require("fs")
             result.should.eql(require("fs"));
+        })
+        it("requires node: prefixed built-in modules", async function() {
+            externalModules.init({userDir: homeDir, get:()=>{}, set:()=>{}});
+            const result = externalModules.require("node:fs")
+            result.should.eql(require("node:fs"));
+            const testResult = externalModules.require("node:test");
+            testResult.should.eql(require("node:test"));
         })
         it("rejects unknown modules", async function() {
             externalModules.init({userDir: homeDir, get:()=>{}, set:()=>{}});
