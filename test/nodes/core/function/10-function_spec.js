@@ -2549,6 +2549,16 @@ describe('function node', function() {
                 ], 6)
             })
 
+            it('should import from an On Start that also loads an external module', async function () {
+                // libs load asynchronously, so the wait must be registered before flows:started fires
+                await expectResult([
+                    { id: "t1", type: "tab" },
+                    lib("t1"),
+                    Object.assign(importer("f1", "t1"), { libs: [{ var: "os", module: "os" }] }),
+                    { id: "h1", type: "helper", z: "t1" }
+                ], 3)
+            })
+
             it('should still report a missing library node', async function () {
                 await expectResult([
                     { id: "t1", type: "tab" },
