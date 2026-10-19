@@ -133,4 +133,20 @@ describe("api/util", function() {
             should(apiUtil.wildcardParam({params:{}},"path")).be.undefined();
         });
     });
+    describe("skipIfBodyParsed", function() {
+        function run(req) {
+            let parsed = false, nexted = false;
+            apiUtil.skipIfBodyParsed(function(req,res,next) { parsed = true; next(); })(req, {}, function() { nexted = true; });
+            return {parsed, nexted};
+        }
+        it('runs the parser when the body has not been read', function() {
+            run({}).should.eql({parsed:true, nexted:true});
+        });
+        it('skips the parser when body-parser already marked the body as read', function() {
+            run({_body:true}).should.eql({parsed:false, nexted:true});
+        });
+        it('skips the parser when another parser has consumed the stream', function() {
+            run({readableEnded:true, body:{a:1}}).should.eql({parsed:false, nexted:true});
+        });
+    });
 });
