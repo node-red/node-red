@@ -98,7 +98,7 @@ describe("api/index", function() {
     describe('initialises api with admin middleware', function() {
         it('ignores non-function values',function(done) {
             api.init({ httpAdminRoot: true, httpAdminMiddleware: undefined },{},{},{});
-            const middlewareFound = api.httpAdmin._router.stack.filter((layer) => layer.name === 'testMiddleware')
+            const middlewareFound = api.httpAdmin.router.stack.filter((layer) => layer.name === 'testMiddleware')
             should(middlewareFound).be.empty();
             done();
         });
@@ -106,7 +106,7 @@ describe("api/index", function() {
         it('only accepts functions as middleware',function(done) {
             const testMiddleware = function(req, res, next){ next(); };
             api.init({ httpAdminRoot: true, httpAdminMiddleware: testMiddleware },{},{},{});
-            const middlewareFound = api.httpAdmin._router.stack.filter((layer) => layer.name === 'testMiddleware')
+            const middlewareFound = api.httpAdmin.router.stack.filter((layer) => layer.name === 'testMiddleware')
             should(middlewareFound).be.length(1);
             done();
         });
@@ -128,7 +128,7 @@ describe("api/index", function() {
             api.init({ httpAdminRoot: true, adminAuth },{},{},{});
             
             // is the name ("initialize") of the passport middleware present
-            const middlewareFound = api.httpAdmin._router.stack.filter((layer) => layer.name === 'initialize')
+            const middlewareFound = api.httpAdmin.router.stack.filter((layer) => layer.name === 'initialize')
             should(middlewareFound).be.length(1);
             done();
         });
@@ -143,14 +143,14 @@ describe("api/index", function() {
 
         it('uses default cors middleware when user settings absent', function(done){
             api.init({ httpAdminRoot: true }, {}, {}, {});
-            const middlewareFound = api.httpAdmin._router.stack.filter((layer) => layer.name === 'corsMiddleware')
+            const middlewareFound = api.httpAdmin.router.stack.filter((layer) => layer.name === 'corsMiddleware')
             should(middlewareFound).be.length(0);
             done();
         })
 
         it('enables custom cors middleware when settings present', function(done){
             api.init({ httpAdminRoot: true, httpAdminCors }, {}, {}, {});
-            const middlewareFound = api.httpAdmin._router.stack.filter((layer) => layer.name === 'corsMiddleware')
+            const middlewareFound = api.httpAdmin.router.stack.filter((layer) => layer.name === 'corsMiddleware')
             should(middlewareFound).be.length(1);
             done();
         })
