@@ -135,7 +135,7 @@ describe("api/admin/index", function() {
                     return done(err);
                 }
                 permissionChecks.should.have.property('flows.read',1);
-                lastRequest.params.should.have.property('id','1234');
+                should(lastRequest.params).have.property('id','1234');
                 done();
             });
         });
@@ -156,7 +156,7 @@ describe("api/admin/index", function() {
                     return done(err);
                 }
                 permissionChecks.should.have.property('flows.write',1);
-                lastRequest.params.should.have.property('id','1234');
+                should(lastRequest.params).have.property('id','1234');
                 done();
             });
         });
@@ -167,7 +167,7 @@ describe("api/admin/index", function() {
                     return done(err);
                 }
                 permissionChecks.should.have.property('flows.write',1);
-                lastRequest.params.should.have.property('id','1234');
+                should(lastRequest.params).have.property('id','1234');
                 done();
             });
         });
@@ -198,7 +198,7 @@ describe("api/admin/index", function() {
                     return done(err);
                 }
                 permissionChecks.should.have.property('nodes.read',1);
-                lastRequest.params.should.have.property(0,'module');
+                should(lastRequest.params).have.property(0,'module');
                 done();
             });
         });
@@ -209,7 +209,7 @@ describe("api/admin/index", function() {
                     return done(err);
                 }
                 permissionChecks.should.have.property('nodes.read',1);
-                lastRequest.params.should.have.property(0,'@scope/module');
+                should(lastRequest.params).have.property(0,'@scope/module');
                 done();
             });
         });
@@ -220,7 +220,7 @@ describe("api/admin/index", function() {
                     return done(err);
                 }
                 permissionChecks.should.have.property('nodes.write',1);
-                lastRequest.params.should.have.property(0,'module');
+                should(lastRequest.params).have.property(0,'module');
                 done();
             });
         });
@@ -231,7 +231,7 @@ describe("api/admin/index", function() {
                     return done(err);
                 }
                 permissionChecks.should.have.property('nodes.write',1);
-                lastRequest.params.should.have.property(0,'@scope/module');
+                should(lastRequest.params).have.property(0,'@scope/module');
                 done();
             });
         });
@@ -242,7 +242,7 @@ describe("api/admin/index", function() {
                     return done(err);
                 }
                 permissionChecks.should.have.property('nodes.write',1);
-                lastRequest.params.should.have.property(0,'module');
+                should(lastRequest.params).have.property(0,'module');
                 done();
             });
         });
@@ -253,7 +253,7 @@ describe("api/admin/index", function() {
                     return done(err);
                 }
                 permissionChecks.should.have.property('nodes.write',1);
-                lastRequest.params.should.have.property(0,'@scope/module');
+                should(lastRequest.params).have.property(0,'@scope/module');
                 done();
             });
         });
@@ -264,8 +264,8 @@ describe("api/admin/index", function() {
                     return done(err);
                 }
                 permissionChecks.should.have.property('nodes.read',1);
-                lastRequest.params.should.have.property(0,'module');
-                lastRequest.params.should.have.property(2,'set');
+                should(lastRequest.params).have.property(0,'module');
+                should(lastRequest.params).have.property(2,'set');
                 done();
             });
         });
@@ -276,8 +276,8 @@ describe("api/admin/index", function() {
                     return done(err);
                 }
                 permissionChecks.should.have.property('nodes.read',1);
-                lastRequest.params.should.have.property(0,'@scope/module');
-                lastRequest.params.should.have.property(2,'set');
+                should(lastRequest.params).have.property(0,'@scope/module');
+                should(lastRequest.params).have.property(2,'set');
                 done();
             });
         });
@@ -288,8 +288,8 @@ describe("api/admin/index", function() {
                     return done(err);
                 }
                 permissionChecks.should.have.property('nodes.write',1);
-                lastRequest.params.should.have.property(0,'module');
-                lastRequest.params.should.have.property(2,'set');
+                should(lastRequest.params).have.property(0,'module');
+                should(lastRequest.params).have.property(2,'set');
                 done();
             });
         });
@@ -300,8 +300,8 @@ describe("api/admin/index", function() {
                     return done(err);
                 }
                 permissionChecks.should.have.property('nodes.write',1);
-                lastRequest.params.should.have.property(0,'@scope/module');
-                lastRequest.params.should.have.property(2,'set');
+                should(lastRequest.params).have.property(0,'@scope/module');
+                should(lastRequest.params).have.property(2,'set');
                 done();
             });
         });
@@ -322,7 +322,7 @@ describe("api/admin/index", function() {
                     return done(err);
                 }
                 permissionChecks.should.have.property('nodes.read',1);
-                lastRequest.params.should.have.property(0,'module/set');
+                should(lastRequest.params).have.property(0,'module/set');
                 done();
             });
         });
@@ -333,7 +333,7 @@ describe("api/admin/index", function() {
                     return done(err);
                 }
                 permissionChecks.should.have.property('nodes.read',1);
-                lastRequest.params.should.have.property(0,'@scope/module/set');
+                should(lastRequest.params).have.property(0,'@scope/module/set');
                 done();
             });
         });
@@ -344,7 +344,7 @@ describe("api/admin/index", function() {
                     return done(err);
                 }
                 permissionChecks.should.have.property('context.read',1);
-                lastRequest.params.should.have.property('scope','global');
+                should(lastRequest.params).have.property('scope','global');
                 done();
             });
         });
@@ -355,9 +355,10 @@ describe("api/admin/index", function() {
                     return done(err);
                 }
                 permissionChecks.should.have.property('context.read',1);
-                lastRequest.params.should.have.property('scope','global');
-                lastRequest.params.should.have.property(0,'key');
-                lastRequest.query.should.have.property('store','memory');
+                should(lastRequest.params).have.property('scope','global');
+                // Express 5: named wildcard "*key" gives the path segments
+                should(lastRequest.params).have.property('key',['key']);
+                should(lastRequest.query).have.property('store','memory');
                 done();
             });
         });
@@ -368,8 +369,8 @@ describe("api/admin/index", function() {
                     return done(err);
                 }
                 permissionChecks.should.have.property('context.read',1);
-                lastRequest.params.should.have.property('scope','flow');
-                lastRequest.params.should.have.property('id','1234');
+                should(lastRequest.params).have.property('scope','flow');
+                should(lastRequest.params).have.property('id','1234');
                 done();
             });
         });
@@ -380,10 +381,11 @@ describe("api/admin/index", function() {
                     return done(err);
                 }
                 permissionChecks.should.have.property('context.read',1);
-                lastRequest.params.should.have.property('scope','flow');
-                lastRequest.params.should.have.property('id','1234');
-                lastRequest.params.should.have.property(0,'key');
-                lastRequest.query.should.have.property('store','memory');
+                should(lastRequest.params).have.property('scope','flow');
+                should(lastRequest.params).have.property('id','1234');
+                // Express 5: named wildcard "*key" gives the path segments
+                should(lastRequest.params).have.property('key',['key']);
+                should(lastRequest.query).have.property('store','memory');
                 done();
             });
         });
@@ -394,8 +396,8 @@ describe("api/admin/index", function() {
                     return done(err);
                 }
                 permissionChecks.should.have.property('context.read',1);
-                lastRequest.params.should.have.property('scope','node');
-                lastRequest.params.should.have.property('id','5678');
+                should(lastRequest.params).have.property('scope','node');
+                should(lastRequest.params).have.property('id','5678');
                 done();
             });
         });
@@ -406,10 +408,11 @@ describe("api/admin/index", function() {
                     return done(err);
                 }
                 permissionChecks.should.have.property('context.read',1);
-                lastRequest.params.should.have.property('scope','node');
-                lastRequest.params.should.have.property('id','5678');
-                lastRequest.params.should.have.property(0,'foo');
-                lastRequest.query.should.have.property('store','memory');
+                should(lastRequest.params).have.property('scope','node');
+                should(lastRequest.params).have.property('id','5678');
+                // Express 5: named wildcard "*key" gives the path segments
+                should(lastRequest.params).have.property('key',['foo']);
+                should(lastRequest.query).have.property('store','memory');
                 done();
             });
         });
@@ -420,9 +423,10 @@ describe("api/admin/index", function() {
                     return done(err);
                 }
                 permissionChecks.should.have.property('context.write',1);
-                lastRequest.params.should.have.property('scope','global');
-                lastRequest.params.should.have.property(0,'key');
-                lastRequest.query.should.have.property('store','memory');
+                should(lastRequest.params).have.property('scope','global');
+                // Express 5: named wildcard "*key" gives the path segments
+                should(lastRequest.params).have.property('key',['key']);
+                should(lastRequest.query).have.property('store','memory');
                 done();
             });
         });
@@ -433,10 +437,11 @@ describe("api/admin/index", function() {
                     return done(err);
                 }
                 permissionChecks.should.have.property('context.write',1);
-                lastRequest.params.should.have.property('scope','flow');
-                lastRequest.params.should.have.property('id','1234');
-                lastRequest.params.should.have.property(0,'key');
-                lastRequest.query.should.have.property('store','memory');
+                should(lastRequest.params).have.property('scope','flow');
+                should(lastRequest.params).have.property('id','1234');
+                // Express 5: named wildcard "*key" gives the path segments
+                should(lastRequest.params).have.property('key',['key']);
+                should(lastRequest.query).have.property('store','memory');
                 done();
             });
         });
@@ -447,10 +452,11 @@ describe("api/admin/index", function() {
                     return done(err);
                 }
                 permissionChecks.should.have.property('context.write',1);
-                lastRequest.params.should.have.property('scope','node');
-                lastRequest.params.should.have.property('id','5678');
-                lastRequest.params.should.have.property(0,'foo');
-                lastRequest.query.should.have.property('store','memory');
+                should(lastRequest.params).have.property('scope','node');
+                should(lastRequest.params).have.property('id','5678');
+                // Express 5: named wildcard "*key" gives the path segments
+                should(lastRequest.params).have.property('key',['foo']);
+                should(lastRequest.query).have.property('store','memory');
                 done();
             });
         });

@@ -295,6 +295,7 @@ describe('HTTP Request Node', function() {
     before(function(done) {
 
         testApp = express();
+        testApp.set('query parser', 'extended'); // parse nested query params as Express 4 did
 
         // The fileupload test needs a different set of middleware - so mount
         // as a separate express instance
@@ -405,7 +406,7 @@ describe('HTTP Request Node', function() {
             };
             res.json(result);
         });
-        testApp.options('/*', function(req,res) {
+        testApp.options('/{*path}', function(req,res) {
             res.status(200).end();
         });
         testApp.get('/redirectToSameDomain', function(req, res) {
