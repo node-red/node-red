@@ -30,13 +30,16 @@ describe("api/admin/context", function () {
     before(function () {
         app = express();
         app.use(bodyParser.json());
-        app.get("/context/:scope(global)", context.get);
-        app.get("/context/:scope(global)/*", context.get);
-        app.get("/context/:scope(node|flow)/:id", context.get);
-        app.get("/context/:scope(node|flow)/:id/*", context.get);
+        // Mirrors the routes in lib/admin/index.js: Express 5 has no inline
+        // regex params, so a guard skips to the next route on other scopes
+        const scope = (scopes) => (req, res, next) => scopes.includes(req.params.scope) ? next() : next("route");
+        app.get("/context/:scope", scope(["global"]), context.get);
+        app.get("/context/:scope/*key", scope(["global"]), context.get);
+        app.get("/context/:scope/:id", scope(["node","flow"]), context.get);
+        app.get("/context/:scope/:id/*key", scope(["node","flow"]), context.get);
 
-        app.delete("/context/:scope(global)/*", context.delete);
-        app.delete("/context/:scope(node|flow)/:id/*", context.delete);
+        app.delete("/context/:scope/*key", scope(["global"]), context.delete);
+        app.delete("/context/:scope/:id/*key", scope(["node","flow"]), context.delete);
     });
 
     describe("get", function () {
