@@ -1,3 +1,8 @@
+#### 4.1.17: Maintenance Release
+
+ - Fix merge conflict resolution bug (#5999) @knolleary
+ - Verify resolveMerge is called for valid files pending conflict resolution (#5998) @knolleary
+
 #### 4.1.16: Maintenance Release
 
  - Update dependencies
