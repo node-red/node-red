@@ -15,6 +15,7 @@
  **/
 
 var should = require("should");
+var sinon = require("sinon");
 var splitNode = require("nr-test-utils").require("@node-red/nodes/core/sequence/17-split.js");
 var joinNode = require("nr-test-utils").require("@node-red/nodes/core/sequence/17-split.js");
 var helper = require("node-red-node-test-helper");
@@ -897,6 +898,123 @@ describe('JOIN node', function() {
             n1.receive({payload:"a"});
             n1.receive({payload:"b"});
             n1.receive({payload:"c"});
+        });
+    });
+
+    describe('manual object timeouts', function() {
+        var clock;
+
+        afterEach(function() {
+            if (clock) {
+                clock.restore();
+                clock = null;
+            }
+        });
+
+        ['object', 'merged'].forEach(function(build) {
+            it('should start a new '+build+' group after each timeout without a count', async function() {
+                var flow = [{id:"n1", type:"join", wires:[["n2"]], build:build, mode:"custom", accumulate:true, count:"", timeout:1},
+                            {id:"n2", type:"helper"}];
+                await helper.load(joinNode, flow);
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                var messages = [];
+                n2.on("input", function(msg) {
+                    messages.push(msg.payload);
+                });
+                // Advance the timeout without replacing asynchronous message delivery.
+                clock = sinon.useFakeTimers({toFake:["setTimeout", "clearTimeout"]});
+
+                n1.receive({payload:build === 'object' ? 1 : {a:1}, topic:"a"});
+                await clock.tickAsync(500);
+                n1.receive({payload:build === 'object' ? 2 : {b:2}, topic:"b"});
+                await clock.tickAsync(500);
+                messages.should.deepEqual([{a:1, b:2}]);
+
+                // An idle node must wait for the next message to start its timer.
+                await clock.tickAsync(2000);
+                messages.should.have.length(1);
+                n1.receive({payload:build === 'object' ? 3 : {c:3}, topic:"c"});
+                await clock.tickAsync(500);
+                n1.receive({payload:build === 'object' ? 4 : {d:4}, topic:"d"});
+                await clock.tickAsync(499);
+                messages.should.have.length(1);
+                await clock.tickAsync(1);
+                messages.should.deepEqual([{a:1, b:2}, {c:3, d:4}]);
+
+                n1.receive({payload:build === 'object' ? 5 : {a:5}, topic:"a"});
+                await clock.tickAsync(1000);
+                messages.should.deepEqual([{a:1, b:2}, {c:3, d:4}, {a:5}]);
+            });
+        });
+
+        ['configured', 'msg.parts'].forEach(function(countSource) {
+            it('should keep accumulating after a timeout with a '+countSource+' count', async function() {
+                var flow = [{id:"n1", type:"join", wires:[["n2"]], build:"object", mode:"custom", accumulate:true, count:countSource === 'configured' ? 2 : "", timeout:1},
+                            {id:"n2", type:"helper"}];
+                await helper.load(joinNode, flow);
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                var messages = [];
+                n2.on("input", function(msg) {
+                    messages.push(msg.payload);
+                });
+                clock = sinon.useFakeTimers({toFake:["setTimeout", "clearTimeout"]});
+
+                var firstMessage = {payload:1, topic:"a"};
+                var secondMessage = {payload:2, topic:"b"};
+                var thirdMessage = {payload:3, topic:"a"};
+                if (countSource === 'msg.parts') {
+                    // The effective count can come from the sequence, not the node.
+                    firstMessage.parts = {id:"sequence", count:2};
+                    secondMessage.parts = {id:"sequence", count:2};
+                    thirdMessage.parts = {id:"sequence", count:2};
+                }
+                n1.receive(firstMessage);
+                await clock.tickAsync(1000);
+                messages.should.deepEqual([{a:1}]);
+
+                n1.receive(secondMessage);
+                await clock.tickAsync(0);
+                messages.should.deepEqual([{a:1}, {a:1, b:2}]);
+                n1.receive(thirdMessage);
+                await clock.tickAsync(1000);
+                messages.should.deepEqual([{a:1}, {a:1, b:2}, {a:3, b:2}]);
+            });
+        });
+
+        it('should allow a new timeout group to be restarted and reset', async function() {
+            var flow = [{id:"n1", type:"join", wires:[["n2"]], build:"object", mode:"custom", accumulate:true, count:"", timeout:1},
+                        {id:"n2", type:"helper"}];
+            await helper.load(joinNode, flow);
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            var messages = [];
+            n2.on("input", function(msg) {
+                messages.push(msg.payload);
+            });
+            clock = sinon.useFakeTimers({toFake:["setTimeout", "clearTimeout"]});
+
+            n1.receive({payload:1, topic:"a"});
+            await clock.tickAsync(1000);
+            messages.should.deepEqual([{a:1}]);
+
+            n1.receive({payload:2, topic:"b"});
+            await clock.tickAsync(500);
+            n1.receive({payload:3, topic:"c", restartTimeout:true});
+            await clock.tickAsync(999);
+            messages.should.have.length(1);
+            await clock.tickAsync(1);
+            messages.should.deepEqual([{a:1}, {b:2, c:3}]);
+
+            n1.receive({payload:4, topic:"d"});
+            await clock.tickAsync(500);
+            n1.receive({reset:true});
+            await clock.tickAsync(1000);
+            messages.should.have.length(2);
+            n1.receive({payload:5, topic:"e"});
+            await clock.tickAsync(1000);
+            messages.should.deepEqual([{a:1}, {b:2, c:3}, {e:5}]);
         });
     });
 
