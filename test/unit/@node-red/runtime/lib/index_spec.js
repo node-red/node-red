@@ -180,6 +180,69 @@ describe("runtime", function() {
                 }
             }).catch(err=>{done(err)});
         });
+        it("removes disabled modules that are missing",function(done) {
+            redNodesGetNodeList = sinon.stub(redNodes,"getNodeList").callsFake(function(cb) {
+                return [
+                    {  module:"module",enabled:false,types:["typeA","typeB"]}
+                ].filter(cb);
+            });
+            var redNodesGetModuleInfo = sinon.stub(redNodes,"getModuleInfo").callsFake(function() { return null; });
+            runtime.init({testSettings: true, externalModules:{autoInstall:false}, httpAdminRoot:"/", load:function() { return Promise.resolve();}});
+            runtime.start().then(function() {
+                try {
+                    log.warn.calledWithMatch("Missing node modules");
+                    redNodesCleanModuleList.calledOnce.should.be.true();
+                    done();
+                } catch(err) {
+                    done(err);
+                } finally {
+                    redNodesGetModuleInfo.restore();
+                }
+            }).catch(err=>{done(err)});
+        });
+        it("does not treat disabled installed modules as missing",function(done) {
+            redNodesGetNodeList = sinon.stub(redNodes,"getNodeList").callsFake(function(cb) {
+                return [
+                    {  module:"module",enabled:false,loaded:false,types:["typeA","typeB"]}
+                ].filter(cb);
+            });
+            var redNodesGetModuleInfo = sinon.stub(redNodes,"getModuleInfo").callsFake(function(name) { return {name:name}; });
+            runtime.init({testSettings: true, externalModules:{autoInstall:false}, httpAdminRoot:"/", load:function() { return Promise.resolve();}});
+            runtime.start().then(function() {
+                try {
+                    redNodesCleanModuleList.called.should.be.false();
+                    done();
+                } catch(err) {
+                    done(err);
+                } finally {
+                    redNodesGetModuleInfo.restore();
+                }
+            }).catch(err=>{done(err)});
+        });
+        it("does not auto-install disabled modules that are missing",function(done) {
+            redNodesGetNodeList = sinon.stub(redNodes,"getNodeList").callsFake(function(cb) {
+                return [
+                    {  module:"disabledModule",enabled:false,types:["typeA"]},
+                    {  module:"enabledModule",enabled:true,loaded:false,types:["typeB"]}
+                ].filter(cb);
+            });
+            var redNodesGetModuleInfo = sinon.stub(redNodes,"getModuleInfo").callsFake(function() { return null; });
+            var serverInstallModule = sinon.stub(redNodes,"installModule").callsFake(function(name) { return Promise.resolve({nodes:[]});});
+            runtime.init({testSettings: true, externalModules:{autoInstall:true}, httpAdminRoot:"/", load:function() { return Promise.resolve();}});
+            runtime.start().then(function() {
+                try {
+                    redNodesCleanModuleList.called.should.be.false();
+                    serverInstallModule.calledOnce.should.be.true();
+                    serverInstallModule.firstCall.args[0].should.equal("enabledModule");
+                    done();
+                } catch(err) {
+                    done(err);
+                } finally {
+                    serverInstallModule.restore();
+                    redNodesGetModuleInfo.restore();
+                }
+            }).catch(err=>{done(err)});
+        });
         it("reports errored modules when verbose is enabled",function(done) {
             redNodesGetNodeList = sinon.stub(redNodes,"getNodeList").callsFake(function(cb) {
                 return [
