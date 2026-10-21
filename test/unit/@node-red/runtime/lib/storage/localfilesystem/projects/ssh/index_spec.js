@@ -336,6 +336,21 @@ describe("storage/localfilesystem/projects/ssh", function() {
         });
     });
 
+    it('should reject an sshkey with an invalid name', function(done) {
+        sshkeys.generateSSHKey('test', { name: 'test key' }).then(function() {
+            done(new Error('Does NOT throw error!'));
+        }).catch(function(err) {
+            try {
+                err.should.have.property('message', 'Invalid SSH Key name');
+                err.should.have.property('code', 'invalid_key_name');
+                done();
+            }
+            catch (error) {
+                done(error);
+            }
+        });
+    });
+
     it('should not generate sshkey file with illegal size data', function(done) {
         this.timeout(10000);
         var sshkeyDirPath = path.join(userDir, 'projects', '.sshkeys');
