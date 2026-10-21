@@ -92,6 +92,16 @@ describe("red/nodes/registry/util",function() {
             checkList("abc","1.2.3",["ab*"],["a*"]).should.be.true();
             checkList("def","1.2.3",["d*"],["de*"]).should.be.false();
         })
+        it("allows everything when allow list is * and deny list is empty", function() {
+            checkList("abc","1.2.3",["*"],[]).should.be.true();
+            checkList("node-red-node-sns","1.2.3",["*"],[]).should.be.true();
+        })
+        it("treats an allow list as a whitelist when deny list is empty", function() {
+            checkList("abc","1.2.3",["abc"],[]).should.be.true();
+            checkList("def","1.2.3",["abc"],[]).should.be.false();
+            checkList("node-red-contrib-foo","1.2.3",["node-red-contrib-*"],[]).should.be.true();
+            checkList("node-red-node-sns","1.2.3",["node-red-contrib-*"],[]).should.be.false();
+        })
         it("checks version string using semver rules", function() {
             // Deny
             checkList("abc","1.2.3",["abc@1.2.2"],["*"]).should.be.false();
