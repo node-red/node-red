@@ -331,6 +331,32 @@ describe('rbe node', function() {
         });
     });
 
+    it('should reset a single topic when using a custom topic property (rbe)', function(done) {
+        var flow = [{"id":"n1", "type":"rbe", func:"rbe", gap:"0", topi:"device", wires:[["n2"]] },
+            {id:"n2", type:"helper"} ];
+        helper.load(testNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            var received = [];
+            n2.on("input", function(msg) {
+                received.push(msg.device + ":" + msg.payload);
+                if (msg.payload === 2) {
+                    try {
+                        received.should.eql(["a:1", "b:1", "a:1", "a:2"]);
+                        done();
+                    } catch(err) { done(err); }
+                }
+            });
+            n1.emit("input", {device:"a", payload:1});
+            n1.emit("input", {device:"b", payload:1});
+            n1.emit("input", {device:"a", payload:1});
+            n1.emit("input", {device:"a", reset:true});  // reset a only
+            n1.emit("input", {device:"a", payload:1});
+            n1.emit("input", {device:"b", payload:1});
+            n1.emit("input", {device:"a", payload:2});
+        });
+    });
+
     it('should only send output if x away from original value (deadbandEq)', function(done) {
         var flow = [{"id":"n1", "type":"rbe", func:"deadbandEq", gap:"10", inout:"out", wires:[["n2"]] },
             {id:"n2", type:"helper"} ];
