@@ -1,4 +1,118 @@
-#### 5.0.0: : Milestone Release
+#### 5.0.9: Maintenance Release
+
+ - Fix MQTT connect action dropping its url when repeated (#6019) @sankalpsthakur
+ - Fix contextMenu for the internal nodes of subflow (#6025) @GogoVega
+ - Fix quick-add dialog moving instead of closing when clicking the workspace (#6027) @NUAAwqy
+ - Fix invalid SSH key name error code (#6026) @NUAAwqy
+ - Fix the subflow's 'changed' state when its content is modified (#6023) @GogoVega
+ - fix: include embedded script and style errors in getAnnotations (#6015) @Steve-Mcl
+ - Emit nodes:change when a nodes moved state changes (#6006) @knolleary
+ - Add badges to the Explorer sidebar (#5951) @GogoVega
+ - Allow flows to be drag-ordered in explorer sidebar (#6004) @knolleary
+ - Add a fallback lookup for esm only modules (#6003) @knolleary
+ - Add the *error* badge to the flow tab (#5950) @GogoVega
+ - fix: default editor theme to auto (#5873) @AkhilTrivediX
+ - Fix CSV node to remove initial BOM char (#5864) @dceejay
+ - Allow empty object first for RBE (#6000) @hardillb
+ - Range node: drop non-numeric input instead of coercing it (#5976) @JMBMdes
+ - Fix CSV array output for independent sequence elements (#5978) @Anthounn
+ - feat: add JavaScript and CSS support to script and style blocks in HT… (#5994) @Steve-Mcl
+ - Support node:-prefixed core modules in parseModuleName (#5993) @shubhamrai9122-creator
+ - Fix filter node blocking every Date payload (#5990) @sarmah-rup
+ - Fix crash on comms auth packet when adminAuth is not set (#5988) @sankalpsthakur
+ - Verify resolveMerge is called for valid files pending conflict resolution (#5996) @knolleary
+
+#### 5.0.8: Maintenance Release
+
+ - Docs: document msg.reset behaviour for tcp out/request nodes (#5968)
+ - Fix legacy CSV parsing of leading empty columns (#5961)
+ - Fix validation of Subflow (#5957) @GogoVega
+ - Support .mjs node files in template derivation (#5920) @sankalpsthakur
+ - Clear trigger overrideDelay when saved as wait to be reset (#5972) @dlwhdgus0810
+ - Avoid converting whole Buffers when encoding debug messages (#5973) @Juice-de-Orange
+ - Fix the behavior of `showLabel` (node definition) (#5952) @GogoVega
+ - Exclude doc generated from the name by the Comment node (#5948) @GogoVega
+ - Add `data-sync` support for sequential script loading (#5945) @GogoVega
+ - fix: catch-all-in-group scope depends on node add order (#5944) @sathyanarayanan-v
+ - Fix setObjectProperty with invalid array paths (#5943) @R0CKing666
+ - Fix group default fill colors (#5942) @bonanitech
+ - Count each conflicting node once in the resolve conflicts header (#5958) @Yash121l
+ - Do not focus first context menu item when the menu opens (#5960) @Yash121l
+ - Fix editor search indexing of `__proto__` node names (#5980) @this-caroline
+ - Update dependencies (#5982) @knolleary
+ - Fix websocket client leaking a connection on every deploy (#5971) @yuanzhiqing
+ - Wait for a library entry to be written before resolving the save (#5975) @dlwhdgus0810
+
+#### 5.0.7: Maintenance Release
+
+ - Fix incorrect rendering of typedInput with a single type (#5934) @GogoVega
+ - Update body-parser (#5935) @knolleary 
+ - docs: clarify settings.js nodesDir accepts an array of paths (#5925) @Bryandero98
+ - Fix file in completion after filename evaluation error (#5931) @R0CKing666
+ - fix(editor): make disabled wires visible in dark theme (#5926) @Bryandero98
+ - Migrate to patched JSONata (#5933) @knolleary
+
+#### 5.0.6: Maintenance Release
+
+- Revert @node-rs/bcrypt update due to OS/arch compatibility issues
+
+#### 5.0.5: Maintenance Release
+
+ - Update dependencies (#5916) @knolleary
+ - Fix uncaught exception in json node for malformed JSON string with schema + action=str (#5905) @karthikchundi-commits
+ - Update jsonata 2.2.2 (#5915) @knolleary
+ - Remove broken stars chart (#5900) @hardillb
+ - Fix tlsConfigDisableLocalFiles (#5904) @hardillb
+ - Ensure multiplayer event properties are valid (#5898) @knolleary
+ - Fix group default fill and fill opacity values (#5878) @bonanitech
+
+#### 5.0.4: Maintenance Release
+
+ - Revert JSONata update further due to regression in behaviour
+
+#### 5.0.3: Maintenance Release
+
+ - Revert JSONata update due to regression in behaviour
+
+#### 5.0.2: Maintenance Release
+
+ - Sanitize session messages (#5883) @knolleary
+ - fix tests for windows env (#5866) @Steve-Mcl
+ - chore: Update jsonata to latest (#5859) @Steve-Mcl
+ - added description for one letter attributes (#5853) @gorenje
+ - Fix: escape characters in mocha script commands (#5858) @Steve-Mcl
+
+#### 5.0.1: Maintenance Release
+
+ - Update dependencies (#5847) @knolleary
+ - Handle unknown node type properties in info properties table (#5846) @knolleary
+ - Add a button to ignore the import of unknown types (#5836) @GogoVega
+ - Add --watch option to npm run dev (#5843) @knolleary
+ - Load images in info popup before positioning (#5845) @knolleary
+ - Handle repositioning tooltip when aligned to top (#5844) @knolleary
+ - [5839] NR5: info popover does not support node.info() (#5841) @n-lark
+ - [5828] Scroll bars don't update properly (#5832) @n-lark
+ - [BUGFIX] Fix git ref parsing resulting in broken merge conflicts and commit diffs (#5833) @beasteers
+ - [5808] NR5: navigaton elements overlap workspace content at edges (#5827) @n-lark
+ - Fix issue with monaco after expanding and collapsing the editor (#5830) @Steve-Mcl
+ - [7522] Sync theme preference into the embedded Node-RED editor (#5819) @n-lark
+ - [5809] NR5: Scrollbars are not updating when jumping between nodes in the same workspace (#5826) @n-lark
+ - [5810] NR5: "0 plugins" in palette manager (#5825) @n-lark
+ - Reposition active popups in response to window resize events (#5823) @knolleary
+ - Make docs popup styling consistent with info sidebar (#5822) @knolleary
+ - Don't throw error looking up locales for themes (#5813) @hardillb
+ - german translation for help texts of the link nodes (#5801) @m-schaeffler
+ - Add Japanese Translations for v5.0.0 (#5815) @kazuhitoyokoi
+ - Fix images in welcome tour for 4.1 (#5814) @kazuhitoyokoi
+ - Fix expandOnClick behaviour of treeList (#5821) @knolleary
+ - Avoid initialising sidebars with tabs that do not exist yet (#5818) @knolleary
+ - Move sidebar resize-handle down one level in z-index (#5817) @knolleary
+ - Fix RED.sidebar.containsTab api (#5816) @knolleary
+ - Remove dead link in contributing guide (#5797) @knolleary
+ - Set minimum node version to 22.9 (#5792) @bonanitech
+ - Update default branch references (#5793) @knolleary
+
+#### 5.0.0: Milestone Release
 
 This marks the next major release of Node-RED. The following changes represent
 those added since the last beta. Check the beta release details below for the complete

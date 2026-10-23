@@ -1,7 +1,7 @@
 <!--
 ## Before you hit that Submit button....
 
-Please read our [contribution guidelines](https://github.com/node-red/node-red/blob/master/CONTRIBUTING.md)
+Please read our [contribution guidelines](https://github.com/node-red/node-red/blob/main/CONTRIBUTING.md)
 before submitting a pull-request.
 
 ## Types of changes
@@ -28,7 +28,7 @@ the [forum](https://discourse.nodered.org) or
 ## Checklist
 <!-- Put an `x` in the boxes that apply -->
 
-- [ ] I have read the [contribution guidelines](https://github.com/node-red/node-red/blob/master/CONTRIBUTING.md)
+- [ ] I have read the [contribution guidelines](https://github.com/node-red/node-red/blob/main/CONTRIBUTING.md)
 - [ ] For non-bugfix PRs, I have discussed this change on the forum/slack team.
 - [ ] I have run `npm run test` to verify the unit tests pass
 - [ ] I have added suitable unit tests to cover the new/changed functionality

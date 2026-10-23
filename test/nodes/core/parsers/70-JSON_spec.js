@@ -416,6 +416,34 @@ describe('JSON node', function() {
         });
     });
 
+    it('should log an error, not throw, if passed a malformed JSON string, a schema, and action is string', function(done) {
+        var flow = [{id:"jn1",type:"json",action:"str",wires:[["jn2"]]},
+                    {id:"jn2", type:"helper"}];
+        helper.load(jsonNode, flow, function() {
+            try {
+                var jn1 = helper.getNode("jn1");
+                var jn2 = helper.getNode("jn2");
+                var schema = {title: "testSchema", type: "object", properties: {number: {type: "number"}, string: {type: "string" }}};
+                jn1.on('call:error', () => { });
+                jn1.receive({payload:'{"number":3,', schema:schema});
+                setTimeout(function() {
+                    try {
+                        var logEvents = helper.log().args.filter(function(evt) {
+                            return evt[0].type == "json";
+                        });
+                        logEvents.should.have.length(1);
+                        logEvents[0][0].should.have.a.property('msg');
+                        logEvents[0][0].msg.should.match(/JSON/i);
+                        logEvents[0][0].should.have.a.property('level',helper.log().ERROR);
+                        done();
+                    } catch(err) { done(err) }
+                },50);
+            } catch(err) {
+                done(err);
+            }
+        });
+    });
+
     it('should log an error if passed an invalid object and valid schema', function(done) {
         var flow = [{id:"jn1",type:"json",wires:[["jn2"]]},
                     {id:"jn2", type:"helper"}];
