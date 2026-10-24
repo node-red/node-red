@@ -127,6 +127,7 @@ describe('exec node', function() {
         it('should exec a simple command with appended value from message', function (done) {
             var flow = [{id:"n1", type:"exec", wires:[["n2"]], command:"echo", addpay:"topic", append:"more", oldrc:"false"},
                         {id:"n2", type:"helper"}];
+            var expected = (osType === "Windows_NT") ? "bar more\r\n" : "bar more\n";
             helper.load(execNode, flow, function () {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
@@ -134,7 +135,7 @@ describe('exec node', function() {
                     try {
                         msg.should.have.property("payload");
                         msg.payload.should.be.a.String();
-                        msg.payload.should.equal("bar more\n");
+                        msg.payload.should.equal(expected);
                         done();
                     } catch(err) {
                         done(err)
@@ -710,7 +711,13 @@ describe('exec node', function() {
                     try {
                         msg.should.have.property("payload");
                         msg.payload.should.have.property("code");
-                        msg.payload.code.should.be.below(0);
+                        if (osType === "Windows_NT") {
+                            // On Windows the command runs via the shell (cmd.exe), which
+                            // reports an unknown command as a positive exit code (1).
+                            msg.payload.code.should.be.above(0);
+                        } else {
+                            msg.payload.code.should.be.below(0);
+                        }
                         done();
                     }
                     catch(err) { done(err); }
@@ -933,12 +940,15 @@ describe('exec node', function() {
                 var n3 = helper.getNode("n3");
                 var n4 = helper.getNode("n4");
                 var received = 0;
+                var finished = false;
                 var messages = [null,null];
                 var completeTest = function() {
                     if (messages[0] === null || messages[1] === null) {
                         // We have not yet had responses on both ports.
                         return
                     }
+                    if (finished) { return; }
+                    finished = true;
                     try {
                         var msg = messages[0];
                         msg.should.have.property("payload");
@@ -957,6 +967,12 @@ describe('exec node', function() {
                     }
                 };
 
+                // The failing command writes its diagnostic to stderr on Linux
+                // (mkdir) but to stdout on Windows (ping), so listen on both ports.
+                n2.on("input", function(msg) {
+                    messages[0] = msg;
+                    completeTest();
+                });
                 n3.on("input", function(msg) {
                     messages[0] = msg;
                     completeTest();

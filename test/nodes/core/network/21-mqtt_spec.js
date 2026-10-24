@@ -113,6 +113,27 @@ describe('MQTT Nodes', function () {
             }
         });
     });
+    it('should use the url from a repeated "connect" action', function (done) {
+        const { flow } = buildBasicMQTTSendRecvFlow({ id: "mqtt.broker", name: "mqtt_broker", broker: "localhost", port: 1883, autoConnect: false }, { id: "mqtt.in", topic: "in_topic" }, { id: "mqtt.out", topic: "out_topic" });
+        helper.load(mqttNodes, flow, function () {
+            try {
+                const mqttBroker = helper.getNode("mqtt.broker");
+                mqttBroker.should.have.property('brokerurl', 'mqtt://localhost:1883');
+                //a "connect" action passes msg.broker to setOptions
+                mqttBroker.setOptions({ url: "mqtts://broker.example.com" });
+                mqttBroker.should.have.property('brokerurl', 'mqtts://broker.example.com');
+                //repeating the same action should not fall back to broker/port
+                mqttBroker.setOptions({ url: "mqtts://broker.example.com" });
+                mqttBroker.should.have.property('brokerurl', 'mqtts://broker.example.com');
+                //a later broker/port override still replaces the url
+                mqttBroker.setOptions({ broker: "broker2.example.com", port: 1884 });
+                mqttBroker.should.have.property('brokerurl', 'mqtt://broker2.example.com:1884');
+                done();
+            } catch (error) {
+                done(error)
+            }
+        });
+    });
 
     if (skipTests) {
         it('skipping MQTT tests. Set env var "NR_MQTT_TESTS=true" to enable. Requires a v5 capable broker running on localhost:1883.', function (done) {

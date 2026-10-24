@@ -276,7 +276,7 @@ describe('nodes/registry/installer', function() {
 
             installer.installModule("foo",null,"/example path/foo-0.1.1.tgz").then(function(info) {
                 const lastCallArgs = exec.run.lastCall.args[1];
-                lastCallArgs[0].should.match(/npm\/bin\/npm-cli\.js$/)
+                lastCallArgs[0].should.match(/npm[\\/]bin[\\/]npm-cli\.js$/)
                 const remainingArgs = lastCallArgs.slice(1);
                 remainingArgs.should.eql([ 'install', '--no-audit', '--no-update-notifier', '--no-fund', '--save', '--save-prefix=~', '--omit=dev', '--engine-strict', '--', '/example path/foo-0.1.1.tgz' ]);
                 info.should.eql(nodeInfo);

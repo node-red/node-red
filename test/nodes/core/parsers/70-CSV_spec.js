@@ -23,6 +23,78 @@ const delayNode = require("nr-test-utils").require("@node-red/nodes/core/functio
 const helper = require("node-red-node-test-helper");
 // const { neq } = require("semver");
 
+describe('CSV node sequence metadata', function() {
+    before(function(done) {
+        helper.startServer(done);
+    });
+
+    after(function(done) {
+        helper.stopServer(done);
+    });
+
+    afterEach(function() {
+        helper.unload();
+    });
+
+    [undefined, 'rfc'].forEach(function(spec) {
+        var mode = spec === 'rfc' ? 'RFC4180' : 'Legacy';
+        [
+            {name:'array part with trailing newline', payload:'1,2,3\n', parts:{id:'files', type:'array', index:6, count:19, len:1}},
+            {name:'array part without trailing newline', payload:'1,2,3', parts:{id:'files', type:'array', index:6, count:19, len:1}},
+            {name:'single-item array part', payload:'1,2,3\n', parts:{id:'files', type:'array', index:0, count:1, len:1}},
+            {name:'object part', payload:'1,2,3\n', parts:{id:'files', type:'object', index:1, count:2, key:'file.csv'}},
+            {name:'array part with its own header', payload:'a,b,c\n1,2,3', hdrin:true, parts:{id:'files', type:'array', index:6, count:19, len:1}},
+            {name:'array part with a skipped line', payload:'ignored\n1,2,3', skip:1, parts:{id:'files', type:'array', index:6, count:19, len:1}}
+        ].forEach(function(testCase) {
+            it('should parse an independent ' + testCase.name + ' in ' + mode + ' mode', function(done) {
+                var flow = [
+                    {id:'n1', type:'csv', spec:spec, temp:'a,b,c', multi:'mult', hdrin:testCase.hdrin, skip:testCase.skip, wires:[['n2']]},
+                    {id:'n2', type:'helper'}
+                ];
+                helper.load(csvNode, flow, function() {
+                    var n1 = helper.getNode('n1');
+                    var n2 = helper.getNode('n2');
+                    n2.on('input', function(msg) {
+                        try {
+                            msg.should.have.property('payload', [{a:1, b:2, c:3}]);
+                            msg.should.have.property('columns', 'a,b,c');
+                            msg.should.have.property('parts', testCase.parts);
+                            done();
+                        } catch (err) {
+                            done(err);
+                        }
+                    });
+                    n1.receive({payload:testCase.payload, parts:Object.assign({}, testCase.parts)});
+                });
+            });
+        });
+
+        [undefined, 'string', 'buffer'].forEach(function(type) {
+            it('should aggregate newline-terminated CSV parts with ' + (type || 'unspecified') + ' type in ' + mode + ' mode', function(done) {
+                var flow = [
+                    {id:'n1', type:'csv', spec:spec, temp:'a,b,c', multi:'mult', wires:[['n2']]},
+                    {id:'n2', type:'helper'}
+                ];
+                helper.load(csvNode, flow, function() {
+                    var n1 = helper.getNode('n1');
+                    var n2 = helper.getNode('n2');
+                    n2.on('input', function(msg) {
+                        try {
+                            msg.should.have.property('payload', [{a:1, b:2, c:3}, {a:4, b:5, c:6}]);
+                            msg.should.not.have.property('parts');
+                            done();
+                        } catch (err) {
+                            done(err);
+                        }
+                    });
+                    n1.receive({payload:'1,2,3\n', parts:{id:'rows', type:type, index:0, count:2}});
+                    n1.receive({payload:'4,5,6\n', parts:{id:'rows', type:type, index:1, count:2}});
+                });
+            });
+        });
+    });
+});
+
 describe('CSV node (Legacy Mode)', function() {
 
     before(function(done) {

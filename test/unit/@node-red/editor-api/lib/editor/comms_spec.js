@@ -118,6 +118,33 @@ describe("api/editor/comms", function() {
                 done();
             });
         });
+
+        it('acknowledges an auth packet when adminAuth is not set', function(done) {
+            // The editor can still hold a token from when adminAuth was enabled
+            var ws = new WebSocket(url);
+            var received = 0;
+            ws.on('open', function() {
+                ws.send('{"auth":"x"}');
+            });
+            ws.on('message', function(msg) {
+                received++;
+                try {
+                    if (received == 1) {
+                        msg.should.equal('{"auth":"ok"}');
+                        connections.length.should.eql(1);
+                        ws.send('{"subscribe":"topic4"}');
+                        connections[0].send('topic4', 'foo');
+                    } else {
+                        msg.should.equal('[{"topic":"topic4","data":"foo"}]');
+                        ws.close();
+                        done();
+                    }
+                } catch(err) {
+                    ws.close();
+                    done(err);
+                }
+            });
+        });
     });
 
     describe("disabled editor", function() {

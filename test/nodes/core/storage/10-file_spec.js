@@ -99,7 +99,8 @@ describe('file Nodes', function() {
         });
 
         it('should write to a file using JSONata', function(done) {
-            var fileToTest4jsonata = "'" + resourcesDir + "/'&(20+30)&'-file-test-file.txt'";
+            // Use forward slashes: backslashes in a Windows path would be treated as escape sequences in a JSONata string literal
+            var fileToTest4jsonata = "'" + resourcesDir.replace(/\\/g,"/") + "/'&(20+30)&'-file-test-file.txt'";
             var flow = [{id:"fileNode1", type:"file", name: "fileNode", "filename": fileToTest4jsonata, "filenameType": "jsonata", "appendNewline":false, "overwriteFile":true, wires: [["helperNode1"]]},
                         {id:"helperNode1", type:"helper"}];
             helper.load(fileNode, flow, function() {
@@ -240,7 +241,7 @@ describe('file Nodes', function() {
                                 f.should.equal("Line1\nLine2\nLine3\nLine4");
                             }
                             else {
-                                f.should.have.length(23);
+                                f.should.have.length(26);
                                 f.should.equal("Line1\r\nLine2\r\nLine3\r\nLine4");
                             }
                             done();
@@ -1285,7 +1286,8 @@ describe('file Nodes', function() {
         });
 
         it('should read in a file using JSONata and output a utf8 string', function(done) {
-            var fileToTest4jsonata = "'" + resourcesDir + "/'&(20+30)&'-file-test-file.txt'";
+            // Use forward slashes: backslashes in a Windows path would be treated as escape sequences in a JSONata string literal
+            var fileToTest4jsonata = "'" + resourcesDir.replace(/\\/g,"/") + "/'&(20+30)&'-file-test-file.txt'";
             var flow = [{id:"fileInNode1", type:"file in", name: "fileInNode", "filename":fileToTest4jsonata, "filenameType": "jsonata", "format":"utf8", wires:[["n2"]]},
                         {id:"n2", type:"helper"}];
             helper.load(fileNode, flow, function() {
@@ -1303,6 +1305,30 @@ describe('file Nodes', function() {
                     }
                 });
                 n1.receive({payload:""});
+            });
+        });
+
+        it('should handle a filename JSONata evaluation error and call done', function(done) {
+            const completeNode = require("nr-test-utils").require("@node-red/nodes/core/common/24-complete.js");
+            var flow = [{id:"fileInNode1", type:"file in", name: "fileInNode", "filename":"$nonExistentFunction()", "filenameType":"jsonata", "format":"utf8", wires:[[]]},
+                        {id:"completeNode1", type:"complete", scope:["fileInNode1"], uncaught:false, wires:[["helperNode1"]]},
+                        {id:"helperNode1", type:"helper", wires:[[]]}];
+            helper.load([fileNode, completeNode], flow, function() {
+                var n1 = helper.getNode("fileInNode1");
+                var helperNode1 = helper.getNode("helperNode1");
+                helperNode1.on("input", function(msg) {
+                    try {
+                        n1.error.called.should.be.true();
+                        n1.error.lastCall.args[0].should.have.property("code", "T1006");
+                        n1.error.lastCall.args[0].should.have.property("message", "Attempted to invoke a non-function");
+                        n1.error.lastCall.args[1].should.have.property("payload", "trigger");
+                        msg.should.have.property("payload", "trigger");
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                n1.receive({payload:"trigger"});
             });
         });
 

@@ -536,6 +536,60 @@ describe('websocket Node', function() {
             });
         });
 
+        it('should keep a single connection when in and out share a client', function(done) {
+            var flow = [
+                { id: "server", type: "websocket-listener", path: "/ws" },
+                { id: "client", type: "websocket-client", path: getWsUrl("/ws") },
+                { id: "out1", type: "websocket out", client: "client" },
+                { id: "in1", type: "websocket in", client: "client", wires: [[]] }
+            ];
+            helper.load(websocketNode, flow, function() {
+                var opens = 0;
+                getSocket('server').on('connection', function() {
+                    opens++;
+                });
+                setTimeout(function() {
+                    try {
+                        opens.should.equal(1);
+                        Object.keys(helper.getNode("server")._clients).should.have.length(1);
+                        done();
+                    } catch (err) {
+                        done(err);
+                    }
+                }, 200);
+            });
+        });
+
+        it('should not add a connection when the client flow is redeployed', function(done) {
+            var flow = [
+                { id: "server", type: "websocket-listener", path: "/ws" },
+                { id: "client", type: "websocket-client", path: getWsUrl("/ws") },
+                { id: "out1", type: "websocket out", client: "client" },
+                { id: "in1", type: "websocket in", client: "client", wires: [[]] }
+            ];
+            helper.load(websocketNode, flow, function() {
+                getSocket('server').on('connection', function() {
+                    helper.setFlows(flow, "full", {}).then(function() {
+                        var opens = 0;
+                        getSocket('server').on('connection', function() {
+                            opens++;
+                        });
+                        setTimeout(function() {
+                            try {
+                                opens.should.equal(1);
+                                Object.keys(helper.getNode("server")._clients).should.have.length(1);
+                                done();
+                            } catch (err) {
+                                done(err);
+                            }
+                        }, 300);
+                    }).catch(function(err) {
+                        done(err);
+                    });
+                });
+            });
+        });
+
         it('should NOT feedback more than once', function(done) {
             var flow = [
                 { id: "server", type: "websocket-listener", path: "/ws", wholemsg: "true" },

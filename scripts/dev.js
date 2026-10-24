@@ -26,6 +26,8 @@ function parseArgs(argv) {
             process.env.BROWSERSTACK = "true";
         } else if (a === "--non-headless") {
             process.env.NODE_RED_NON_HEADLESS = "true";
+        } else if (a === "--watch") {
+            out.watchDirs = argv[++i]
         } else {
             out.passthrough.push(a);
         }
@@ -74,13 +76,13 @@ function watchPath(label, patterns, handler) {
         .on("unlink", onChange);
 }
 
-function startNodemon(scriptArgs) {
+function startNodemon(scriptArgs, watchDirs) {
     nodemon({
         script: "packages/node_modules/node-red/red.js",
         args: scriptArgs,
         ext: "js,html,json",
         verbose: false,
-        watch: ["packages/node_modules"],
+        watch: ["packages/node_modules", ...watchDirs],
         ignore: ["packages/node_modules/@node-red/editor-client/*"]
     });
     nodemon.on("log", (event) => {
@@ -134,7 +136,7 @@ async function main() {
     watchPath("tours", path.join(EDITOR_SRC, "tours"), () => copy());
     watchPath("misc", path.join(ROOT, "CHANGELOG.md"), () => copy());
 
-    startNodemon(scriptArgs);
+    startNodemon(scriptArgs, [opts.watchDirs]);
 }
 
 main().catch((err) => {
