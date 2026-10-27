@@ -107,4 +107,46 @@ describe("api/util", function() {
             apiUtil.determineLangFromHeaders(['fr-FR','en-GB']).should.eql("fr-FR");
         })
     })
+    describe("createExpressApp", function() {
+        it('parses nested query parameters as Express 4 did', function(done) {
+            const app = apiUtil.createExpressApp({});
+            app.get("/q", function(req,res) { res.json(req.query); });
+            request(app).get("/q?a[b]=c&d=1&d=2").expect(200).end(function(err,res) {
+                if (err) { return done(err); }
+                res.body.should.eql({a:{b:"c"},d:["1","2"]});
+                done();
+            });
+        });
+        it('lets httpServerOptions override the query parser', function() {
+            const app = apiUtil.createExpressApp({httpServerOptions:{"query parser":"simple"}});
+            app.get("query parser").should.equal("simple");
+        });
+    });
+    describe("wildcardParam", function() {
+        it('joins the segments of an Express 5 named wildcard', function() {
+            apiUtil.wildcardParam({params:{path:["a","b","c.json"]}},"path").should.equal("a/b/c.json");
+        });
+        it('returns a string parameter unchanged', function() {
+            apiUtil.wildcardParam({params:{path:"a/b"}},"path").should.equal("a/b");
+        });
+        it('returns undefined when the parameter is absent', function() {
+            should(apiUtil.wildcardParam({params:{}},"path")).be.undefined();
+        });
+    });
+    describe("skipIfBodyParsed", function() {
+        function run(req) {
+            let parsed = false, nexted = false;
+            apiUtil.skipIfBodyParsed(function(req,res,next) { parsed = true; next(); })(req, {}, function() { nexted = true; });
+            return {parsed, nexted};
+        }
+        it('runs the parser when the body has not been read', function() {
+            run({}).should.eql({parsed:true, nexted:true});
+        });
+        it('skips the parser when body-parser already marked the body as read', function() {
+            run({_body:true}).should.eql({parsed:false, nexted:true});
+        });
+        it('skips the parser when another parser has consumed the stream', function() {
+            run({readableEnded:true, body:{a:1}}).should.eql({parsed:false, nexted:true});
+        });
+    });
 });
