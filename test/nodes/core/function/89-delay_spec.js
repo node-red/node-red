@@ -245,6 +245,45 @@ describe('delay Node', function() {
         genericRateLimitSECONDSTest(1, 1, 1500, 2000, done);
     });
 
+    it('limits the message rate with a random interval', function(done) {
+        this.timeout(3000);
+        var flow = [{"id":"delayNode1","type":"delay","nbRateUnits":1,"name":"delayNode","pauseType":"rate","timeout":5,"timeoutUnits":"seconds","rate":1,"rateUnits":"second","randomRate":true,"randomFirst":"200","randomLast":"400","randomUnits":"milliseconds","drop":false,"wires":[["helperNode1"]]},
+                    {id:"helperNode1", type:"helper", wires:[]}];
+        helper.load(delayNode, flow, function() {
+            var delayNode1 = helper.getNode("delayNode1");
+            var helperNode1 = helper.getNode("helperNode1");
+            var receivedMessagesStack = [];
+            var receiveTimestamp;
+            var finished = false;
+
+            helperNode1.on("input", function(msg) {
+                if (finished) { return; }
+                try {
+                    if (receiveTimestamp) {
+                        var elapse = process.hrtime(receiveTimestamp);
+                        var receiveInterval = (elapse[0] * 1000) + ((elapse[1] / nanosToSeconds) * 1000);
+                        if (!inBetweenDelays(200, 400, receiveInterval, GRACE_PERCENTAGE)) {
+                            should.fail(null, null, "Random rate interval " + receiveInterval + "ms was not between 200ms and 400ms");
+                        }
+                    }
+                    receiveTimestamp = process.hrtime();
+                    receivedMessagesStack.push(msg);
+                    if (receivedMessagesStack.length === 4) {
+                        finished = true;
+                        done();
+                    }
+                } catch(err) {
+                    finished = true;
+                    done(err);
+                }
+            });
+
+            for (var i = 0; i < 4; i++) {
+                delayNode1.receive({ payload: i });
+            }
+        });
+    });
+
     /**
      * Runs a rate limit test with drop support - only testing seconds!
      * @param aLimit - the message limit count
@@ -359,6 +398,57 @@ describe('delay Node', function() {
         this.timeout(6000);
         RED.settings.nodeMessageBufferMaxLength = 3;
         dropRateLimitSECONDSTest(2, 1, 5000, 1000, done);
+    });
+
+    it('limits the message rate with drop using a random interval', function(done) {
+        this.timeout(4000);
+        var flow = [{"id":"delayNode1","type":"delay","nbRateUnits":1,"name":"delayNode","pauseType":"rate","timeout":5,"timeoutUnits":"seconds","rate":1,"rateUnits":"second","randomRate":true,"randomFirst":"200","randomLast":"400","randomUnits":"milliseconds","drop":true,"outputs":1,"wires":[["helperNode1"]]},
+                    {id:"helperNode1", type:"helper", wires:[]}];
+        helper.load(delayNode, flow, function() {
+            var delayNode1 = helper.getNode("delayNode1");
+            var helperNode1 = helper.getNode("helperNode1");
+            var receivedMessagesStack = [];
+            var receiveTimestamp;
+            var totalSent = 0;
+            var finished = false;
+
+            helperNode1.on("input", function(msg) {
+                if (finished) { return; }
+                try {
+                    if (receiveTimestamp) {
+                        var elapse = process.hrtime(receiveTimestamp);
+                        var receiveInterval = (elapse[0] * 1000) + ((elapse[1] / nanosToSeconds) * 1000);
+                        receiveInterval.should.be.above(200 * 0.9);
+                    }
+                    receiveTimestamp = process.hrtime();
+                    receivedMessagesStack.push(msg);
+                } catch(err) {
+                    finished = true;
+                    done(err);
+                }
+            });
+
+            var sender = setInterval(function() {
+                delayNode1.receive({ payload: totalSent });
+                totalSent++;
+                if (totalSent >= 60) {
+                    clearInterval(sender);
+                    setTimeout(function() {
+                        if (finished) { return; }
+                        try {
+                            receivedMessagesStack.length.should.be.greaterThan(1);
+                            receivedMessagesStack.length.should.be.lessThan(totalSent);
+                            receivedMessagesStack[0].payload.should.be.exactly(0);
+                            finished = true;
+                            done();
+                        } catch(err) {
+                            finished = true;
+                            done(err);
+                        }
+                    }, 500);
+                }
+            }, 25);
+        });
     });
 
     /**
