@@ -574,6 +574,37 @@ describe('delay Node', function() {
         });
     });
 
+    it('can part flush queue with a number larger than the queue', function(done) {
+        this.timeout(2000);
+        var flow = [{id:"delayNode1", type :"delay","name":"delayNode","nbRateUnits":"1","pauseType":"queue","timeout":1,"timeoutUnits":"seconds","rate":4,"rateUnits":"second","randomFirst":"1","randomLast":"5","randomUnits":"seconds","drop":false,"wires":[["helperNode1"]]},
+                    {id:"helperNode1", type:"helper", wires:[]}];
+        helper.load(delayNode, flow, function() {
+            var delayNode1 = helper.getNode("delayNode1");
+            var helperNode1 = helper.getNode("helperNode1");
+            var c = 0;
+            delayNode1.on("call:error", function(err) {
+                try {
+                    done(new Error("flush should not raise a node error: " + (err && err.message || err)));
+                } catch (e) { /* done already called */ }
+            });
+            helperNode1.on("input", function(msg) {
+                msg.should.have.a.property('payload');
+                msg.should.have.a.property('topic');
+                try {
+                    c = c + 1;
+                    if (c === 3) { done(); }  // flush must release exactly the queued messages
+                } catch(e) {
+                    done(e);
+                }
+            });
+            // send test messages
+            delayNode1.receive({payload:1,topic:"A"});
+            delayNode1.receive({payload:2,topic:"B"});
+            delayNode1.receive({payload:3,topic:"C"});
+            setImmediate( function() { delayNode1.receive({flush:99}); } );
+        });
+    });
+
     it('handles timed queue', function(done) {
         this.timeout(2000);
         var flow = [{"id":"delayNode1","type":"delay","name":"delayNode","pauseType":"timed","timeout":1,"timeoutUnits":"seconds","rate":2,"rateUnits":"second","randomFirst":"1","randomLast":"5","randomUnits":"seconds","drop":false,"wires":[["helperNode1"]]},
