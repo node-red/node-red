@@ -177,6 +177,23 @@ describe("api/auth/strategies", function() {
             };
             strategies.tokensStrategy.authenticate({headers:{"authorization":"Bearer 1234"}});
         });
+        it('Succeeds if tokens user enabled default header with a non-Bearer value',function(done) {
+            var userTokens = sinon.stub(Users,"tokens").callsFake(function(token) {
+                token.should.equal("custom-token");
+                return Promise.resolve("tokens-"+token);
+            });
+            var userTokenHeader = sinon.stub(Users,"tokenHeader").callsFake(function(token) {
+                return "authorization";
+            });
+            strategies.tokensStrategy._success = strategies.tokensStrategy.success;
+            strategies.tokensStrategy.success = function(user) {
+                user.should.equal("tokens-custom-token");
+                strategies.tokensStrategy.success = strategies.tokensStrategy._success;
+                delete strategies.tokensStrategy._success;
+                done();
+            };
+            strategies.tokensStrategy.authenticate({headers:{"authorization":"custom-token"}});
+        });
         it('Fails if tokens user not enabled',function(done) {
             var userTokens = sinon.stub(Users,"tokens").callsFake(function() {
                 return Promise.resolve(null);
