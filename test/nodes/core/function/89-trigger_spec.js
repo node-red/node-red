@@ -795,6 +795,39 @@ describe('trigger node', function() {
         });
     });
 
+    it('should re-evaluate date for the second output when the delay is extended', function(done) {
+        this.timeout(5000); // add extra time for flake
+        var flow = [{"id":"n1", "type":"trigger", "name":"triggerNode", extend:"true", op1:"1", op1type:"num", op2:"", op2type:"date", duration:"100", wires:[["n2"]] },
+            {id:"n2", type:"helper"} ];
+        helper.load(triggerNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            var c = 0;
+            var firstSent = 0;
+            n2.on("input", function(msg) {
+                try {
+                    if (c === 0) {
+                        msg.should.have.a.property("payload", 1);
+                        firstSent = Date.now();
+                        c += 1;
+                    }
+                    else {
+                        // the second output must carry the time the (extended) timeout
+                        // fired, not the time the first message arrived
+                        msg.payload.should.be.a.Number();
+                        (msg.payload).should.be.greaterThan(firstSent + 50);
+                        done();
+                    }
+                }
+                catch(err) { done(err); }
+            });
+            n1.emit("input", {payload:"Hello"});
+            setTimeout( function() {
+                n1.emit("input", {payload:null}); // extends the delay
+            },40);
+        });
+    });
+
     it('should be able to extend the delay (but with no 2nd output)', function(done) {
         var flow = [{"id":"n1", "type":"trigger", "name":"triggerNode", extend:"true", op1type:"pay", op2type:"nul", op1:"false",  op2:"true", duration:"200", wires:[["n2"]] },
             {id:"n2", type:"helper"} ];
