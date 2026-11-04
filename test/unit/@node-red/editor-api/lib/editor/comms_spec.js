@@ -109,6 +109,12 @@ describe("api/editor/comms", function() {
             ws.on('open', function() {
                 ws.send('not json');
                 ws.send('[]');
+                // The following are all valid JSON that parse to non-objects.
+                // They must not crash the server.
+                ws.send('null');
+                ws.send('42');
+                ws.send('true');
+                ws.send('"a string"');
                 ws.send('{"subscribe":"topic3"}');
                 connections[0].send('topic3', 'correct');
             });
