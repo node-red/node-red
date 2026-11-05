@@ -228,6 +228,29 @@ describe("@node-red/util/util", function() {
             result.should.be.false();
             obj.should.eql({a:[null]});
         });
+        it('does not modify an object prototype via __proto__', function() {
+            var obj = {a:{}};
+            util.setObjectProperty(obj,"__proto__.polluted","bar").should.be.false();
+            util.setObjectProperty(obj,"__proto__",{polluted:"bar"}).should.be.false();
+            util.setObjectProperty(obj,"a.__proto__.polluted","bar").should.be.false();
+            util.setObjectProperty(obj,"a['__proto__'].polluted","bar").should.be.false();
+            Object.getPrototypeOf(obj).should.equal(Object.prototype);
+            Object.getPrototypeOf(obj.a).should.equal(Object.prototype);
+            should.not.exist(obj.polluted);
+            should.not.exist({}.polluted);
+        });
+        it('does not modify an object prototype via constructor.prototype', function() {
+            function Foo() {}
+            var obj = {a:{}, fn:Foo, inst: new Foo()};
+            util.setObjectProperty(obj,"constructor.prototype.polluted","bar").should.be.false();
+            util.setObjectProperty(obj,"a.constructor.prototype.polluted","bar").should.be.false();
+            util.setObjectProperty(obj,"fn.prototype.polluted","bar").should.be.false();
+            util.setObjectProperty(obj,"a.constructor","bar").should.be.false();
+            should.not.exist(Foo.prototype.polluted);
+            should.not.exist(obj.inst.polluted);
+            should.not.exist({}.polluted);
+            obj.a.should.eql({});
+        });
     });
     describe('setMessageProperty', function() {
         it('sets a property', function() {
