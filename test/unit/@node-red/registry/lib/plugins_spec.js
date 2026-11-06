@@ -101,6 +101,13 @@ describe("red/nodes/registry/plugins",function() {
 <!-- --- [red-plugin:test-module/test-set] --- -->
 test-module-config`)
         })
+        it("does not return Object.prototype properties for lang", function() {
+            ["constructor","toString","hasOwnProperty","__proto__"].forEach(lang => {
+                plugins.getPluginConfigs(lang).should.eql(`
+<!-- --- [red-plugin:test-module/test-set] --- -->
+test-module-config`)
+            })
+        })
     })
 
 
