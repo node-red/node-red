@@ -1121,6 +1121,39 @@ describe('switch Node', function() {
         });
     });
 
+    it('should not report too many pending messages when repairing complete groups', function(done) {
+        var flow = [{id:"n1",type:"switch",name:"switchNode",property:"payload",
+                     rules:[{"t":"else"}],
+                     checkall:true,repair:true,
+                     outputs:1,wires:[["n2"]]},
+                    {id:"n2", type:"helper", wires:[]}
+                   ];
+        helper.load(switchNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            RED.settings.nodeMessageBufferMaxLength = 10;
+            var received = 0;
+            n2.on("input", function(msg) {
+                received++;
+            });
+            setTimeout(function() {
+                try {
+                    received.should.equal(12);
+                    var logEvents = helper.log().args.filter(function (evt) {
+                        return evt[0].type == "switch" && evt[0].msg == "switch.errors.too-many";
+                    });
+                    logEvents.length.should.equal(0);
+                    done();
+                } catch(err) { done(err); }
+            }, 300);
+            for (var g = 1; g <= 4; g++) {
+                for (var i = 0; i < 3; i++) {
+                    n1.receive({payload: g*10+i, parts:{index: i, count: 3, id: g}});
+                }
+            }
+        });
+    });
+
     it('should handle invalid jsonata expression', function(done) {
 
         var flow = [{id:"switchNode1",type:"switch",name:"switchNode",property:"$invalidExpression(payload)",propertyType:"jsonata",rules:[{"t":"btwn","v":"$sqrt(16)","vt":"jsonata","v2":"$sqrt(36)","v2t":"jsonata"}],checkall:true,outputs:1,wires:[["helperNode1"]]},
