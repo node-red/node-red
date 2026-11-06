@@ -416,6 +416,36 @@ describe('BATCH node', function() {
             });
         });
 
+        it('should report only the overflowing message (mode: concat)', function(done) {
+            var flow = [{id:"n1", type:"batch", name: "BatchNode", mode: "concat", count: 0, overlap: 0, interval: 1, allowEmptySequence: false, topics: [{topic: "TA"}, {topic: "TB"}], wires:[["n2"]]},
+                        {id:"n2", type:"helper"}];
+            helper.load(batchNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                RED.settings.nodeMessageBufferMaxLength = 2;
+                setTimeout(function() {
+                    try {
+                        var logEvents = helper.log().args.filter(function (evt) {
+                            return evt[0].type == "batch";
+                        });
+                        // six messages against a limit of two: the buffer overflows twice (on
+                        // TA#1 and TB#2), and each overflow reports only the message that
+                        // caused it - not every message still pending
+                        logEvents.should.have.length(2);
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                }, 150);
+                var C = 3;
+                for(var i = 0; i < C; i++) {
+                    var parts_a = {index:i, count:C, id:"A"};
+                    var parts_b = {index:i, count:C, id:"B"};
+                    n1.receive({payload: i, topic: "TA", parts:parts_a});
+                    n1.receive({payload: i, topic: "TB", parts:parts_b});
+                }
+            });
+        });
+
         it('should handle reset', function(done) {
             var flow = [{id:"n1", type:"batch", name: "BatchNode", mode: "concat", count: 0, overlap: 0, interval: 1, allowEmptySequence: false, topics: [{topic: "TA"}, {topic: "TB"}], wires:[["n2"]]},
                         {id:"n2", type:"helper"}];
