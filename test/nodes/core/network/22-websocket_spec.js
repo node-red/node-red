@@ -15,6 +15,7 @@
  **/
 
 var ws = require("ws");
+var net = require("net");
 var should = require("should");
 var helper = require("node-red-node-test-helper");
 var websocketNode = require("nr-test-utils").require("@node-red/nodes/core/network/22-websocket.js");
@@ -328,6 +329,30 @@ describe('websocket Node', function() {
                     return Promise.all(promises).then(() => {done()});
                 }).catch(function(err) {
                     done(err);
+                });
+            });
+        });
+
+        it('should close socket for an upgrade request with a malformed url', function(done) {
+            var flow = [{ id: "n1", type: "websocket-listener", path: "/ws" }];
+            helper.load(websocketNode, flow, function() {
+                var serverUrl = new URL(helper.url());
+                var client = net.connect(serverUrl.port, serverUrl.hostname, function() {
+                    client.write('GET http://[::1/ws HTTP/1.1\r\n'+
+                        'Host: a\r\n'+
+                        'Connection: Upgrade\r\n'+
+                        'Upgrade: websocket\r\n'+
+                        'Sec-WebSocket-Version: 13\r\n'+
+                        'Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==\r\n\r\n');
+                });
+                client.on("error", function() {});
+                client.on("close", function() {
+                    // Check the listener is still accepting connections
+                    createClient("n1").then(function() {
+                        done();
+                    }).catch(function(err) {
+                        done(err);
+                    });
                 });
             });
         });
