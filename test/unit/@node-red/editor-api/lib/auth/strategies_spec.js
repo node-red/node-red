@@ -110,6 +110,43 @@ describe("api/auth/strategies", function() {
             });
         
         });
+
+        it('Handles authentication rejecting',function(done) {
+            userAuthentication = sinon.stub(Users,"authenticate").callsFake(function(username,password) {
+                return Promise.reject(new Error("bcrypt error"));
+            });
+
+            strategies.passwordTokenExchange({},"rejecting-user","password","scope",function(err,token) {
+                try {
+                    should.not.exist(err);
+                    token.should.be.false();
+                    done();
+                } catch(e) {
+                    done(e);
+                }
+            });
+        });
+
+        it('Handles token creation rejecting',function(done) {
+            userAuthentication = sinon.stub(Users,"authenticate").callsFake(function(username,password) {
+                return Promise.resolve({username:"user",permissions:"*"});
+            });
+            var tokenCreate = sinon.stub(Tokens,"create").callsFake(function() {
+                return Promise.reject(new Error("token error"));
+            });
+
+            strategies.passwordTokenExchange({id:"myclient"},"token-fail-user","password","read",function(err,token) {
+                try {
+                    should.not.exist(err);
+                    token.should.be.false();
+                    done();
+                } catch(e) {
+                    done(e);
+                } finally {
+                    tokenCreate.restore();
+                }
+            });
+        });
     });
 
     describe("Anonymous Strategy", function() {
