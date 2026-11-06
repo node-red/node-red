@@ -384,6 +384,26 @@ describe("red/nodes/registry/registry",function() {
             typeRegistry.getNodeConfig("test-module/test-name-2").should.eql('<!-- --- [red-module:test-module/test-name-2] --- -->\nconfigBHEtest-name-2LP');
             typeRegistry.getAllNodeConfigs().should.eql('\n<!-- --- [red-module:test-module/test-name] --- -->\nconfigAHEtest-nameLP\n<!-- --- [red-module:test-module/test-name-2] --- -->\nconfigBHEtest-name-2LP');
         });
+        it('does not return Object.prototype properties for lang', function() {
+            typeRegistry.init(settings,{
+                getNodeHelp: function(config) { return "HE"+config.name+"LP" }
+            });
+            typeRegistry.addModule({name: "test-module",version:"0.0.1",nodes: {
+                "test-name":{
+                    id: "test-module/test-name",
+                    module: "test-module",
+                    name: "test-name",
+                    enabled: true,
+                    loaded: false,
+                    config: "configA",
+                    types: [ "test-a","test-b"]
+                }
+            }});
+            const expected = '\n<!-- --- [red-module:test-module/test-name] --- -->\nconfigAHEtest-nameLP';
+            ["constructor","toString","hasOwnProperty","__proto__"].forEach(function(lang) {
+                typeRegistry.getAllNodeConfigs(lang).should.eql(expected);
+            });
+        });
     });
     describe('#getModuleInfo', function() {
         it('returns module info', function() {
