@@ -331,6 +331,11 @@ describe('HTTP Request Node', function() {
                 res.send('hello');
             }, 50);
         });
+        testApp.get('/delayedPlain', function(req, res){
+            setTimeout(function() {
+                res.send('slow');
+            }, 400);
+        });
         testApp.get('/checkCookie', function(req, res){
             res.send(req.cookies);
         });
@@ -518,6 +523,37 @@ describe('HTTP Request Node', function() {
     });
 
     describe('request', function() {
+        it('should not leak redirects between concurrent requests', function(done) {
+            var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"GET",ret:"txt"},
+                {id:"n2", type:"helper"}];
+            helper.load(httpRequestNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                var results = {};
+                var received = 0;
+                n2.on("input", function(msg) {
+                    try {
+                        results[msg.responseUrl] = msg.redirectList;
+                        if (++received == 2) {
+                            // B has no redirects of its own and completes last; it must not
+                            // inherit the redirect chain collected by the concurrent request A
+                            var bEntry = Object.keys(results).find(function(k) { return k.endsWith('/delayedPlain'); });
+                            var aEntry = Object.keys(results).find(function(k) { return k.endsWith('/redirectReturn'); });
+                            should.exist(bEntry, 'plain response should have arrived');
+                            results[bEntry].length.should.equal(0);
+                            should.exist(aEntry, 'redirect chain response should have arrived');
+                            results[aEntry].length.should.be.greaterThan(0);
+                            done();
+                        }
+                    } catch(err) { done(err); }
+                });
+                n1.receive({payload:"A", url: getTestURL('/redirectMultipleTimes')});
+                setTimeout(function() {
+                    n1.receive({payload:"B", url: getTestURL('/delayedPlain')});
+                }, 20);
+            });
+        });
+
         it('should get plain text content', function(done) {
             var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"GET",ret:"txt",url:getTestURL('/text')},
                 {id:"n2", type:"helper"}];
