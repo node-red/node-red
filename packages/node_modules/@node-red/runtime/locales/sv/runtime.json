@@ -1,0 +1,195 @@
+{
+    "runtime": {
+        "welcome": "Välkommen till Node-RED",
+        "version": "__component__ version: __version__",
+        "unsupported_version": "Versionen av __component__ stöds inte. Kräver: __requires__. Hittade: __version__",
+        "paths": {
+            "settings": "Inställningsfil: __path__",
+            "httpStatic": "Statisk HTTP: __path__"
+        }
+    },
+    "server": {
+        "loading": "Läser in palettnoder",
+        "palette-editor": {
+            "disabled": "Palettredigeraren är inaktiverad: användarinställningar",
+            "npm-not-found": "Palettredigeraren är inaktiverad: kommandot npm hittades inte",
+            "npm-too-old": "Palettredigeraren är inaktiverad: npm-versionen är för gammal. Kräver npm >= 3.x"
+        },
+        "errors": "Det gick inte att registrera __count__ nodtyp",
+        "errors_plural": "Det gick inte att registrera __count__ nodtyper",
+        "errors-help": "Kör med -v för detaljer",
+        "missing-modules": "Nodmoduler saknas:",
+        "node-version-mismatch": "Nodmodulen kan inte läsas in i denna version. Kräver: __version__ ",
+        "set-has-no-types": "Uppsättningen har inga typer. namn: '__name__', modul: '__module__', fil: '__file__'",
+        "type-already-registered": "'__type__' är redan registrerad av modulen __module__",
+        "removing-modules": "Tar bort moduler från konfigurationen",
+        "added-types": "Tillagda nodtyper:",
+        "removed-types": "Borttagna nodtyper:",
+        "removed-plugins": "Borttagna insticksmoduler:",
+        "install": {
+            "invalid": "Ogiltigt modulnamn",
+            "installing": "Installerar modul: __name__, version: __version__",
+            "installed": "Installerad modul: __name__",
+            "install-failed": "Installationen misslyckades",
+            "install-failed-long": "Installationen av modulen __name__ misslyckades:",
+            "install-failed-not-found": "$t(server.install.install-failed-long) modulen hittades inte",
+            "install-failed-name": "$t(server.install.install-failed-long) ogiltigt modulnamn: __name__",
+            "install-failed-url": "$t(server.install.install-failed-long) ogiltig URL: __url__",
+            "post-install-error": "Fel när postInstall-kroken kördes:",
+            "upgrading": "Uppgraderar modulen __name__ till version __version__",
+            "upgraded": "Modulen __name__ har uppgraderats. Starta om Node-RED för att använda den nya versionen",
+            "upgrade-failed-not-found": "$t(server.install.install-failed-long) versionen hittades inte",
+            "uninstalling": "Avinstallerar modulen: __name__",
+            "uninstall-failed": "Avinstallationen misslyckades",
+            "uninstall-failed-long": "Avinstallationen av modulen __name__ misslyckades:",
+            "uninstalled": "Avinstallerad modul: __name__",
+            "old-ext-mod-dir-warning": "\n\n---------------------------------------------------------------------\nKatalogen för externa moduler från Node-RED 1.3 har upptäckts:\n    __oldDir__\nDen här katalogen används inte längre. Externa moduler kommer att\ninstalleras på nytt i din Node-RED-användarkatalog:\n   __newDir__\nTa bort den gamla externalModules-katalogen för att sluta visa detta meddelande.\n---------------------------------------------------------------------\n"
+        },
+        "deprecatedOption": "Användningen av __old__ är FÖRÅLDRAD. Använd __new__ i stället",
+        "unable-to-listen": "Kan inte lyssna på __listenpath__",
+        "port-in-use": "Fel: porten används",
+        "uncaught-exception": "Icke fångat undantag:",
+        "admin-ui-disabled": "Administrationsgränssnittet är inaktiverat",
+        "now-running": "Servern kör nu på __listenpath__",
+        "failed-to-start": "Det gick inte att starta servern:",
+        "headless-mode": "Kör i huvudlöst läge",
+        "httpadminauth-deprecated": "Användningen av httpAdminAuth är FÖRÅLDRAD. Använd adminAuth i stället",
+        "https": {
+            "refresh-interval": "Uppdaterar https-inställningar var __interval__ timme",
+            "settings-refreshed": "Serverns https-inställningar har uppdaterats",
+            "refresh-failed": "Det gick inte att uppdatera https-inställningarna: __message__",
+            "function-required": "httpsRefreshInterval kräver att egenskapen https är en funktion"
+        }
+    },
+    "api": {
+        "flows": {
+            "error-save": "Fel när flöden sparades: __message__",
+            "error-reload": "Fel när flöden lästes in på nytt: __message__"
+        },
+        "library": {
+            "error-load-entry": "Fel när biblioteksposten '__path__' lästes in: __message__",
+            "error-save-entry": "Fel när biblioteksposten '__path__' sparades: __message__",
+            "error-load-flow": "Fel när flödet '__path__' lästes in: __message__",
+            "error-save-flow": "Fel när flödet '__path__' sparades: __message__"
+        },
+        "nodes": {
+            "enabled": "Aktiverade nodtyper:",
+            "disabled": "Inaktiverade nodtyper:",
+            "error-enable": "Det gick inte att aktivera noden:"
+        }
+    },
+    "comms": {
+        "error": "Fel i kommunikationskanalen: __message__",
+        "error-server": "Fel i kommunikationsservern: __message__",
+        "error-send": "Fel när kommunikation skickades: __message__"
+    },
+    "settings": {
+        "user-not-available": "Det går inte att spara användarinställningarna: __message__",
+        "not-available": "Inställningar är inte tillgängliga",
+        "property-read-only": "Egenskapen '__prop__' är skrivskyddad",
+        "readonly-mode": "Körmiljön är i skrivskyddat läge. Ändringar sparas inte."
+    },
+    "library": {
+        "unknownLibrary": "Okänt bibliotek: __library__",
+        "unknownType": "Okänd bibliotekstyp: __type__",
+        "readOnly": "Biblioteket __library__ är skrivskyddat",
+        "failedToInit": "Det gick inte att initiera biblioteket __library__: __error__",
+        "invalidProperty": "Ogiltig egenskap __prop__: '__value__'"
+    },
+    "nodes": {
+        "credentials": {
+            "error": "Fel när autentiseringsuppgifter lästes in: __message__",
+            "error-saving": "Fel när autentiseringsuppgifter sparades: __message__",
+            "not-registered": "Autentiseringsuppgiftstypen '__type__' är inte registrerad",
+            "system-key-warning": "\n\n---------------------------------------------------------------------\nDin fil med autentiseringsuppgifter för flöden krypteras med en systemgenererad nyckel.\n\nOm den systemgenererade nyckeln av någon anledning går förlorad kan filen med\nautentiseringsuppgifter inte återställas. Du måste då ta bort den och ange\nautentiseringsuppgifterna på nytt.\n\nDu bör ange en egen nyckel med alternativet 'credentialSecret' i\ndin inställningsfil. Node-RED krypterar då om filen med autentiseringsuppgifter\nmed din valda nyckel nästa gång du driftsätter en ändring.\n---------------------------------------------------------------------\n",
+            "unencrypted": "Använder okrypterade autentiseringsuppgifter",
+            "encryptedNotFound": "Krypterade autentiseringsuppgifter hittades inte"
+        },
+        "flows": {
+            "safe-mode": "Flöden har stoppats i felsäkert läge. Driftsätt för att starta.",
+            "registered-missing": "Saknad typ registrerad: __type__",
+            "error": "Fel när flöden lästes in: __message__",
+            "starting-modified-nodes": "Startar ändrade noder",
+            "starting-modified-flows": "Startar ändrade flöden",
+            "starting-flows": "Startar flöden",
+            "started-modified-nodes": "Startade ändrade noder",
+            "started-modified-flows": "Startade ändrade flöden",
+            "started-flows": "Startade flöden",
+            "stopping-modified-nodes": "Stoppar ändrade noder",
+            "stopping-modified-flows": "Stoppar ändrade flöden",
+            "stopping-flows": "Stoppar flöden",
+            "stopped-modified-nodes": "Stoppade ändrade noder",
+            "stopped-modified-flows": "Stoppade ändrade flöden",
+            "stopped-flows": "Stoppade flöden",
+            "stopped": "Stoppad",
+            "stopping-error": "Fel när noden stoppades: __message__",
+            "updated-flows": "Uppdaterade flöden",
+            "added-flow": "Lägger till flöde: __label__",
+            "updated-flow": "Uppdaterade flödet: __label__",
+            "removed-flow": "Tog bort flödet: __label__",
+            "missing-types": "Väntar på att saknade typer ska registreras:",
+            "missing-type-provided": " - __type__ (tillhandahålls av npm-modulen __module__)",
+            "missing-type-install-1": "Kör följande för att installera de saknade modulerna:",
+            "missing-type-install-2": "i katalogen:"
+        },
+        "flow": {
+            "unknown-type": "Okänd typ: __type__",
+            "missing-types": "saknade typer",
+            "error-loop": "Meddelandet överskred det högsta antalet fångster",
+            "non-message-returned": "Noden försökte skicka ett meddelande av typen __type__"
+        },
+        "index": {
+            "unrecognised-id": "Okänt id: __id__",
+            "type-in-use": "Typ används: __msg__",
+            "unrecognised-module": "Okänd modul: __module__"
+        },
+        "registry": {
+            "localfilesystem": {
+                "module-not-found": "Modulen '__module__' hittades inte"
+            }
+        }
+    },
+    "storage": {
+        "index": {
+            "forbidden-flow-name": "otillåtet flödesnamn"
+        },
+        "localfilesystem": {
+            "user-dir": "Användarkatalog: __path__",
+            "flows-file": "Flödesfil: __path__",
+            "create": "Skapar ny __type__-fil",
+            "empty": "Befintlig __type__-fil är tom",
+            "invalid": "Befintlig __type__-fil innehåller inte giltig JSON",
+            "restore": "Återställer säkerhetskopia av __type__-fil: __path__",
+            "restore-fail": "Det gick inte att återställa säkerhetskopian av __type__-filen: __message__",
+            "fsync-fail": "Det gick inte att synkronisera filen __path__ till disken: __message__",
+            "warn_name": "Flödesfilens namn är inte angivet. Genererar ett namn med värdnamnet.",
+            "projects": {
+                "changing-project": "Anger aktivt projekt: __project__",
+                "active-project": "Aktivt projekt: __project__",
+                "projects-directory": "Projektkatalog: __projectsDirectory__",
+                "project-not-found": "Projektet hittades inte: __project__",
+                "no-active-project": "Inget aktivt projekt: använder standardflödesfilen",
+                "disabled": "Projekt är inaktiverade: editorTheme.projects.enabled=false",
+                "disabledNoFlag": "Projekt är inaktiverade: ange editorTheme.projects.enabled=true för att aktivera",
+                "git-not-found": "Projekt är inaktiverade: kommandot git hittades inte",
+                "git-version-old": "Projekt är inaktiverade: git __version__ stöds inte. Kräver 2.x",
+                "summary": "Ett Node-RED-projekt",
+                "readme": "### Om\n\nDet här är ditt projekts README.md-fil. Den hjälper användare att förstå vad ditt\nprojekt gör, hur det används och annat de kan behöva veta."
+            }
+        }
+    },
+    "context": {
+        "log-store-init": "Kontextlager: '__name__' [__info__]",
+        "error-loading-module": "Fel när kontextlagret lästes in: __message__",
+        "error-loading-module2": "Fel när kontextlagret '__module__' lästes in: __message__",
+        "error-module-not-defined": "Kontextlagret '__storage__' saknar alternativet 'module'",
+        "error-invalid-module-name": "Ogiltigt namn på kontextlager: '__name__'",
+        "error-invalid-default-module": "Standardkontextlagret är okänt: '__storage__'",
+        "unknown-store": "Okänt kontextlager '__name__' angivet. Använder standardlagret.",
+        "localfilesystem": {
+            "invalid-json": "Ogiltig JSON i kontextfilen '__file__'",
+            "error-circular": "Kontexten __scope__ innehåller en cirkulär referens som inte kan bevaras",
+            "error-write": "Fel när kontexten skrevs: __message__"
+        }
+    }
+}
