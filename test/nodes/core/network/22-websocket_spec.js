@@ -197,6 +197,44 @@ describe('websocket Node', function() {
             });
         });
 
+        it('should receive wholemsg when data is null', function(done) {
+            var flow = [
+                { id: "n1", type: "websocket-listener", path: "/ws", wholemsg: "true" },
+                { id: "n2", type: "websocket in", server: "n1", wires: [["n3"]] },
+                { id: "n3", type: "helper" }];
+            helper.load(websocketNode, flow, function() {
+                createClient("n1").then(function(sock) {
+                    helper.getNode("n3").on("input", function(msg) {
+                        msg.should.have.property("payload", null);
+                        msg.should.have.property("_session");
+                        done();
+                    });
+                    sock.send('null');
+                }).catch(function(err) {
+                    done(err);
+                });
+            });
+        });
+
+        it('should receive wholemsg when data is an array', function(done) {
+            var flow = [
+                { id: "n1", type: "websocket-listener", path: "/ws", wholemsg: "true" },
+                { id: "n2", type: "websocket in", server: "n1", wires: [["n3"]] },
+                { id: "n3", type: "helper" }];
+            helper.load(websocketNode, flow, function() {
+                createClient("n1").then(function(sock) {
+                    helper.getNode("n3").on("input", function(msg) {
+                        msg.should.have.property("payload", [1,2]);
+                        msg.should.have.property("_session");
+                        done();
+                    });
+                    sock.send('[1,2]');
+                }).catch(function(err) {
+                    done(err);
+                });
+            });
+        });
+
         it('should send', function(done) {
             var flow = [
                 { id: "n1", type: "websocket-listener", path: "/ws" },
@@ -492,6 +530,42 @@ describe('websocket Node', function() {
                 });
                 helper.getNode("n3").on("input", function(msg) {
                     msg.should.have.property("payload", "hello");
+                    done();
+                });
+            });
+        });
+
+        it('should receive wholemsg when data is null', function(done) {
+            var flow = [
+                { id: "server", type: "websocket-listener", path: "/ws" },
+                { id: "n1", type: "websocket-client", path: getWsUrl("/ws"), wholemsg: "true" },
+                { id: "n2", type: "websocket in", client: "n1", wires: [["n3"]] },
+                { id: "n3", type: "helper" }];
+            helper.load(websocketNode, flow, function() {
+                getSocket('server').on('connection', function(sock) {
+                    sock.send('null');
+                });
+                helper.getNode("n3").on("input", function(msg) {
+                    msg.should.have.property("payload", null);
+                    msg.should.have.property("_session");
+                    done();
+                });
+            });
+        });
+
+        it('should receive wholemsg when data is an array', function(done) {
+            var flow = [
+                { id: "server", type: "websocket-listener", path: "/ws" },
+                { id: "n1", type: "websocket-client", path: getWsUrl("/ws"), wholemsg: "true" },
+                { id: "n2", type: "websocket in", client: "n1", wires: [["n3"]] },
+                { id: "n3", type: "helper" }];
+            helper.load(websocketNode, flow, function() {
+                getSocket('server').on('connection', function(sock) {
+                    sock.send('[1,2]');
+                });
+                helper.getNode("n3").on("input", function(msg) {
+                    msg.should.have.property("payload", [1,2]);
+                    msg.should.have.property("_session");
                     done();
                 });
             });
