@@ -289,6 +289,46 @@ describe("api/auth/tokens", function() {
                 });
             });
         });
+        it('notifies session expiry listeners when a token is revoked', function(done) {
+            var expiredSessions = [];
+            Tokens.init({},{
+                getSessions:function() {
+                    return Promise.resolve({"1234":{"user":"fred","accessToken":"1234","expires":Date.now()+1000}});
+                },
+                saveSessions:function(sess) {
+                    return Promise.resolve();
+                }
+            }).then(function() {
+                Tokens.onSessionExpiry(function(session) {
+                    expiredSessions.push(session);
+                });
+                return Tokens.revoke("1234");
+            }).then(function() {
+                expiredSessions.should.have.length(1);
+                expiredSessions[0].should.have.property("accessToken","1234");
+                expiredSessions[0].should.have.property("user","fred");
+                done();
+            }).catch(done);
+        });
+        it('does not notify session expiry listeners for an unknown token', function(done) {
+            var expiredSessions = [];
+            Tokens.init({},{
+                getSessions:function() {
+                    return Promise.resolve({"1234":{"user":"fred","accessToken":"1234","expires":Date.now()+1000}});
+                },
+                saveSessions:function(sess) {
+                    return Promise.resolve();
+                }
+            }).then(function() {
+                Tokens.onSessionExpiry(function(session) {
+                    expiredSessions.push(session);
+                });
+                return Tokens.revoke("5678");
+            }).then(function() {
+                expiredSessions.should.have.length(0);
+                done();
+            }).catch(done);
+        });
     });
 
 });
