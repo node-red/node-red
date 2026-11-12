@@ -19,6 +19,7 @@ var sinon = require("sinon");
 const stoppable = require('stoppable');
 
 var http = require('http');
+var net = require('net');
 var express = require('express');
 var app = express();
 var WebSocket = require('ws');
@@ -50,7 +51,23 @@ describe("api/editor/comms", function() {
             return Promise.resolve()
         },
         subscribe: function() { return Promise.resolve()},
-        unsubscribe: function() { return Promise.resolve(); }
+        unsubscribe: function() { return Promise.resolve(); },
+        receive: function() { return Promise.resolve(); }
+    }
+
+    // Replaces the given mockComms function with one that rejects, and records
+    // any unhandled rejections that occur whilst it is in place.
+    function withRejectingRuntime(fn, test) {
+        var original = mockComms[fn];
+        var unhandled = [];
+        var onUnhandled = function(err) { unhandled.push(err); };
+        mockComms[fn] = function() { return Promise.reject(new Error("runtime failure")); };
+        process.on('unhandledRejection', onUnhandled);
+        var restore = function() {
+            mockComms[fn] = original;
+            process.removeListener('unhandledRejection', onUnhandled);
+        };
+        return test(unhandled, restore);
     }
 
     describe("with default keepalive", function() {
@@ -109,6 +126,12 @@ describe("api/editor/comms", function() {
             ws.on('open', function() {
                 ws.send('not json');
                 ws.send('[]');
+                // The following are all valid JSON that parse to non-objects.
+                // They must not crash the server.
+                ws.send('null');
+                ws.send('42');
+                ws.send('true');
+                ws.send('"a string"');
                 ws.send('{"subscribe":"topic3"}');
                 connections[0].send('topic3', 'correct');
             });
@@ -116,6 +139,74 @@ describe("api/editor/comms", function() {
                 msg.should.equal('[{"topic":"topic3","data":"correct"}]');
                 ws.close();
                 done();
+            });
+        });
+
+        it('handles runtime rejecting a subscribe request', function(done) {
+            withRejectingRuntime('subscribe', function(unhandled, restore) {
+                var finish = function(err) { restore(); done(err); };
+                var ws = new WebSocket(url);
+                ws.on('open', function() {
+                    ws.send('{"subscribe":"a{2,1}"}');
+                    ws.send('{"subscribe":1}');
+                    setTimeout(function() {
+                        connections[0].send('topic5', 'still-alive');
+                    },100);
+                });
+                ws.on('message', function(msg) {
+                    try {
+                        msg.should.equal('[{"topic":"topic5","data":"still-alive"}]');
+                        unhandled.should.have.length(0);
+                        ws.close();
+                        finish();
+                    } catch(err) {
+                        finish(err);
+                    }
+                });
+            });
+        });
+
+        it('handles runtime rejecting a received message', function(done) {
+            withRejectingRuntime('receive', function(unhandled, restore) {
+                var finish = function(err) { restore(); done(err); };
+                var ws = new WebSocket(url);
+                ws.on('open', function() {
+                    ws.send('{"topic":"foo","data":"bar"}');
+                    setTimeout(function() {
+                        connections[0].send('topic6', 'still-alive');
+                    },100);
+                });
+                ws.on('message', function(msg) {
+                    try {
+                        msg.should.equal('[{"topic":"topic6","data":"still-alive"}]');
+                        unhandled.should.have.length(0);
+                        ws.close();
+                        finish();
+                    } catch(err) {
+                        finish(err);
+                    }
+                });
+            });
+        });
+
+        it('closes the socket for an upgrade request with a malformed url', function(done) {
+            var client = net.connect(port, address, function() {
+                client.write('GET http://[::1/comms HTTP/1.1\r\n'+
+                    'Host: a\r\n'+
+                    'Connection: Upgrade\r\n'+
+                    'Upgrade: websocket\r\n'+
+                    'Sec-WebSocket-Version: 13\r\n'+
+                    'Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==\r\n\r\n');
+            });
+            client.on('error', function() {});
+            client.on('close', function() {
+                // Check the server is still accepting connections
+                var ws = new WebSocket(url);
+                ws.on('open', function() {
+                    ws.close();
+                    done();
+                });
+                ws.on('error', done);
             });
         });
 
@@ -405,7 +496,11 @@ describe("api/editor/comms", function() {
             authenticateUserToken = sinon.stub(Strategies, "authenticateUserToken").callsFake(async function(req) {
                 var token = req.headers['custom-header'];
                 if (token === "knock-knock") {
-                    return {user:"fred",scope:["*"]}
+                    return {username:"fred",permissions:"*"}
+                } else if (token === "knock-knock-read") {
+                    return {username:"barney",permissions:"read"}
+                } else if (token === "knock-knock-nodes-read") {
+                    return {username:"wilma",permissions:"nodes.read"}
                 }
                 throw new Error("Invalid user");
             })
@@ -493,6 +588,48 @@ describe("api/editor/comms", function() {
             ws.on('close', function() {
                 try {
                     received.should.equal(1);
+                    done();
+                } catch(err) {
+                    done(err);
+                }
+            });
+        });
+        it('allows connections that do authenticate - header-provided-token with read permission',function(done) {
+            var ws = new WebSocket(url,{
+                headers: { "custom-header": "knock-knock-read" }
+            });
+            var received = 0;
+            ws.on('open', function() {
+                ws.send('{"subscribe":"foo"}');
+                connections.should.have.length(1);
+                connections[0].send('foo', 'correct');
+            });
+            ws.on('message', function(msg) {
+                received++;
+                if (received == 1) {
+                    msg.should.equal('[{"topic":"foo","data":"correct"}]');
+                    ws.close();
+                }
+            });
+            ws.on('close', function() {
+                try {
+                    received.should.equal(1);
+                    done();
+                } catch(err) {
+                    done(err);
+                }
+            });
+        });
+        it('rejects connections without status.read permission - header-provided-token',function(done) {
+            var ws = new WebSocket(url,{
+                headers: { "custom-header": "knock-knock-nodes-read" }
+            });
+            ws.on('open', function() {
+                done(new Error("connection should not have been accepted"));
+            });
+            ws.on('error', function() {
+                try {
+                    connections.should.have.length(0);
                     done();
                 } catch(err) {
                     done(err);
@@ -637,6 +774,29 @@ describe("api/editor/comms", function() {
                 } catch(err) {
                     done(err);
                 }
+            });
+        });
+
+        it('handles runtime rejecting an anonymous subscribe request',function(done) {
+            withRejectingRuntime('subscribe', function(unhandled, restore) {
+                var finish = function(err) { restore(); done(err); };
+                var ws = new WebSocket(url);
+                ws.on('open', function() {
+                    ws.send('{"subscribe":"a{2,1}"}');
+                    setTimeout(function() {
+                        connections[0].send('foo', 'still-alive');
+                    },200);
+                });
+                ws.on('message', function(msg) {
+                    try {
+                        msg.should.equal('[{"topic":"foo","data":"still-alive"}]');
+                        unhandled.should.have.length(0);
+                        ws.close();
+                        finish();
+                    } catch(err) {
+                        finish(err);
+                    }
+                });
             });
         });
     });

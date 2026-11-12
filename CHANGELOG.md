@@ -1,3 +1,27 @@
+#### 5.0.9: Maintenance Release
+
+ - Fix MQTT connect action dropping its url when repeated (#6019) @sankalpsthakur
+ - Fix contextMenu for the internal nodes of subflow (#6025) @GogoVega
+ - Fix quick-add dialog moving instead of closing when clicking the workspace (#6027) @NUAAwqy
+ - Fix invalid SSH key name error code (#6026) @NUAAwqy
+ - Fix the subflow's 'changed' state when its content is modified (#6023) @GogoVega
+ - fix: include embedded script and style errors in getAnnotations (#6015) @Steve-Mcl
+ - Emit nodes:change when a nodes moved state changes (#6006) @knolleary
+ - Add badges to the Explorer sidebar (#5951) @GogoVega
+ - Allow flows to be drag-ordered in explorer sidebar (#6004) @knolleary
+ - Add a fallback lookup for esm only modules (#6003) @knolleary
+ - Add the *error* badge to the flow tab (#5950) @GogoVega
+ - fix: default editor theme to auto (#5873) @AkhilTrivediX
+ - Fix CSV node to remove initial BOM char (#5864) @dceejay
+ - Allow empty object first for RBE (#6000) @hardillb
+ - Range node: drop non-numeric input instead of coercing it (#5976) @JMBMdes
+ - Fix CSV array output for independent sequence elements (#5978) @Anthounn
+ - feat: add JavaScript and CSS support to script and style blocks in HT… (#5994) @Steve-Mcl
+ - Support node:-prefixed core modules in parseModuleName (#5993) @shubhamrai9122-creator
+ - Fix filter node blocking every Date payload (#5990) @sarmah-rup
+ - Fix crash on comms auth packet when adminAuth is not set (#5988) @sankalpsthakur
+ - Verify resolveMerge is called for valid files pending conflict resolution (#5996) @knolleary
+
 #### 5.0.8: Maintenance Release
 
  - Docs: document msg.reset behaviour for tcp out/request nodes (#5968)

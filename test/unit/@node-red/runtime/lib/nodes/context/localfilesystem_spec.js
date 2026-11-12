@@ -377,6 +377,131 @@ describe('localfilesystem',function() {
         });
     });
 
+    describe('#path traversal',function() {
+        var context;
+        var invalidScopes = [
+            "..",
+            "../outside",
+            "../../outside",
+            "nodeX/../../outside",
+            "nodeX\\..\\..\\outside",
+            "nodeX:..",
+            "../outside:flowX",
+            "nodeX:../outside",
+            "nodeX:../../outside",
+            "nodeX:",
+            ":flowX",
+            "nodeX:."
+        ];
+
+        // Lists the files in the directories surrounding the storage directory,
+        // which a traversal could escape into
+        var parentDir = path.dirname(resourcesDir);
+        var outsideSnapshot;
+        function listOutside() {
+            return Promise.all([
+                fs.readdir(parentDir),
+                fs.readdir(resourcesDir).then(files => files.filter(f => f !== defaultContextBase))
+            ]).then(function(results) {
+                return results[0].concat(results[1].map(f => path.join(path.basename(resourcesDir), f)));
+            });
+        }
+
+        [true, false].forEach(function(cache) {
+            describe(cache ? 'with cache' : 'without cache', function() {
+                beforeEach(function() {
+                    context = LocalFileSystem({dir: resourcesDir, cache: cache, flushInterval: 0});
+                    return context.open().then(listOutside).then(function(files) {
+                        outsideSnapshot = files;
+                    });
+                });
+
+                afterEach(function() {
+                    return context.clean([]).then(function(){
+                        return context.close();
+                    }).then(function(){
+                        return fs.remove(resourcesDir);
+                    });
+                });
+
+                invalidScopes.forEach(function(scope) {
+                    it('should reject set for scope "'+scope+'"', function(done) {
+                        context.set(scope, "foo", "bar", function(err) {
+                            try {
+                                should.exist(err);
+                                err.code.should.equal("INVALID_SCOPE");
+                            } catch(e) {
+                                return done(e);
+                            }
+                            context.close().then(listOutside).then(function(files) {
+                                files.should.eql(outsideSnapshot);
+                                done();
+                            }).catch(done);
+                        });
+                    });
+                    it('should throw on set without callback for scope "'+scope+'"', function() {
+                        (function() {
+                            context.set(scope, "foo", "bar");
+                        }).should.throw(/Invalid context scope/);
+                    });
+                    it('should reject delete for scope "'+scope+'"', function() {
+                        return context.delete(scope).then(function() {
+                            throw new Error("delete should have failed");
+                        }, function(err) {
+                            err.code.should.equal("INVALID_SCOPE");
+                        });
+                    });
+                    if (!cache) {
+                        it('should reject get for scope "'+scope+'"', function(done) {
+                            context.get(scope, "foo", function(err, value) {
+                                try {
+                                    should.exist(err);
+                                    err.code.should.equal("INVALID_SCOPE");
+                                    should.not.exist(value);
+                                    done();
+                                } catch(e) {
+                                    done(e);
+                                }
+                            });
+                        });
+                        it('should reject keys for scope "'+scope+'"', function(done) {
+                            context.keys(scope, function(err, keys) {
+                                try {
+                                    should.exist(err);
+                                    err.code.should.equal("INVALID_SCOPE");
+                                    done();
+                                } catch(e) {
+                                    done(e);
+                                }
+                            });
+                        });
+                    }
+                });
+
+                it('should not read files outside the storage directory', function(done) {
+                    var secret = path.join(resourcesDir, "flow.json");
+                    fs.outputFile(secret, JSON.stringify({secret:"value"})).then(function() {
+                        context.get("..", "secret", function(err, value) {
+                            should.not.exist(value);
+                            done();
+                        });
+                    }).catch(done);
+                });
+
+                it('should still allow valid scopes', function(done) {
+                    context.set("nodeX:flowY", "foo", "bar", function(err) {
+                        if (err) { return done(err); }
+                        context.get("nodeX:flowY", "foo", function(err, value) {
+                            if (err) { return done(err); }
+                            value.should.equal("bar");
+                            done();
+                        });
+                    });
+                });
+            });
+        });
+    });
+
     describe('#keys',function() {
         var context;
         beforeEach(function() {

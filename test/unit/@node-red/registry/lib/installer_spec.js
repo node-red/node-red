@@ -493,6 +493,98 @@ describe('nodes/registry/installer', function() {
         })
         });
     });
+    describe("installs module from tarball", function() {
+        const os = require("os");
+        const tar = require("tar");
+        let tmpDir;
+        let userDir;
+
+        function createTarball(pkg) {
+            const pkgDir = path.join(tmpDir, "src");
+            fs.removeSync(pkgDir);
+            fs.outputJsonSync(path.join(pkgDir, "package", "package.json"), pkg);
+            const tarballFile = path.join(tmpDir, "test.tgz");
+            tar.c({ gzip: true, sync: true, file: tarballFile, cwd: pkgDir }, ["package"]);
+            return fs.readFileSync(tarballFile);
+        }
+
+        beforeEach(function() {
+            tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "nr-installer-test-"));
+            userDir = path.join(tmpDir, "userDir");
+            fs.ensureDirSync(userDir);
+            installer.init({ userDir });
+        });
+        afterEach(function() {
+            fs.removeSync(tmpDir);
+        });
+
+        it("succeeds when tarball contains valid node-red module", async function() {
+            const nodeInfo = {nodes:{module:"foo",types:["a"]}};
+            sinon.stub(registry,"addModule").callsFake(() => Promise.resolve(nodeInfo));
+            execResponse = Promise.resolve({ code: 0, stdout: "", stderr: "" });
+            const tarball = createTarball({ name: "@scope/foo", version: "1.2.3", "node-red": {} });
+            const info = await installer.installModule(tarball);
+            info.should.eql(nodeInfo);
+            const expectedPath = path.join(userDir, "nodes", "scope-foo-1.2.3.tgz");
+            fs.existsSync(expectedPath).should.be.true();
+            exec.run.lastCall.args[1].slice(-1).should.eql([expectedPath]);
+        });
+
+        it("rejects tarball with path traversal in version", async function() {
+            const tarball = createTarball({ name: "foo", version: "../../../escape", "node-red": {} });
+            await installer.installModule(tarball).should.be.rejectedWith({ code: "invalid_module_version" });
+            fs.readdirSync(tmpDir).should.not.containEql("escape.tgz");
+            fs.existsSync(path.join(userDir, "nodes")).should.be.false();
+            exec.run.called.should.be.false();
+        });
+
+        it("rejects tarball that would be written outside the nodes directory", async function() {
+            // Bypass version validation to exercise the path check directly
+            const semver = require("semver");
+            sinon.stub(semver, "valid").returns("1.0.0");
+            try {
+                const tarball = createTarball({ name: "foo", version: "../../../escape", "node-red": {} });
+                await installer.installModule(tarball).should.be.rejectedWith({ code: "invalid_module_path" });
+            } finally {
+                semver.valid.restore();
+            }
+            fs.readdirSync(tmpDir).should.not.containEql("escape.tgz");
+            fs.existsSync(path.join(userDir, "nodes")).should.be.false();
+            exec.run.called.should.be.false();
+        });
+
+        it("rejects tarball with invalid version", async function() {
+            const tarball = createTarball({ name: "foo", version: "not-a-version", "node-red": {} });
+            await installer.installModule(tarball).should.be.rejectedWith({ code: "invalid_module_version" });
+            exec.run.called.should.be.false();
+        });
+
+        it("rejects tarball with missing version", async function() {
+            const tarball = createTarball({ name: "foo", "node-red": {} });
+            await installer.installModule(tarball).should.be.rejectedWith({ code: "invalid_module_version" });
+            exec.run.called.should.be.false();
+        });
+
+        it("rejects tarball with path traversal in name", async function() {
+            const tarball = createTarball({ name: "../../../escape", version: "1.0.0", "node-red": {} });
+            await installer.installModule(tarball).should.be.rejectedWith({ code: "invalid_module_name" });
+            fs.existsSync(path.join(userDir, "nodes")).should.be.false();
+            exec.run.called.should.be.false();
+        });
+
+        it("rejects tarball with missing name", async function() {
+            const tarball = createTarball({ version: "1.0.0", "node-red": {} });
+            await installer.installModule(tarball).should.be.rejectedWith({ code: "invalid_module_name" });
+            exec.run.called.should.be.false();
+        });
+
+        it("rejects tarball when upload is disabled", async function() {
+            installer.init({ userDir, externalModules: { palette: { allowUpload: false } } });
+            const tarball = createTarball({ name: "foo", version: "1.0.0", "node-red": {} });
+            await installer.installModule(tarball).should.be.rejectedWith("Module upload disabled");
+            exec.run.called.should.be.false();
+        });
+    });
     describe("uninstalls module", function() {
         it("rejects invalid module names", function(done) {
             var promises = [];

@@ -352,6 +352,34 @@ describe("red/nodes/registry/registry",function() {
             moduleList.should.not.have.a.property("test-module");
             typeRegistry.getNodeList().should.have.lengthOf(0);
         });
+        it('keeps a module in the runtime if another module depends on it', function() {
+            var s = stubSettings({},true,{});
+            typeRegistry.init(s,null);
+            typeRegistry.addModule({name: "test-module",version:"0.0.1",user:true,nodes: {
+                "test-name":testNodeSet1
+            }});
+            typeRegistry.addModuleDependency("test-module","other-module");
+
+            var info = typeRegistry.removeModule('test-module');
+            info.should.have.lengthOf(1);
+            var moduleList = typeRegistry.getModuleList();
+            moduleList.should.have.a.property("test-module");
+            moduleList["test-module"].should.have.property("user",false);
+            // Hidden from the palette, but its types are still registered
+            typeRegistry.getNodeList().should.have.lengthOf(0);
+            typeRegistry.getNodeInfo("test-a").should.have.property("id","test-module/test-name");
+        });
+        it('removes a module whose usedBy list is empty', function() {
+            var s = stubSettings({},true,{});
+            typeRegistry.init(s,null);
+            typeRegistry.addModule({name: "test-module",version:"0.0.1",usedBy:[],nodes: {
+                "test-name":testNodeSet1
+            }});
+
+            typeRegistry.removeModule('test-module');
+            typeRegistry.getModuleList().should.not.have.a.property("test-module");
+            typeRegistry.getNodeList().should.have.lengthOf(0);
+        });
     });
 
     describe('#get[All]NodeConfigs', function() {
@@ -383,6 +411,26 @@ describe("red/nodes/registry/registry",function() {
             typeRegistry.getNodeConfig("test-module/test-name").should.eql('<!-- --- [red-module:test-module/test-name] --- -->\nconfigAHEtest-nameLP');
             typeRegistry.getNodeConfig("test-module/test-name-2").should.eql('<!-- --- [red-module:test-module/test-name-2] --- -->\nconfigBHEtest-name-2LP');
             typeRegistry.getAllNodeConfigs().should.eql('\n<!-- --- [red-module:test-module/test-name] --- -->\nconfigAHEtest-nameLP\n<!-- --- [red-module:test-module/test-name-2] --- -->\nconfigBHEtest-name-2LP');
+        });
+        it('does not return Object.prototype properties for lang', function() {
+            typeRegistry.init(settings,{
+                getNodeHelp: function(config) { return "HE"+config.name+"LP" }
+            });
+            typeRegistry.addModule({name: "test-module",version:"0.0.1",nodes: {
+                "test-name":{
+                    id: "test-module/test-name",
+                    module: "test-module",
+                    name: "test-name",
+                    enabled: true,
+                    loaded: false,
+                    config: "configA",
+                    types: [ "test-a","test-b"]
+                }
+            }});
+            const expected = '\n<!-- --- [red-module:test-module/test-name] --- -->\nconfigAHEtest-nameLP';
+            ["constructor","toString","hasOwnProperty","__proto__"].forEach(function(lang) {
+                typeRegistry.getAllNodeConfigs(lang).should.eql(expected);
+            });
         });
     });
     describe('#getModuleInfo', function() {
