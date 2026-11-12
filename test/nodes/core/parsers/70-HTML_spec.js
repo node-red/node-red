@@ -232,6 +232,48 @@ describe('HTML node', function() {
         });
     });
 
+    it('should not encode non-ASCII characters in returned html', function(done) {
+        var flow = [{id:"n1",type:"html",wires:[["n2"]],tag:"div"},
+                    {id:"n2", type:"helper"}];
+
+        helper.load(htmlNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function(msg) {
+                try {
+                    msg.payload.should.eql([
+                        '<p title="crème">Café 日本語 😀</p><p>a &amp; b &lt;c&gt; &amp;#xE9;<br/></p>'
+                    ]);
+                    done();
+                } catch(err) {
+                    done(err)
+                }
+            });
+            n1.receive({payload:'<div><p title="crème">Café 日本語 😀</p><p>a &amp; b &lt;c&gt; &amp;#xE9;<br></p></div>',topic: "bar"});
+        });
+    });
+
+    it('should not decode ASCII or invalid character references left in returned html', function(done) {
+        var flow = [{id:"n1",type:"html",wires:[["n2"]],tag:"div"},
+                    {id:"n2", type:"helper"}];
+
+        helper.load(htmlNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function(msg) {
+                try {
+                    msg.payload.should.eql([
+                        '<!-- --&#x3E;<b>x</b> &#x110000; --><p>é</p>'
+                    ]);
+                    done();
+                } catch(err) {
+                    done(err)
+                }
+            });
+            n1.receive({payload:'<div><!-- --&#x3E;<b>x</b> &#x110000; --><p>é</p></div>',topic: "bar"});
+        });
+    });
+
     it('should retrieve an attribute from a tag', function(done) {
         fs.readFile(file, 'utf8', function(err, data) {
             var flow = [{id:"n1",type:"html",wires:[["n2"]],ret:"attr",tag:"span img"},
@@ -456,6 +498,31 @@ describe('HTML node', function() {
                     });
                     n1.receive({payload:data,topic: "bar"});
                 });
+            });
+        });
+
+        it('should not encode non-ASCII characters in html with output as multiple msgs', function(done) {
+            var flow = [{id:"n1",type:"html",wires:[["n2"]],tag:"div",as:"multi"},
+                        {id:"n2", type:"helper"}];
+
+            helper.load(htmlNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    try {
+                        cnt++;
+                        check_parts(msg, cnt -1, 2);
+                        if (cnt === 1) {
+                            should.equal(msg.payload, '<p>Café crème</p>');
+                        } else if (cnt === 2) {
+                            should.equal(msg.payload, '<p>日本語 😀</p>');
+                            done();
+                        }
+                    } catch(err) {
+                        done(err)
+                    }
+                });
+                n1.receive({payload:'<div><p>Café crème</p></div><div><p>日本語 😀</p></div>',topic: "bar"});
             });
         });
 
