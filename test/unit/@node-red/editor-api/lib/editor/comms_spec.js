@@ -384,7 +384,11 @@ describe("api/editor/comms", function() {
             authenticateUserToken = sinon.stub(Strategies, "authenticateUserToken").callsFake(async function(req) {
                 var token = req.headers['custom-header'];
                 if (token === "knock-knock") {
-                    return {user:"fred",scope:["*"]}
+                    return {username:"fred",permissions:"*"}
+                } else if (token === "knock-knock-read") {
+                    return {username:"barney",permissions:"read"}
+                } else if (token === "knock-knock-nodes-read") {
+                    return {username:"wilma",permissions:"nodes.read"}
                 }
                 throw new Error("Invalid user");
             })
@@ -472,6 +476,48 @@ describe("api/editor/comms", function() {
             ws.on('close', function() {
                 try {
                     received.should.equal(1);
+                    done();
+                } catch(err) {
+                    done(err);
+                }
+            });
+        });
+        it('allows connections that do authenticate - header-provided-token with read permission',function(done) {
+            var ws = new WebSocket(url,{
+                headers: { "custom-header": "knock-knock-read" }
+            });
+            var received = 0;
+            ws.on('open', function() {
+                ws.send('{"subscribe":"foo"}');
+                connections.should.have.length(1);
+                connections[0].send('foo', 'correct');
+            });
+            ws.on('message', function(msg) {
+                received++;
+                if (received == 1) {
+                    msg.should.equal('[{"topic":"foo","data":"correct"}]');
+                    ws.close();
+                }
+            });
+            ws.on('close', function() {
+                try {
+                    received.should.equal(1);
+                    done();
+                } catch(err) {
+                    done(err);
+                }
+            });
+        });
+        it('rejects connections without status.read permission - header-provided-token',function(done) {
+            var ws = new WebSocket(url,{
+                headers: { "custom-header": "knock-knock-nodes-read" }
+            });
+            ws.on('open', function() {
+                done(new Error("connection should not have been accepted"));
+            });
+            ws.on('error', function() {
+                try {
+                    connections.should.have.length(0);
                     done();
                 } catch(err) {
                     done(err);
