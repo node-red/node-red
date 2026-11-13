@@ -430,4 +430,118 @@ describe("storage/localfilesystem/projects/ssh", function() {
             done(err);
         });
     });
+
+    describe('key name validation', function() {
+        var sshkeyDirPath = path.join(userDir, 'projects', '.sshkeys');
+        var outsideDir = path.join(userDir, 'outside');
+        var homeDir = path.join(userDir, 'home');
+        var username = 'test';
+        var fileContent = "ssh-rsa AAAA outside\n";
+
+        beforeEach(function() {
+            process.env.HOME = homeDir;
+            fs.mkdirSync(path.join(homeDir, '.ssh'), { recursive: true });
+            fs.mkdirSync(outsideDir);
+            fs.writeFileSync(path.join(outsideDir, 'id_rsa'), "PRIVATE", "utf8");
+            fs.writeFileSync(path.join(outsideDir, 'id_rsa.pub'), fileContent, "utf8");
+            return sshkeys.init(mockSettings, mockRuntime);
+        });
+
+        function expectInvalidKeyName(promise) {
+            return promise.then(function() {
+                throw new Error('Did not reject');
+            }, function(err) {
+                err.should.have.property('code', 'invalid_key_name');
+            });
+        }
+
+        var badNames = [
+            '../../outside/id_rsa',
+            '../outside/id_rsa',
+            '..',
+            '.hidden',
+            'a/b',
+            'a\\b',
+            '',
+            undefined,
+            { toString: function() { return 'x'; } }
+        ];
+
+        badNames.forEach(function(name) {
+            it('should reject getSSHKey with name ' + JSON.stringify(name), function() {
+                return expectInvalidKeyName(sshkeys.getSSHKey(username, name));
+            });
+            it('should reject deleteSSHKey with name ' + JSON.stringify(name), function() {
+                return expectInvalidKeyName(sshkeys.deleteSSHKey(username, name));
+            });
+            it('should return null from getPrivateKeyPath with name ' + JSON.stringify(name), function() {
+                should(sshkeys.getPrivateKeyPath(username, name)).be.null();
+            });
+        });
+
+        it('should not read a key pair outside the sshkey directory', function() {
+            // test_../../outside/id_rsa resolves to <userDir>/outside/id_rsa
+            return expectInvalidKeyName(sshkeys.getSSHKey(username, '../../../outside/id_rsa'));
+        });
+
+        it('should not read a key pair outside the user .ssh directory', function() {
+            // <userDir>/home/.ssh/../../outside/id_rsa resolves to <userDir>/outside/id_rsa
+            return expectInvalidKeyName(sshkeys.getSSHKey(username, '../../outside/id_rsa'));
+        });
+
+        it('should not delete a key pair outside the sshkey directory', function() {
+            return expectInvalidKeyName(sshkeys.deleteSSHKey(username, '../../../outside/id_rsa')).then(function() {
+                fs.existsSync(path.join(outsideDir, 'id_rsa')).should.be.true();
+                fs.existsSync(path.join(outsideDir, 'id_rsa.pub')).should.be.true();
+            });
+        });
+
+        it('should not access keys when the username escapes the sshkey directory', function() {
+            var evilUser = '../../outside/x';
+            fs.writeFileSync(path.join(outsideDir, 'x_key'), "PRIVATE", "utf8");
+            fs.writeFileSync(path.join(outsideDir, 'x_key.pub'), fileContent, "utf8");
+            return sshkeys.getSSHKey(evilUser, 'key').then(function(result) {
+                should(result).be.null();
+                should(sshkeys.getPrivateKeyPath(evilUser, 'key')).be.null();
+                return expectInvalidKeyName(sshkeys.deleteSSHKey(evilUser, 'key'));
+            }).then(function() {
+                fs.existsSync(path.join(outsideDir, 'x_key')).should.be.true();
+                fs.existsSync(path.join(outsideDir, 'x_key.pub')).should.be.true();
+                return expectInvalidKeyName(sshkeys.generateSSHKey(evilUser, { name: 'key' }));
+            });
+        });
+
+        it('should not delete a directory with a matching .pub sibling', function() {
+            fs.mkdirSync(path.join(sshkeyDirPath, username + '_dirkey', 'nested'), { recursive: true });
+            fs.writeFileSync(path.join(sshkeyDirPath, username + '_dirkey', 'nested', 'file'), "data", "utf8");
+            fs.writeFileSync(path.join(sshkeyDirPath, username + '_dirkey.pub'), fileContent, "utf8");
+            return sshkeys.deleteSSHKey(username, 'dirkey').then(function() {
+                throw new Error('Did not reject');
+            }, function(err) {
+                fs.existsSync(path.join(sshkeyDirPath, username + '_dirkey', 'nested', 'file')).should.be.true();
+            });
+        });
+
+        it('should still get and resolve keys in the user .ssh directory', function() {
+            fs.writeFileSync(path.join(homeDir, '.ssh', 'id_ed25519'), "PRIVATE", "utf8");
+            fs.writeFileSync(path.join(homeDir, '.ssh', 'id_ed25519.pub'), fileContent, "utf8");
+            return sshkeys.getSSHKey(username, 'id_ed25519').then(function(result) {
+                result.should.equal(fileContent);
+                sshkeys.getPrivateKeyPath(username, 'id_ed25519').should.equal(path.join(homeDir, '.ssh', 'id_ed25519'));
+            });
+        });
+
+        it('should still get, resolve and delete keys with a dot in the name', function() {
+            fs.writeFileSync(path.join(sshkeyDirPath, username + '_my.key'), "PRIVATE", "utf8");
+            fs.writeFileSync(path.join(sshkeyDirPath, username + '_my.key.pub'), fileContent, "utf8");
+            return sshkeys.getSSHKey(username, 'my.key').then(function(result) {
+                result.should.equal(fileContent);
+                sshkeys.getPrivateKeyPath(username, 'my.key').should.equal(path.join(sshkeyDirPath, username + '_my.key'));
+                return sshkeys.deleteSSHKey(username, 'my.key');
+            }).then(function() {
+                fs.existsSync(path.join(sshkeyDirPath, username + '_my.key')).should.be.false();
+                fs.existsSync(path.join(sshkeyDirPath, username + '_my.key.pub')).should.be.false();
+            });
+        });
+    });
 });
