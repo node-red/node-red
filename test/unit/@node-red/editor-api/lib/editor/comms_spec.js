@@ -50,7 +50,23 @@ describe("api/editor/comms", function() {
             return Promise.resolve()
         },
         subscribe: function() { return Promise.resolve()},
-        unsubscribe: function() { return Promise.resolve(); }
+        unsubscribe: function() { return Promise.resolve(); },
+        receive: function() { return Promise.resolve(); }
+    }
+
+    // Replaces the given mockComms function with one that rejects, and records
+    // any unhandled rejections that occur whilst it is in place.
+    function withRejectingRuntime(fn, test) {
+        var original = mockComms[fn];
+        var unhandled = [];
+        var onUnhandled = function(err) { unhandled.push(err); };
+        mockComms[fn] = function() { return Promise.reject(new Error("runtime failure")); };
+        process.on('unhandledRejection', onUnhandled);
+        var restore = function() {
+            mockComms[fn] = original;
+            process.removeListener('unhandledRejection', onUnhandled);
+        };
+        return test(unhandled, restore);
     }
 
     describe("with default keepalive", function() {
@@ -122,6 +138,53 @@ describe("api/editor/comms", function() {
                 msg.should.equal('[{"topic":"topic3","data":"correct"}]');
                 ws.close();
                 done();
+            });
+        });
+
+        it('handles runtime rejecting a subscribe request', function(done) {
+            withRejectingRuntime('subscribe', function(unhandled, restore) {
+                var finish = function(err) { restore(); done(err); };
+                var ws = new WebSocket(url);
+                ws.on('open', function() {
+                    ws.send('{"subscribe":"a{2,1}"}');
+                    ws.send('{"subscribe":1}');
+                    setTimeout(function() {
+                        connections[0].send('topic5', 'still-alive');
+                    },100);
+                });
+                ws.on('message', function(msg) {
+                    try {
+                        msg.should.equal('[{"topic":"topic5","data":"still-alive"}]');
+                        unhandled.should.have.length(0);
+                        ws.close();
+                        finish();
+                    } catch(err) {
+                        finish(err);
+                    }
+                });
+            });
+        });
+
+        it('handles runtime rejecting a received message', function(done) {
+            withRejectingRuntime('receive', function(unhandled, restore) {
+                var finish = function(err) { restore(); done(err); };
+                var ws = new WebSocket(url);
+                ws.on('open', function() {
+                    ws.send('{"topic":"foo","data":"bar"}');
+                    setTimeout(function() {
+                        connections[0].send('topic6', 'still-alive');
+                    },100);
+                });
+                ws.on('message', function(msg) {
+                    try {
+                        msg.should.equal('[{"topic":"topic6","data":"still-alive"}]');
+                        unhandled.should.have.length(0);
+                        ws.close();
+                        finish();
+                    } catch(err) {
+                        finish(err);
+                    }
+                });
             });
         });
     });
@@ -662,6 +725,29 @@ describe("api/editor/comms", function() {
                 } catch(err) {
                     done(err);
                 }
+            });
+        });
+
+        it('handles runtime rejecting an anonymous subscribe request',function(done) {
+            withRejectingRuntime('subscribe', function(unhandled, restore) {
+                var finish = function(err) { restore(); done(err); };
+                var ws = new WebSocket(url);
+                ws.on('open', function() {
+                    ws.send('{"subscribe":"a{2,1}"}');
+                    setTimeout(function() {
+                        connections[0].send('foo', 'still-alive');
+                    },200);
+                });
+                ws.on('message', function(msg) {
+                    try {
+                        msg.should.equal('[{"topic":"foo","data":"still-alive"}]');
+                        unhandled.should.have.length(0);
+                        ws.close();
+                        finish();
+                    } catch(err) {
+                        finish(err);
+                    }
+                });
             });
         });
     });
