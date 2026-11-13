@@ -42,7 +42,13 @@ async function concatOne({ dest, src, separator }) {
     const files = await expand(src);
     const parts = [];
     for (const f of files) {
-        parts.push(await fs.promises.readFile(f, "utf8"));
+        let content = await fs.promises.readFile(f, "utf8");
+        // Ensure a trailing newline so a final line comment (eg sourceMappingURL)
+        // does not swallow the separator and the start of the next file
+        if (!content.endsWith("\n")) {
+            content += "\n";
+        }
+        parts.push(content);
     }
     await fs.promises.mkdir(path.dirname(dest), { recursive: true });
     await fs.promises.writeFile(dest, parts.join(separator));

@@ -106,7 +106,7 @@
     "devDependencies": {
         "archiver": "^7.0.1",
         "chokidar": "^4.0.3",
-        "dompurify": "3.4.14",
+        "dompurify": "3.4.17",
         "esbuild": "^0.28.0",
         "eslint": "^9.39.4",
         "fast-glob": "^3.3.3",
