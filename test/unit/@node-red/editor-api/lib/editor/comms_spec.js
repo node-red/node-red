@@ -19,6 +19,7 @@ var sinon = require("sinon");
 const stoppable = require('stoppable');
 
 var http = require('http');
+var net = require('net');
 var express = require('express');
 var app = express();
 var WebSocket = require('ws');
@@ -185,6 +186,27 @@ describe("api/editor/comms", function() {
                         finish(err);
                     }
                 });
+            });
+        });
+
+        it('closes the socket for an upgrade request with a malformed url', function(done) {
+            var client = net.connect(port, address, function() {
+                client.write('GET http://[::1/comms HTTP/1.1\r\n'+
+                    'Host: a\r\n'+
+                    'Connection: Upgrade\r\n'+
+                    'Upgrade: websocket\r\n'+
+                    'Sec-WebSocket-Version: 13\r\n'+
+                    'Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==\r\n\r\n');
+            });
+            client.on('error', function() {});
+            client.on('close', function() {
+                // Check the server is still accepting connections
+                var ws = new WebSocket(url);
+                ws.on('open', function() {
+                    ws.close();
+                    done();
+                });
+                ws.on('error', done);
             });
         });
     });
