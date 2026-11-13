@@ -19,6 +19,7 @@ var sinon = require("sinon");
 var path = require("path");
 var fs = require('fs-extra');
 var EventEmitter = require('events');
+var child_process = require('child_process');
 
 var NR_TEST_UTILS = require("nr-test-utils");
 
@@ -351,6 +352,60 @@ describe('nodes/registry/installer', function() {
             }).catch(done);
         });
 
+        describe("allow/deny lists", function() {
+            afterEach(function() {
+                if (child_process.execFile.restore) {
+                    child_process.execFile.restore();
+                }
+            })
+            function stubNpmInfo(version) {
+                sinon.stub(child_process, "execFile").callsFake(function(cmd, args, cb) {
+                    cb(null, JSON.stringify({ version: version }), "");
+                });
+            }
+            function stubInstall(moduleName) {
+                var res = { code: 0, stdout: "", stderr: "" };
+                var p = Promise.resolve(res);
+                p.catch((err)=>{});
+                execResponse = p;
+                var nodeInfo = {nodes:{module:moduleName,types:["a"]}};
+                sinon.stub(registry,"addModule").callsFake(function(md) {
+                    return Promise.resolve(nodeInfo);
+                });
+                sinon.stub(typeRegistry,"getModuleInfo").callsFake(function() { return null; });
+            }
+            it("allows install when allowList is ['*'] and denyList is omitted", function(done) {
+                // https://github.com/node-red/node-red/issues/6013
+                installer.init({ externalModules: { palette: { allowList: ['*'] } } })
+                stubNpmInfo("0.1.2");
+                stubInstall("this_is_allowed");
+                installer.installModule("this_is_allowed","0.1.2").then(function() {
+                    done();
+                }).catch(done);
+            })
+            it("treats allowList as a whitelist when denyList is omitted", function(done) {
+                installer.init({ externalModules: { palette: { allowList: ['this_is_allowed'] } } })
+                stubNpmInfo("0.1.2");
+                stubInstall("this_wont_exist");
+                installer.installModule("this_wont_exist","0.1.2").then(function() {
+                    done(new Error("Install should have been rejected"));
+                }).catch(function(err) {
+                    err.should.have.property("code","install_not_allowed");
+                    done();
+                }).catch(done);
+            })
+            it("treats allowList as a whitelist when denyList is empty", function(done) {
+                installer.init({ externalModules: { palette: { allowList: ['this_is_allowed'], denyList: [] } } })
+                stubNpmInfo("0.1.2");
+                stubInstall("this_wont_exist");
+                installer.installModule("this_wont_exist","0.1.2").then(function() {
+                    done(new Error("Install should have been rejected"));
+                }).catch(function(err) {
+                    err.should.have.property("code","install_not_allowed");
+                    done();
+                }).catch(done);
+            })
+        })
         describe("allowUpdate lists", function() {
             it("rejects when update requested with allowUpdate set to false", function(done) {
                 installer.init({ externalModules: { palette: { allowUpdate: false } } })
