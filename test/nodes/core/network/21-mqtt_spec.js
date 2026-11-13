@@ -660,6 +660,28 @@ describe('MQTT Nodes', function () {
             .catch(done);
         });
     });
+    it('should build will message userProperties from a JSON string passed as userProperties', function (done) {
+        this.timeout = 2000;
+        const brokerOptions = {
+            id: "mqtt.broker", name: "mqtt_broker", protocolVersion: 5, autoConnect: false,
+            willTopic: "will/string/userproperties",
+            willPayload: '{"msg":"will"}',
+            willQos: 2,
+            willMsg: { userProperties: '{"will":"value"}' } // standard property name, JSON string
+        }
+        const { flow } = buildBasicMQTTSendRecvFlow(brokerOptions, { id: "mqtt.in", topic: "in_topic" }, { id: "mqtt.out", topic: "out_topic" })
+        helper.load(mqttNodes, flow, function () {
+            try {
+                const mqttBroker = helper.getNode("mqtt.broker");
+                should.exist(mqttBroker.options.will, "will message should be built at node creation");
+                mqttBroker.options.will.should.have.property("topic", brokerOptions.willTopic);
+                mqttBroker.options.will.properties.should.have.property("userProperties", { will: "value" });
+                done();
+            } catch (error) {
+                done(error)
+            }
+        });
+    });
     //#endregion  ADVANCED TESTS
 });
 
