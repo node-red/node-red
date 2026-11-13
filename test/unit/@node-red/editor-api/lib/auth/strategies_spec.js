@@ -214,6 +214,54 @@ describe("api/auth/strategies", function() {
             };
             strategies.tokensStrategy.authenticate({headers:{"authorization":"Bearer 1234"}});
         });
+        it('Passes the full header to the tokens function when scheme is not Bearer',function(done) {
+            var seenToken = null;
+            var userTokens = sinon.stub(Users,"tokens").callsFake(function(token) {
+                seenToken = token;
+                return Promise.resolve("tokens-"+token);
+            });
+            var userTokenHeader = sinon.stub(Users,"tokenHeader").callsFake(function(token) {
+                return "authorization";
+            });
+            strategies.tokensStrategy._success = strategies.tokensStrategy.success;
+            strategies.tokensStrategy.success = function(user) {
+                try {
+                    seenToken.should.equal("Basic 1234");
+                    user.should.equal("tokens-Basic 1234");
+                    done();
+                } catch(err) {
+                    done(err);
+                } finally {
+                    strategies.tokensStrategy.success = strategies.tokensStrategy._success;
+                    delete strategies.tokensStrategy._success;
+                }
+            };
+            strategies.tokensStrategy.authenticate({headers:{"authorization":"Basic 1234"}});
+        });
+        it('Passes a single-part authorization header to the tokens function in full',function(done) {
+            var seenToken = null;
+            var userTokens = sinon.stub(Users,"tokens").callsFake(function(token) {
+                seenToken = token;
+                return Promise.resolve("tokens-"+token);
+            });
+            var userTokenHeader = sinon.stub(Users,"tokenHeader").callsFake(function(token) {
+                return "authorization";
+            });
+            strategies.tokensStrategy._success = strategies.tokensStrategy.success;
+            strategies.tokensStrategy.success = function(user) {
+                try {
+                    seenToken.should.equal("1234");
+                    user.should.equal("tokens-1234");
+                    done();
+                } catch(err) {
+                    done(err);
+                } finally {
+                    strategies.tokensStrategy.success = strategies.tokensStrategy._success;
+                    delete strategies.tokensStrategy._success;
+                }
+            };
+            strategies.tokensStrategy.authenticate({headers:{"authorization":"1234"}});
+        });
         it('Fails if tokens user not enabled',function(done) {
             var userTokens = sinon.stub(Users,"tokens").callsFake(function() {
                 return Promise.resolve(null);
