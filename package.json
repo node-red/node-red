@@ -79,7 +79,7 @@
         "moment": "2.31.0",
         "moment-timezone": "0.5.48",
         "mqtt": "5.15.2",
-        "multer": "2.4.0",
+        "multer": "2.5.0",
         "mustache": "4.2.0",
         "node-red-admin": "^4.1.8",
         "node-watch": "0.7.4",
