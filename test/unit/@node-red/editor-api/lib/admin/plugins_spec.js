@@ -108,4 +108,63 @@ test-module-config`;
             }
         });
     });
+
+    describe("error handling", function() {
+        before(function() {
+            const errInstance = new Error("message");
+            errInstance.code = "random_error";
+            errInstance.status = 400;
+            plugins.init({
+                plugins: {
+                    getPluginList: async function() { throw errInstance },
+                    // res.send throws when given a function
+                    getPluginConfigs: async function() { return Object },
+                    getPluginCatalogs: async function() { return pluginCatalogs }
+                }
+            })
+        });
+        after(function() {
+            plugins.init({
+                plugins: {
+                    getPluginList: async function() { return pluginList },
+                    getPluginConfigs: async function() { return pluginConfigs },
+                    getPluginCatalogs: async function() { return pluginCatalogs }
+                }
+            })
+        });
+        it('returns error if plugin list fails', function(done) {
+            request(app)
+            .get("/plugins")
+            .set('Accept', 'application/json')
+            .expect(400)
+            .end(function(err,res) {
+                if (err) {
+                    return done(err);
+                }
+                try {
+                    res.body.should.have.property("code","random_error");
+                    done();
+                } catch(err) {
+                    done(err)
+                }
+            });
+        });
+        it('returns error if plugin configs cannot be sent', function(done) {
+            request(app)
+            .get("/plugins")
+            .set('Accept', 'text/html')
+            .expect(400)
+            .end(function(err,res) {
+                if (err) {
+                    return done(err);
+                }
+                try {
+                    res.body.should.have.property("code","ERR_INVALID_ARG_TYPE");
+                    done();
+                } catch(err) {
+                    done(err)
+                }
+            });
+        });
+    });
 });

@@ -61,6 +61,14 @@ describe("api/auth/users", function() {
                     }
                 });
             });
+
+            it('returns null for Object.prototype property names', function() {
+                return Promise.all(["constructor","__proto__","toString","hasOwnProperty"].map(function(name) {
+                    return Users.get(name).then(function(user) {
+                        should.not.exist(user);
+                    });
+                }));
+            });
         });
 
         describe('#default',function() {
@@ -109,6 +117,22 @@ describe("api/auth/users", function() {
                         done(err);
                     }
                 });
+            });
+
+            it('rejects Object.prototype property names as usernames', function() {
+                return Promise.all(["constructor","__proto__","toString","hasOwnProperty"].map(function(name) {
+                    return Users.authenticate(name,'password').then(function(user) {
+                        should.not.exist(user);
+                    });
+                }));
+            });
+
+            it('rejects a non-string password for a known user', function() {
+                return Promise.all([['password'],{a:'password'},123].map(function(password) {
+                    return Users.authenticate('fred',password).then(function(user) {
+                        should.not.exist(user);
+                    });
+                }));
             });
         });
     });

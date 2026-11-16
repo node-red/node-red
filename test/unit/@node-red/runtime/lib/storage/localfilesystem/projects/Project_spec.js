@@ -72,6 +72,68 @@ describe("storage/localfilesystem/projects/Project", function() {
         }
     });
 
+    describe("load", function() {
+        beforeEach(async function() {
+            await fs.remove(userDir);
+            await fs.ensureDir(projectDir);
+            writeFile("README.md","# test\n");
+            Projects.init(mockSettings, mockRuntime);
+        });
+
+        afterEach(async function() {
+            await fs.remove(userDir);
+        });
+
+        function writePackage(settings) {
+            writeFile("package.json",JSON.stringify({
+                name: "test-project",
+                "node-red": { settings: settings }
+            }));
+        }
+
+        it("uses flow and credentials files inside the project", async function() {
+            writePackage({ flowFile: "flows.json", credentialsFile: "flows_cred.json" });
+            var project = await Projects.load(projectDir);
+            project.getFlowFile().should.eql(path.join(projectDir,"flows.json"));
+            project.getCredentialsFile().should.eql(path.join(projectDir,"flows_cred.json"));
+        });
+
+        it("uses flow and credentials files in a subdirectory of the project", async function() {
+            writePackage({ flowFile: "sub/flows.json", credentialsFile: "sub/flows_cred.json" });
+            var project = await Projects.load(projectDir);
+            project.getFlowFile().should.eql(path.join(projectDir,"sub","flows.json"));
+            project.getCredentialsFile().should.eql(path.join(projectDir,"sub","flows_cred.json"));
+        });
+
+        it("ignores a flow file outside the project directory", async function() {
+            writePackage({ flowFile: "../../settings.js", credentialsFile: "flows_cred.json" });
+            var project = await Projects.load(projectDir);
+            should.not.exist(project.getFlowFile());
+            project.getCredentialsFile().should.eql(path.join(projectDir,"flows_cred.json"));
+        });
+
+        it("ignores a credentials file outside the project directory", async function() {
+            writePackage({ flowFile: "flows.json", credentialsFile: "../../settings_cred.json" });
+            var project = await Projects.load(projectDir);
+            project.getFlowFile().should.eql(path.join(projectDir,"flows.json"));
+            should.not.exist(project.getCredentialsFile());
+        });
+
+        it("ignores files that resolve outside the project via a subdirectory", async function() {
+            writePackage({ flowFile: "sub/../../flows.json", credentialsFile: "sub/../../../flows_cred.json" });
+            var project = await Projects.load(projectDir);
+            should.not.exist(project.getFlowFile());
+            should.not.exist(project.getCredentialsFile());
+        });
+
+        it("ignores flow and credentials files that are not strings", async function() {
+            writePackage({ flowFile: 123, credentialsFile: { a: 1 } });
+            var project = await Projects.load(projectDir);
+            should.not.exist(project.getFlowFile());
+            should.not.exist(project.getCredentialsFile());
+        });
+    });
+
     describe("resolveMerge", function() {
         var project;
 

@@ -16,6 +16,9 @@
 
 const should = require("should");
 const sinon = require("sinon");
+const os = require("os");
+const path = require("path");
+const fs = require("fs-extra");
 const functionNode = require("nr-test-utils").require("@node-red/nodes/core/function/10-function.js");
 const linkNode = require("nr-test-utils").require("@node-red/nodes/core/common/60-link.js");
 const Context = require("nr-test-utils").require("@node-red/runtime/lib/nodes/context");
@@ -1426,6 +1429,42 @@ describe('function node', function() {
             });
             n1.receive({payload: "foo"});
         });
+    });
+
+    it('should log (and not crash the runtime) if an On Start context callback throws', function(done) {
+        var contextDir = fs.mkdtempSync(path.join(os.tmpdir(), "nr-function-context-"));
+        Context.init({
+            contextStorage: {
+                default: {
+                    module: "localfilesystem",
+                    config: { dir: contextDir, cache: false }
+                }
+            }
+        });
+        Context.load().then(function() {
+            var flow = [{id:"n1",type:"function",name:"Buggy On Start",wires:[["n2"]],
+                initialize:"flow.set('x', 1, function (err) { done(); });",
+                func:"return msg;"},
+            {id:"n2", type:"helper"}];
+            helper.load(functionNode, flow, function() {
+                setTimeout(function() {
+                    fs.remove(contextDir).then(function() {
+                        try {
+                            helper.log().called.should.be.true();
+                            var logEvents = helper.log().args.filter(function(evt) {
+                                return evt[0].level === helper.log().ERROR;
+                            });
+                            logEvents.should.have.length(1);
+                            logEvents[0][0].msg.should.match(/Error in context callback/);
+                            logEvents[0][0].msg.should.match(/ReferenceError: done is not defined/);
+                            done();
+                        } catch (err) {
+                            done(err);
+                        }
+                    });
+                }, 250);
+            });
+        }).catch(done);
     });
 
     it('should timeout if timeout is set', function(done) {

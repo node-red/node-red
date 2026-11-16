@@ -858,6 +858,26 @@ describe('Flow', function() {
 
             await flow.stop()
         });
+        it("handles a msg with an own hasOwnProperty property", async function() {
+            var config = flowUtils.parseConfig([
+                {id:"t1",type:"tab"},
+                {id:"1",x:10,y:10,z:"t1",type:"test",name:"a",wires:[]},
+                {id:"sn",x:10,y:10,z:"t1",type:"catch",foo:"a",wires:[]}
+            ]);
+            var flow = Flow.create({},config,config.flows["t1"]);
+
+            await flow.start();
+
+            flow.handleError(config.flows["t1"].nodes["1"],"my-error",{hasOwnProperty:1,error:"existing"});
+            flow.handleError(config.flows["t1"].nodes["1"],"my-error",{error:{hasOwnProperty:1,source:{id:"x"}}});
+            await NR_TEST_UTILS.sleep(50)
+            currentNodes["sn"].should.have.a.property("handled",2);
+            var statusMessage = currentNodes["sn"].messages[0];
+            statusMessage.should.have.a.property("_error","existing");
+            statusMessage.error.should.have.a.property("message","my-error");
+
+            await flow.stop()
+        });
         it("prevents an error looping more than 10 times",function(){});
     });
 

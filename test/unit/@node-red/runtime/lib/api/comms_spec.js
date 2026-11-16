@@ -316,6 +316,45 @@ describe("runtime-api/comms", function() {
                 });
             }).catch(done);
         });
+
+        it('treats regex quantifier characters in topic literally',function(done) {
+            eventHandlers['comms']({
+                topic: "a{2,1}",
+                data: "my-payload",
+                retain: true
+            })
+            eventHandlers['comms']({
+                topic: "aaa",
+                data: "my-payload",
+                retain: true
+            })
+            messages = [];
+            comms.addConnection({client: clientConnection}).then(function() {
+                return comms.subscribe({client: clientConnection, topic: "a{2,1}"}).then(function() {
+                    return comms.subscribe({client: clientConnection, topic: "a{3}"})
+                }).then(function() {
+                    messages.should.have.length(1);
+                    messages[0].should.have.property("topic","a{2,1}");
+                    done();
+                });
+            }).catch(done);
+        });
+
+        it('rejects non-string topics',function(done) {
+            comms.addConnection({client: clientConnection}).then(function() {
+                const invalid = [1, true, {}, [], null, undefined];
+                return Promise.all(invalid.map(function(topic) {
+                    return comms.subscribe({client: clientConnection, topic}).then(function() {
+                        throw new Error("subscribe did not reject topic: "+JSON.stringify(topic));
+                    }, function(err) {
+                        err.should.have.property("message","Invalid topic");
+                    });
+                }));
+            }).then(function() {
+                messages.should.have.length(0);
+                done();
+            }).catch(done);
+        });
     })
 
 });

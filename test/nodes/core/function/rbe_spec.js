@@ -394,6 +394,30 @@ describe('rbe node', function() {
         });
     });
 
+    it('should accept a numeric gap (deadband)', function(done) {
+        var flow = [{"id":"n1", "type":"rbe", func:"deadband", gap:10, wires:[["n2"]] },
+            {id:"n2", type:"helper"} ];
+        helper.load(testNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            var c = 0;
+            n2.on("input", function(msg) {
+                c = c + 1;
+                if (c === 1) {
+                    msg.should.have.a.property("payload", 0);
+                }
+                else {
+                    msg.should.have.a.property("payload", 20);
+                    done();
+                }
+            });
+            n1.emit("input", {payload:0});
+            n1.emit("input", {payload:5});
+            n1.emit("input", {payload:10});
+            n1.emit("input", {payload:20});
+        });
+    });
+
     it('should only send output if more than x% away from original value (deadband)', function(done) {
         var flow = [{"id":"n1", "type":"rbe", func:"deadband", gap:"10%", wires:[["n2"]] },
             {id:"n2", type:"helper"} ];

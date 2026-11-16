@@ -98,6 +98,79 @@ describe("api/admin/nodes", function() {
                 });
         });
 
+        it('returns error if node list fails', function(done) {
+            nodes.init({
+                settings: {},
+                nodes:{
+                    getNodeList: function() {
+                        var errInstance = new Error("message");
+                        errInstance.code = "random_error";
+                        errInstance.status = 400;
+                        return Promise.reject(errInstance);
+                    }
+                }
+            });
+            request(app)
+                .get('/nodes')
+                .set('Accept', 'application/json')
+                .expect(400)
+                .end(function(err,res) {
+                    if (err) {
+                        return done(err);
+                    }
+                    res.body.should.have.property("code","random_error");
+                    done();
+                });
+        });
+
+        it('returns error if node configs fails', function(done) {
+            nodes.init({
+                settings: {},
+                nodes:{
+                    getNodeConfigs: function() {
+                        var errInstance = new Error("message");
+                        errInstance.code = "random_error";
+                        errInstance.status = 400;
+                        return Promise.reject(errInstance);
+                    }
+                }
+            });
+            request(app)
+                .get('/nodes')
+                .set('Accept', 'text/html')
+                .expect(400)
+                .end(function(err,res) {
+                    if (err) {
+                        return done(err);
+                    }
+                    res.body.should.have.property("code","random_error");
+                    done();
+                });
+        });
+
+        it('returns error if node configs cannot be sent', function(done) {
+            nodes.init({
+                settings: {},
+                nodes:{
+                    getNodeConfigs: function() {
+                        // res.send throws when given a function
+                        return Promise.resolve(Object);
+                    }
+                }
+            });
+            request(app)
+                .get('/nodes')
+                .set('Accept', 'text/html')
+                .expect(400)
+                .end(function(err,res) {
+                    if (err) {
+                        return done(err);
+                    }
+                    res.body.should.have.property("code","ERR_INVALID_ARG_TYPE");
+                    done();
+                });
+        });
+
         it('returns node module info', function(done) {
             nodes.init({
                 settings: {},

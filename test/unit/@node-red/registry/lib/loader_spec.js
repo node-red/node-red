@@ -411,6 +411,41 @@ describe("red/nodes/registry/loader",function() {
             });
         });
 
+        it("load plugin that errors on require - reports the error line", function(done) {
+            stubs.push(sinon.stub(localfilesystem,"getNodeFiles").callsFake(function(){
+                var result = {};
+                result["node-red"] = {
+                    "name": "node-red",
+                    "version":"1.2.3",
+                    "plugins": {
+                        "TestPluginError": {
+                            "file": path.join(resourcesDir,"TestPluginError","TestPluginError.js"),
+                            "module": "node-red",
+                            "name": "TestPluginError"
+                        }
+                    }
+                };
+                return result;
+            }));
+
+            stubs.push(sinon.stub(registry,"saveNodeList").callsFake(function(){ return }));
+            stubs.push(sinon.stub(registry,"addModule").callsFake(function(){ return }));
+            // This module isn't already loaded
+            stubs.push(sinon.stub(registry,"getNodeInfo").callsFake(function(){ return null; }));
+            stubs.push(sinon.stub(console,"log"));
+
+            loader.init({nodes:nodes,log:{info:function(){},_:function(){}},settings:{available:function(){return true;}}});
+            loader.load().then(function(result) {
+                registry.addModule.called.should.be.true();
+                var module = registry.addModule.lastCall.args[0];
+                module.plugins.should.have.property("TestPluginError");
+                module.plugins.TestPluginError.should.have.property("err","Error: fail to load plugin (line:1)");
+                done();
+            }).catch(function(err) {
+                done(err);
+            });
+        });
+
         it("load core node files scanned by lfs - missing file", function(done) {
             stubs.push(sinon.stub(localfilesystem,"getNodeFiles").callsFake(function(){
                 var result = {};
