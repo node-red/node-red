@@ -290,6 +290,45 @@ describe("externalModules api", function() {
             }
         })
 
+        it("allows all modules when allowList is ['*'] and denyList is omitted", async function() {
+            // https://github.com/node-red/node-red/issues/6013
+            externalModules.init({userDir: homeDir, get:()=>{}, set:()=>{}, externalModules: {
+                modules: {
+                    allowList: ['*']
+                }
+            }});
+            externalModules.register("function", "libs");
+            await externalModules.checkFlowDependencies([
+                {type: "function", libs:[{module: "foo"},{module: "bar"}]}
+            ])
+            exec.run.calledTwice.should.be.true();
+        })
+        it("treats allowList as a whitelist when denyList is empty", async function() {
+            // https://github.com/node-red/node-red/issues/6012
+            externalModules.init({userDir: homeDir, get:()=>{}, set:()=>{}, externalModules: {
+                modules: {
+                    allowList: ['foo'],
+                    denyList: []
+                }
+            }});
+            externalModules.register("function", "libs");
+            try {
+                await externalModules.checkFlowDependencies([
+                    // foo allowed
+                    // bar not on allowList - disallowed
+                    {type: "function", libs:[{module: "foo"},{module: "bar"}]}
+                ])
+                throw new Error("checkFlowDependencies did not reject after install fail")
+            } catch(err) {
+                exec.run.calledOnce.should.be.true();
+                Array.isArray(err).should.be.true();
+                err.should.have.length(1);
+                err[0].should.have.property("module");
+                err[0].module.should.have.property("module","bar");
+                err[0].should.have.property("error");
+                err[0].error.should.have.property("code","install_not_allowed");
+            }
+        })
         it("reports install fail - built-in module disallowed", async function() {
             externalModules.init({userDir: homeDir, get:()=>{}, set:()=>{}, externalModules: {
                 modules: {
