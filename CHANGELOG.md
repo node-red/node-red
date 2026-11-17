@@ -1,3 +1,25 @@
+#### 4.1.18: Maintenance Release
+
+ - Update dependencies in v4.x (#6113) @knolleary
+ - Validate websocket upgrade url to avoid uncaught exception (#6104) @knolleary
+ - Add comment about path validation in library code (#6109) @knolleary
+ - Ensure comms socket is closed when session token is revoked (#6108) @knolleary
+ - Use history.replaceState to modify location hash (#6107) @knolleary
+ - WS node: Handle a null package in whole-message mode (#6106) @knolleary
+ - Add better error handling on nodes/plugins api end points (#6105) @knolleary
+ - Improve authentication handling to catch and log errors cleanly (#6103) @knolleary
+ - Validate project ssh key file paths (#6102) @knolleary
+ - Ensure project paths remain inside the project directory (#6101) @knolleary
+ - Handle invalid comms topics and prevent uncaught exceptions (#6100) @knolleary
+ - Add permission check on comms connection for custom token path (#6099) @knolleary
+ - Validate SSH key names and remote auth options in projects (#6098) @knolleary
+ - Validate tarball package name and version (#6097) @knolleary
+ - Fix path validation in synchronous FS context store (#6096) @knolleary
+ - Prevent prototype write access (#6095) @knolleary
+ - Validate comms packets are valid objects (#6094) @knolleary
+ - Validate lang parameter on locales requests (#6093) @knolleary
+ - Replace lodash.clonedeep with lodash (#6092) @knolleary
+
 #### 4.1.17: Maintenance Release
 
  - Fix merge conflict resolution bug (#5999) @knolleary
