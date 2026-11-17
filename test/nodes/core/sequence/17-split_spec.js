@@ -313,6 +313,49 @@ describe('SPLIT node', function() {
         });
     });
 
+    it('should send a trailing empty part when a buffer ends with the delimiter', function(done) {
+        var flow = [{id:"sn1", type:"split", wires:[["sn2"]], splt:"\\n"},
+                    {id:"sn2", type:"helper"}];
+        helper.load(splitNode, flow, function() {
+            var sn1 = helper.getNode("sn1");
+            var sn2 = helper.getNode("sn2");
+            sn2.on("input", function(msg) {
+                try {
+                    Buffer.isBuffer(msg.payload).should.be.true();
+                    msg.parts.should.have.property("count",3);
+                    msg.parts.should.have.property("type","buffer");
+                    if (msg.parts.index === 0) { msg.payload.toString().should.equal("A"); }
+                    if (msg.parts.index === 1) { msg.payload.toString().should.equal("B"); }
+                    if (msg.parts.index === 2) { msg.payload.length.should.equal(0); done(); }
+                } catch(err) {
+                    done(err);
+                }
+            });
+            sn1.receive({payload:Buffer.from("A\nB\n")});
+        });
+    });
+
+    it('should send a trailing empty part when a buffer ends with the binary delimiter', function(done) {
+        var flow = [{id:"sn1", type:"split", wires:[["sn2"]], splt:"[52]", spltType:"bin"},
+                    {id:"sn2", type:"helper"}];
+        helper.load(splitNode, flow, function() {
+            var sn1 = helper.getNode("sn1");
+            var sn2 = helper.getNode("sn2");
+            sn2.on("input", function(msg) {
+                try {
+                    Buffer.isBuffer(msg.payload).should.be.true();
+                    msg.parts.should.have.property("count",2);
+                    msg.parts.should.have.property("type","buffer");
+                    if (msg.parts.index === 0) { msg.payload.toString().should.equal("123"); }
+                    if (msg.parts.index === 1) { msg.payload.length.should.equal(0); done(); }
+                } catch(err) {
+                    done(err);
+                }
+            });
+            sn1.receive({payload:Buffer.from("1234")});
+        });
+    });
+
     it('should handle invalid spltType (not an array)', function (done) {
         var flow = [{ id: "sn1", type: "split", splt: "1", spltType: "bin", wires: [["sn2"]] },
                     { id: "sn2", type: "helper" }];
@@ -1137,6 +1180,25 @@ describe('JOIN node', function() {
                 catch(e) { done(e); }
             });
             s1.receive({payload:[[1,2,3],"a\nb\nc",[7,8,9]]});
+        });
+    });
+
+    it('should join a split buffer that ends with the delimiter', function(done) {
+        var flow = [{id:"s1", type:"split", wires:[["j1"]]},
+                    {id:"j1", type:"join", mode:"auto", wires:[["n2"]]},
+                    {id:"n2", type:"helper"}];
+        helper.load(joinNode, flow, function() {
+            var s1 = helper.getNode("s1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function(msg) {
+                try {
+                    Buffer.isBuffer(msg.payload).should.be.true();
+                    msg.payload.toString().should.equal("A\nB\n");
+                    done();
+                }
+                catch(e) { done(e); }
+            });
+            s1.receive({payload:Buffer.from("A\nB\n")});
         });
     });
 
