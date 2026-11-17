@@ -1,3 +1,38 @@
+#### 5.0.10: Maintenance Release
+
+ - Update dependencies (#6110) @knolleary
+ - Update npm to 11.21.2 (#6084) @bitshape
+ - Update body-parser to fix compressed request denial of service (#6083) @bitshape
+ - Add comment about path validation in library code (#6091) @knolleary
+ - Ensure comms socket is closed when session token is revoked (#6089) @knolleary
+ - Handle read-only user in welcome tour (#6088) @knolleary
+ - Use history.replaceState to modify location hash (#6085) @knolleary
+ - Handle node.gap being a number rather than a String representation (#6087) @knolleary
+ - Update project dialog text to reflect sidebar name changes in v5 (#6086) @knolleary
+ - Prevent context store callback errors from crashing Node-RED (#6045) @tobsch04
+ - Keep a module in the runtime when another module uses it (#6017) @cestercian
+ - An invalid and disabled node will not render its flow invalid (#6042) @GogoVega
+ - Use the plugin file when reporting a plugin load error line (#6040) @shubhamrai9122-creator
+ - Fix the hidden in-use module button on the palette (#5861) @GogoVega
+ - Fix error badge state when deleting a node (#6050) @GogoVega
+ - Avoid using hasOwnProperty on message objects directly (#6080) @knolleary
+ - WS node: Handle a null package in whole-message mode (#6078) @knolleary
+ - Add better error handling on nodes/plugins api end points (#6077) @knolleary
+ - Validate websocket upgrade url to avoid uncaught exception (#6076) @knolleary
+ - Improve authentication handling to catch and log errors cleanly (#6075) @knolleary
+ - Validate project ssh key file paths (#6074) @knolleary
+ - Ensure project paths remain inside the project directory (#6073) @knolleary
+ - Handle invalid comms topics and prevent uncaught exceptions (#6072) @knolleary
+ - Add permission check on comms connection for custom token path (#6071) @knolleary
+ - Validate SSH key names and remote auth options in projects (#6070) @knolleary
+ - Validate tarball package name and version (#6069) @knolleary
+ - Fix path validation in synchronous FS context store (#6068) @knolleary
+ - Prevent prototype write access (#6067) @knolleary
+ - Validate comms packets are valid objects (#6066) @knolleary
+ - Validate lang parameter on locales requests (#6065) @knolleary
+ - Replace lodash.clonedeep with lodash (#6064) @knolleary
+ - Fixed a bug where runtime-event banners could be garbled in some situations (#6034) @Autre31415
+
 #### 5.0.9: Maintenance Release
 
  - Fix MQTT connect action dropping its url when repeated (#6019) @sankalpsthakur
