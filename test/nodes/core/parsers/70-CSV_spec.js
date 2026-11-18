@@ -130,6 +130,55 @@ describe('CSV node (Legacy Mode)', function() {
         });
     });
 
+    describe('record separators with empty strings enabled', function() {
+        [
+            {name:'CRLF records with a header', payload:'a,b\r\n1,""\r\n2,last\r\n', hdrin:true, expected:[{a:1, b:''}, {a:2, b:'last'}]},
+            {name:'CRLF records without a header', payload:'1,""\r\n2,last\r\n', expected:[{a:1, b:''}, {a:2, b:'last'}]},
+            {name:'LF records', payload:'1,""\n2,last\n', expected:[{a:1, b:''}, {a:2, b:'last'}]},
+            {name:'CR records', payload:'1,""\r2,last\r', expected:[{a:1, b:''}, {a:2, b:'last'}]},
+            {name:'an unterminated final record', payload:'1,""\r\n2,last', expected:[{a:1, b:''}, {a:2, b:'last'}]},
+            {name:'quoted CRLF values', payload:'1,"first\r\nsecond"\r\n', expected:[{a:1, b:'first\r\nsecond'}]},
+            {name:'empty and null fields', payload:'"",\r\n2,""\r\n', expected:[{a:'', b:null}, {a:2, b:''}]},
+            {name:'an empty record between records', payload:'1,first\r\n\r\n2,last\r\n', expected:[{a:1, b:'first'}, {a:''}, {a:2, b:'last'}]}
+        ].forEach(function(testCase) {
+            ['one', 'mult'].forEach(function(multi) {
+                it('should parse ' + testCase.name + ' with ' + multi + ' output', function(done) {
+                    var flow = [
+                        {id:'n1', type:'csv', temp:'a,b', hdrin:testCase.hdrin, multi:multi, include_empty_strings:true, include_null_values:true, wires:[['n2']]},
+                        {id:'n2', type:'helper'}
+                    ];
+                    helper.load(csvNode, flow, function() {
+                        var n1 = helper.getNode('n1');
+                        var n2 = helper.getNode('n2');
+                        var messages = [];
+                        n2.on('input', function(msg) {
+                            messages.push(msg);
+                        });
+                        n1.receive({payload:testCase.payload});
+                        setTimeout(function() {
+                            try {
+                                if (multi === 'mult') {
+                                    messages.should.have.length(1);
+                                    messages[0].should.have.property('payload', testCase.expected);
+                                } else {
+                                    messages.map(msg => msg.payload).should.eql(testCase.expected);
+                                    messages.forEach(function(msg, index) {
+                                        msg.parts.should.have.property('index', index);
+                                        msg.parts.should.have.property('count', testCase.expected.length);
+                                    });
+                                }
+                                messages.forEach(msg => msg.should.have.property('columns', 'a,b'));
+                                done();
+                            } catch (err) {
+                                done(err);
+                            }
+                        }, 50);
+                    });
+                });
+            });
+        });
+    });
+
     describe('csv to json', function() {
         var parts_id = undefined;
 
