@@ -65,6 +65,13 @@ describe('watch Node', function() {
 
     function testWatch(flow, change_func, results, done) {
         var processed = {};
+        var changeTimeout;
+        // On OSX, the event for creating a watched directory can be delivered
+        // after the watch starts. It is reported against <dir>/<dir>, which
+        // does not exist, so is ignored.
+        var spuriousPaths = flow[0].files.split(",").map(function(f) {
+            return path.join(f, path.basename(f));
+        });
         helper.load(watchNode, flow, function() {
             var n1 = helper.getNode("n1");
             var n2 = helper.getNode("n2");
@@ -75,6 +82,9 @@ describe('watch Node', function() {
                     // console.log(msg);
                     msg.should.have.property('file');
 
+                    if (spuriousPaths.indexOf(msg.filename) !== -1) {
+                        return;
+                    }
                     var file = msg.file;
                     if (file in processed) {
                         // multiple messages come in rare case
@@ -104,11 +114,14 @@ describe('watch Node', function() {
                         wait(100, done);
                     }
                 }catch(err) {
+                    // Do not make the change if the test has already failed - the
+                    // test directory may have been removed by then
+                    clearTimeout(changeTimeout);
                     done(err);
                 }
             });
             // wait for preparation
-            wait(500, change_func);
+            changeTimeout = setTimeout(change_func, 500);
         });
     }
 
