@@ -563,6 +563,33 @@ describe('Flow', function() {
         });
     });
 
+    describe('#getNode with inherited property names',function() {
+        it("does not return inherited properties as nodes", async function() {
+            var config = flowUtils.parseConfig([
+                {id:"t1",type:"tab"},
+                {id:"g1",type:"group",z:"t1"},
+                {id:"1",x:10,y:10,z:"t1",g:"g1",type:"test",foo:"a",wires:[]},
+                {id:"2",z:"t1",type:"test",foo:"a"}
+            ]);
+            var parentLookups = [];
+            var flow = Flow.create({
+                getNode: id => { parentLookups.push(id); return null; }
+            },config,config.flows["t1"]);
+            await flow.start();
+            ["constructor","__proto__","toString","hasOwnProperty","valueOf"].forEach(function(id) {
+                should.not.exist(flow.getNode(id, true), "cancelBubble getNode: "+id);
+                should.not.exist(flow.getNode(id), "getNode: "+id);
+                should.not.exist(flow.getGroupNode(id), "getGroupNode: "+id);
+            });
+            // Unknown ids are passed to the parent flow rather than resolved locally
+            parentLookups.should.eql(["constructor","__proto__","toString","hasOwnProperty","valueOf"]);
+            flow.getNode("1").should.have.a.property("id","1");
+            flow.getNode("2").should.have.a.property("id","2");
+            flow.getGroupNode("g1").should.have.a.property("id","g1");
+            await flow.stop();
+        });
+    });
+
     describe("#handleStatus",function() {
         it("passes a status event to the adjacent status node", async function() {
             var config = flowUtils.parseConfig([
@@ -1339,6 +1366,28 @@ describe('Flow', function() {
             activeNodes.t1g2V2.foo.should.equal("t1v2"); // node in group 2, get V2, (group 2 no V2) --> parent (tab 1 has V2)
             activeNodes.t1g2V3.foo.should.equal("gv3"); // node in group 2, get V3, (group 2 no V3) --> parent (tab 1 no V2) --> parent (global has V3)
 
+            await flow.stop()
+        });
+
+        it("can use environment variables named after Object.prototype properties", async function () {
+            var config = flowUtils.parseConfig([
+                {id:"t1",type:"tab",env:[
+                    {"name": "hasOwnProperty", value: "t1v0", type: "str"}
+                ]},
+                {id:"g1",type:"group",z:"t1",env:[
+                    {"name": "hasOwnProperty", value: "g1v0", type: "str"}
+                ]},
+                {id:"t1__V0",x:10,y:10,z:"t1",type:"test",foo:"${hasOwnProperty}",wires:[]},
+                {id:"t1g1V0",x:10,y:10,z:"t1",g:"g1",type:"test",foo:"${hasOwnProperty}",wires:[]},
+                {id:"t1__V1",x:10,y:10,z:"t1",type:"test",foo:"${constructor}",wires:[]}
+            ]);
+            var flow = Flow.create({getSetting:v=>flowUtils.getEnvVar(v)},config,config.flows["t1"]);
+            await flow.start();
+            var activeNodes = flow.getActiveNodes();
+            activeNodes.t1__V0.foo.should.equal("t1v0");
+            activeNodes.t1g1V0.foo.should.equal("g1v0");
+            // Treated as an unset env var, so left unchanged
+            activeNodes.t1__V1.foo.should.equal("${constructor}");
             await flow.stop()
         });
 
