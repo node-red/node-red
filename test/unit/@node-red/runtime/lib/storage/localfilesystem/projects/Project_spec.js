@@ -134,6 +134,82 @@ describe("storage/localfilesystem/projects/Project", function() {
         });
     });
 
+    describe("project names", function() {
+        beforeEach(async function() {
+            await fs.remove(userDir);
+            Projects.init(mockSettings, mockRuntime);
+        });
+        afterEach(async function() {
+            await fs.remove(userDir);
+        });
+
+        it("rejects loading a project with an unsafe name", async function() {
+            for (var name of ["__proto__","constructor","prototype"]) {
+                var dir = path.join(projectsDir,name);
+                await fs.ensureDir(dir);
+                await Projects.load(dir).should.be.rejectedWith({code:"invalid_project_name"});
+            }
+        });
+
+        it("rejects creating a project with an unsafe name", function() {
+            ["__proto__","constructor","prototype"].forEach(function(name) {
+                (function() {
+                    Projects.create(null, { name: name, path: path.join(projectsDir,name) });
+                }).should.throw({code:"invalid_project_name"});
+                (function() {
+                    Projects.create(null, { name: "sub/"+name, path: path.join(projectsDir,"sub",name) });
+                }).should.throw({code:"invalid_project_name"});
+            });
+            fs.existsSync(projectsDir).should.be.false();
+        });
+
+        it("rejects creating a project with a path sensitive name", function() {
+            [".", "..", "../escape", "a/../b", "a/./b", "a//b", "a/", "/abs", "a\\..\\..\\b", "a\u0000b", "a\nb"].forEach(function(name) {
+                (function() {
+                    Projects.create(null, { name: name, path: path.join(projectsDir,name) });
+                }).should.throw({code:"invalid_project_name"}, "name: "+JSON.stringify(name));
+            });
+            fs.existsSync(userDir).should.be.false();
+        });
+
+        it("loads projects with valid names", async function() {
+            var names = ["my-project","my_project","Project1","my.project","my project",path.join("sub","nested")];
+            if (process.platform !== "win32") {
+                // Not a valid file name character on Windows
+                names.push("my:project");
+            }
+            for (var name of names) {
+                var dir = path.join(projectsDir,name);
+                await fs.ensureDir(dir);
+                var project = await Projects.load(dir);
+                project.name.should.equal(path.basename(name));
+            }
+        });
+
+        it("rejects loading a project that is not inside the projects directory", async function() {
+            await fs.ensureDir(path.join(projectsDir,"sub","__proto__"));
+            await Projects.load(userDir).should.be.rejectedWith({code:"invalid_project_name"});
+            await Projects.load(path.join(projectsDir,"..")).should.be.rejectedWith({code:"invalid_project_name"});
+            await Projects.load(path.join(projectsDir,"sub","..","..")).should.be.rejectedWith({code:"invalid_project_name"});
+            await Projects.load(projectsDir).should.be.rejectedWith({code:"invalid_project_name"});
+            await Projects.load(path.join(projectsDir,"sub","__proto__")).should.be.rejectedWith({code:"invalid_project_name"});
+        });
+
+        it("rejects deleting a project that is not inside the projects directory", async function() {
+            await fs.ensureDir(projectsDir);
+            await Projects.delete(null, path.join(projectsDir,"..")).should.be.rejectedWith({code:"invalid_project_name"});
+            await Projects.delete(null, projectsDir).should.be.rejectedWith({code:"invalid_project_name"});
+            fs.existsSync(projectsDir).should.be.true();
+        });
+
+        it("rejects deleting a project with an unsafe name", async function() {
+            var dir = path.join(projectsDir,"__proto__");
+            await fs.ensureDir(dir);
+            await Projects.delete(null, dir).should.be.rejectedWith({code:"invalid_project_name"});
+            fs.existsSync(dir).should.be.true();
+        });
+    });
+
     describe("resolveMerge", function() {
         var project;
 
