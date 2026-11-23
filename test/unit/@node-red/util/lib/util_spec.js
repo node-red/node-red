@@ -165,6 +165,33 @@ describe("@node-red/util/util", function() {
             var v = util.getObjectProperty(obj,"msg.a");
             v.should.eql("foo");
         })
+        it('does not return an object prototype or constructor', function() {
+            var obj = { a: { b: "foo" } };
+            should.not.exist(util.getObjectProperty(obj,"__proto__"));
+            should.not.exist(util.getObjectProperty(obj,"a.__proto__"));
+            should.not.exist(util.getObjectProperty(obj,"a['__proto__']"));
+            should.not.exist(util.getObjectProperty(obj,"a.constructor"));
+            (function() { util.getObjectProperty(obj,"a.constructor.prototype") }).should.throw();
+            should.not.exist(util.getObjectProperty("abc","constructor"));
+        })
+        it('returns own properties that use unsafe key names', function() {
+            var obj = JSON.parse('{"a":{"__proto__":"foo","constructor":"bar","prototype":"baz"}}');
+            util.getObjectProperty(obj,"a.__proto__").should.eql("foo");
+            util.getObjectProperty(obj,"a.constructor").should.eql("bar");
+            util.getObjectProperty(obj,"a.prototype").should.eql("baz");
+        })
+        it('does not allow a read-then-write to pollute Object.prototype', function() {
+            var store = { profiles: { alice: { name: "Alice" } } };
+            var msg = { payload: { field: "polluted", value: "bad" } };
+            msg.profile = util.getObjectProperty(store, 'profiles["__proto__"]');
+            should.not.exist(msg.profile);
+            util.setMessageProperty(msg, "profile[msg.payload.field]", msg.payload.value);
+            try {
+                should.not.exist({}.polluted);
+            } finally {
+                delete Object.prototype.polluted;
+            }
+        })
     });
     describe('getMessageProperty', function() {
         it('retrieves a simple property', function() {

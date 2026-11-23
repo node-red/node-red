@@ -411,6 +411,40 @@ describe('trigger node', function() {
         });
     });
 
+    it('should handle unsafe topic names without modifying Object.prototype', function(done) {
+        var flow = [{"id":"n1", "type":"trigger", "name":"triggerNode", bytopic:"topic", op1:"", op2:"", op1type:"nul", op2type:"pay", duration:"30", wires:[["n2"]] },
+            {id:"n2", type:"helper"} ];
+        helper.load(triggerNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            var c = 0;
+            n2.on("input", function(msg) {
+                try {
+                    c += 1;
+                    should.not.exist({}.m2);
+                    should.not.exist({}.tout);
+                    if (c === 1) {
+                        msg.should.have.a.property("topic", "__proto__");
+                        msg.should.have.a.property("payload", {user:"admin",scope:"*"});
+                    } else if (c === 2) {
+                        msg.should.have.a.property("topic", "constructor");
+                        msg.should.have.a.property("payload", "b");
+                        done();
+                    }
+                } catch(err) {
+                    done(err);
+                } finally {
+                    delete Object.prototype.m2;
+                    delete Object.prototype.tout;
+                }
+            });
+            n1.emit("input", {payload:{user:"admin",scope:"*"},topic:"__proto__"});
+            n1.emit("input", {payload:"b",topic:"constructor"});
+            should.not.exist({}.m2);
+            should.not.exist({}.tout);
+        });
+    });
+
     it('should handle multiple topics individually, and extend one, if asked to do so', function(done) {
         var flow = [{"id":"n1", "type":"trigger", "name":"triggerNode", bytopic:"topic", extend:"true", op1:"1", op2:"0", op1type:"num", op2type:"num", duration:"30", wires:[["n2"]] },
             {id:"n2", type:"helper"} ];
