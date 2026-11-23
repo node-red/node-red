@@ -584,6 +584,72 @@ describe('nodes/registry/installer', function() {
             await installer.installModule(tarball).should.be.rejectedWith("Module upload disabled");
             exec.run.called.should.be.false();
         });
+
+        it("rejects a version that is not a semver range or dist-tag", async function() {
+            await installer.installModule("node-red-contrib-foo", "git+http://example.com/evil.git").should.be.rejectedWith({ code: "invalid_module_version" });
+            await installer.installModule("node-red-contrib-foo", "file:../evil").should.be.rejectedWith({ code: "invalid_module_version" });
+            exec.run.called.should.be.false();
+        });
+
+        it("accepts a dist-tag version", async function() {
+            const nodeInfo = {nodes:{module:"foo",types:["a"]}};
+            sinon.stub(registry,"addModule").callsFake(() => Promise.resolve(nodeInfo));
+            execResponse = Promise.resolve({ code: 0, stdout: "", stderr: "" });
+            await installer.installModule("node-red-contrib-foo", "latest");
+            exec.run.lastCall.args[1].slice(-1).should.eql(["node-red-contrib-foo@latest"]);
+        });
+
+        describe("with allowList/denyList", function() {
+            let packedTarball;
+            beforeEach(function() {
+                installer.init({ userDir, externalModules: { palette: { allowList: ['node-red-contrib-*'], denyList: ['*'] } } });
+                exec.run.callsFake((cmd, args) => {
+                    if (args[1] === 'pack') {
+                        const dest = args[args.indexOf('--pack-destination') + 1];
+                        fs.writeFileSync(path.join(dest, "packed.tgz"), packedTarball);
+                    }
+                    return Promise.resolve({ code: 0, stdout: "", stderr: "" });
+                });
+            });
+            function npmInstallCalled() {
+                return exec.run.getCalls().some(c => c.args[1][1] === 'install');
+            }
+
+            it("rejects url that contains a different module to the one named", async function() {
+                packedTarball = createTarball({ name: "evil-pkg", version: "6.6.6", "node-red": {} });
+                await installer.installModule("node-red-contrib-approved", "1.0.0", "http://example.com/evil.tgz").should.be.rejectedWith({ code: "invalid_module_name" });
+                npmInstallCalled().should.be.false();
+            });
+
+            it("rejects url that contains a module not on the allowList", async function() {
+                packedTarball = createTarball({ name: "evil-pkg", version: "6.6.6", "node-red": {} });
+                await installer.installModule("evil-pkg", "6.6.6", "http://example.com/evil.tgz").should.be.rejectedWith({ code: "install_not_allowed" });
+                npmInstallCalled().should.be.false();
+            });
+
+            it("rejects git url", async function() {
+                await installer.installModule("node-red-contrib-approved", null, "git+http://example.com/evil.git").should.be.rejectedWith({ code: "install_not_allowed" });
+                exec.run.called.should.be.false();
+            });
+
+            it("rejects local tgz that contains a different module to the one named", async function() {
+                const tgzPath = path.join(tmpDir, "local.tgz");
+                fs.writeFileSync(tgzPath, createTarball({ name: "evil-pkg", version: "6.6.6", "node-red": {} }));
+                await installer.installModule("node-red-contrib-approved", null, tgzPath).should.be.rejectedWith({ code: "invalid_module_name" });
+                npmInstallCalled().should.be.false();
+            });
+
+            it("installs the downloaded tarball of an allowed module from a url", async function() {
+                const nodeInfo = {nodes:{module:"node-red-contrib-approved",types:["a"]}};
+                sinon.stub(registry,"addModule").callsFake(() => Promise.resolve(nodeInfo));
+                packedTarball = createTarball({ name: "node-red-contrib-approved", version: "1.0.0", "node-red": {} });
+                const info = await installer.installModule("node-red-contrib-approved", "1.0.0", "http://example.com/approved.tgz");
+                info.should.eql(nodeInfo);
+                const expectedPath = path.join(userDir, "nodes", "node-red-contrib-approved-1.0.0.tgz");
+                fs.existsSync(expectedPath).should.be.true();
+                exec.run.lastCall.args[1].slice(-1).should.eql([expectedPath]);
+            });
+        });
     });
     describe("uninstalls module", function() {
         it("rejects invalid module names", function(done) {
