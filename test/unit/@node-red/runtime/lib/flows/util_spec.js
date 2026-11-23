@@ -95,6 +95,15 @@ describe('flows/util', function() {
             flowUtil.init({settings:{envVarExcludes:['foo1']}});
             (flowUtil.getEnvVar("foo1") === undefined).should.be.true()
         })
+        it('returns undefined for properties inherited by process.env', function() {
+            flowUtil.init({settings:{}});
+            ["constructor","__proto__","toString","hasOwnProperty"].forEach(function(k) {
+                (flowUtil.getEnvVar(k) === undefined).should.be.true(k);
+            });
+            flowUtil.init({settings:{envVarExcludes:['__proto__','foo2']}});
+            flowUtil.getEnvVar("foo1").should.equal("bar1");
+            (flowUtil.getEnvVar("constructor") === undefined).should.be.true();
+        })
 
     });
 
