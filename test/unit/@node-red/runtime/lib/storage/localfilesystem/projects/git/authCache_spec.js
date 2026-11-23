@@ -29,6 +29,27 @@ describe("localfilesystem/projects/git/authCache", function() {
         authCache.init();
     });
 
+    it('does not modify Object.prototype with unsafe keys', function() {
+        try {
+            authCache.set("project","__proto__","user1",{password:"secret1"});
+            authCache.set("__proto__","remote1","user1",{password:"secret2"});
+            authCache.set("project","remote1","__proto__",{password:"secret3"});
+            should.not.exist({}.user1);
+            should.not.exist({}.remote1);
+            should.not.exist({}.password);
+            authCache.get("project","__proto__","user1").should.have.property("password","secret1");
+            authCache.get("__proto__","remote1","user1").should.have.property("password","secret2");
+            authCache.get("project","remote1","__proto__").should.have.property("password","secret3");
+            should.not.exist(authCache.get("project","constructor","user1"));
+            authCache.clear("project","__proto__");
+            should.not.exist(authCache.get("project","__proto__","user1"));
+        } finally {
+            delete Object.prototype.user1;
+            delete Object.prototype.remote1;
+            delete Object.prototype.password;
+        }
+    });
+
     it('sets/clears auth details for a given project/remote/user', function() {
         should.not.exist(authCache.get("project","remote1","user1"));
         should.not.exist(authCache.get("project","remote1","user2"));

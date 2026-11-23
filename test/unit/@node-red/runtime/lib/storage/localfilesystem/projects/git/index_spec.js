@@ -26,6 +26,43 @@ describe("storage/localfilesystem/projects/git/index", function() {
         sinon.restore();
     });
 
+    describe("getRemotes", function() {
+        it("does not modify Object.prototype with unsafe remote names", async function() {
+            sinon.stub(util.exec, "run").resolves({ stdout: [
+                "__proto__\thttps://example.com/a.git (fetch)",
+                "__proto__\thttps://example.com/a.git (push)",
+                "constructor\thttps://example.com/b.git (fetch)",
+                "origin\thttps://example.com/c.git (fetch)"
+            ].join("\n") });
+            try {
+                var remotes = await gitTools.getRemotes("/tmp/project");
+                should.not.exist({}.fetch);
+                should.not.exist({}.push);
+                should.not.exist(Object.fetch);
+                Object.keys(remotes).should.eql(["__proto__","constructor","origin"]);
+                remotes["__proto__"].fetch.should.equal("https://example.com/a.git");
+                remotes["constructor"].fetch.should.equal("https://example.com/b.git");
+                remotes["origin"].fetch.should.equal("https://example.com/c.git");
+            } finally {
+                delete Object.prototype.fetch;
+                delete Object.prototype.push;
+                delete Object.fetch;
+            }
+        });
+    });
+
+    describe("addRemote", function() {
+        it("rejects unsafe remote names", function() {
+            var runStub = sinon.stub(util.exec, "run").resolves({ stdout: "" });
+            ["__proto__","constructor","prototype"].forEach(function(name) {
+                (function() {
+                    gitTools.addRemote("/tmp/project", name, { url: "https://example.com/a.git" });
+                }).should.throw(/is not a valid remote name/);
+            });
+            runStub.called.should.be.false();
+        });
+    });
+
     describe("isUnmerged", function() {
         it("lists the unmerged index entries for the file", async function() {
             var runStub = sinon.stub(util.exec, "run").resolves({ stdout: "" });
