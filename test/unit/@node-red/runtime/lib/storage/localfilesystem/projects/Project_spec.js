@@ -134,6 +134,79 @@ describe("storage/localfilesystem/projects/Project", function() {
         });
     });
 
+    describe("symlinks", function() {
+        var outsideFile = path.join(userDir,"secret.txt");
+        var project;
+        before(function() {
+            if (process.platform === "win32") {
+                // Creating symlinks on Windows requires extra privileges
+                this.skip();
+            }
+        });
+        beforeEach(async function() {
+            await fs.remove(userDir);
+            await fs.ensureDir(projectDir);
+            fs.writeFileSync(outsideFile,"secret");
+            writeFile("package.json",JSON.stringify({ name: "test-project" }));
+            writeFile("inside.txt","inside");
+            Projects.init(mockSettings, mockRuntime);
+        });
+        afterEach(async function() {
+            await fs.remove(userDir);
+        });
+
+        it("reads files and symlinks that stay inside the project", async function() {
+            await fs.ensureDir(path.join(projectDir,"sub"));
+            fs.symlinkSync("inside.txt",path.join(projectDir,"link.txt"));
+            fs.symlinkSync("../inside.txt",path.join(projectDir,"sub","link.txt"));
+            project = await Projects.load(projectDir);
+            (await project.getFile("inside.txt","_")).should.equal("inside");
+            (await project.getFile("link.txt","_")).should.equal("inside");
+            (await project.getFile("sub/link.txt","_")).should.equal("inside");
+        });
+
+        it("rejects reading a symlink that leads outside the project", async function() {
+            fs.symlinkSync("../../secret.txt",path.join(projectDir,"relative-link.txt"));
+            fs.symlinkSync(outsideFile,path.join(projectDir,"absolute-link.txt"));
+            project = await Projects.load(projectDir);
+            await project.getFile("relative-link.txt","_").should.be.rejectedWith({code:"invalid_file_name"});
+            await project.getFile("absolute-link.txt","_").should.be.rejectedWith({code:"invalid_file_name"});
+        });
+
+        it("rejects reading through a symlinked directory that leads outside the project", async function() {
+            fs.symlinkSync(userDir,path.join(projectDir,"dir-link"));
+            project = await Projects.load(projectDir);
+            await project.getFile("dir-link/secret.txt","_").should.be.rejectedWith({code:"invalid_file_name"});
+        });
+
+        it("rejects a dangling symlink", async function() {
+            fs.symlinkSync(path.join(userDir,"does-not-exist.txt"),path.join(projectDir,"dangling.txt"));
+            project = await Projects.load(projectDir);
+            await project.checkFile("dangling.txt").should.be.rejectedWith({code:"invalid_file_name"});
+            fs.existsSync(path.join(userDir,"does-not-exist.txt")).should.be.false();
+        });
+
+        it("allows files that do not exist yet", async function() {
+            project = await Projects.load(projectDir);
+            var realPath = await project.checkFile(path.join(projectDir,"new.json"));
+            realPath.should.equal(path.join(fs.realpathSync(projectDir),"new.json"));
+        });
+
+        it("does not load a README.md that leads outside the project", async function() {
+            fs.symlinkSync("../../secret.txt",path.join(projectDir,"README.md"));
+            project = await Projects.load(projectDir);
+            project.export().description.should.equal("");
+        });
+
+        it("does not load a package.json that leads outside the project", async function() {
+            fs.writeFileSync(outsideFile,JSON.stringify({ name: "secret", description: "secret" }));
+            fs.removeSync(path.join(projectDir,"package.json"));
+            fs.symlinkSync("../../secret.txt",path.join(projectDir,"package.json"));
+            project = await Projects.load(projectDir);
+            should.not.exist(project.export().summary);
+        });
+    });
+
     describe("project names", function() {
         beforeEach(async function() {
             await fs.remove(userDir);
