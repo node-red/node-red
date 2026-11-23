@@ -58,6 +58,21 @@ describe('memory',function() {
                 should.not.exist(context.get("nodeX","foo"));
             });
 
+            it('should not modify Object.prototype via an unsafe scope', function() {
+                try {
+                    context.set("__proto__","polluted",{user:"admin"});
+                    should.not.exist({}.polluted);
+                    context.get("__proto__","polluted").should.eql({user:"admin"});
+                    context.set("constructor","polluted","test");
+                    should.not.exist(Object.polluted);
+                    context.set("__proto__","hasOwnProperty",undefined);
+                    Object.prototype.should.have.property("hasOwnProperty");
+                } finally {
+                    delete Object.prototype.polluted;
+                    delete Object.polluted;
+                }
+            });
+
             it('should not shared context with other scope', function() {
                 should.not.exist(context.get("nodeX","foo"));
                 should.not.exist(context.get("nodeY","foo"));

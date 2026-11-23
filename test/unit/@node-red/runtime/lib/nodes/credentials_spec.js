@@ -223,6 +223,22 @@ describe('red/runtime/nodes/credentials', function() {
             }
         });
     });
+    it('extract ignores unsafe credential names', function() {
+        credentials.init({
+            log: log,
+            settings: encryptionDisabledSettings,
+            nodes: { getType: () => undefined }
+        });
+        return credentials.load({}).then(function() {
+            var node = {id:"n1",type:"unknown-type",credentials:JSON.parse('{"__proto__":{"polluted":"bad"},"constructor":"bad","user":"abc"}')};
+            credentials.extract(node);
+            var creds = credentials.get("n1");
+            creds.should.have.property("user","abc");
+            Object.getPrototypeOf(creds).should.equal(Object.prototype);
+            should.not.exist(creds.polluted);
+            creds.constructor.should.equal(Object);
+        });
+    });
     it('add ignores credentials for nodes with unsafe ids', function() {
         credentials.init({
             log: log,

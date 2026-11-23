@@ -38,6 +38,21 @@ describe('context', function() {
             context1.set("foo","test");
             context1.get("foo").should.equal("test");
         });
+        it('does not modify Object.prototype via an unsafe flow id',function() {
+            try {
+                var flowContext = Context.getFlowContext("__proto__");
+                flowContext.set("polluted","test");
+                should.not.exist({}.polluted);
+                flowContext.get("polluted").should.equal("test");
+                var context1 = Context.get("1","constructor");
+                context1.flow.set("polluted","test2");
+                should.not.exist(Object.polluted);
+                Context.getFlowContext("__proto__").get("polluted").should.equal("test");
+            } finally {
+                delete Object.prototype.polluted;
+                delete Object.polluted;
+            }
+        });
         it('stores local property - creates parent properties',function() {
             var flowContext = Context.getFlowContext("flowA")
             var context1 = Context.get("1","flowA");

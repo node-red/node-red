@@ -141,7 +141,65 @@ describe('flows/util', function() {
 
     });
 
+    describe('#validateConfig', function() {
+        it('accepts a valid flow configuration', function() {
+            flowUtil.validateConfig([
+                {id:"t1",type:"tab"},
+                {id:"sf1",type:"subflow",in:[{wires:[{id:"sf1-1"}]}],out:[{wires:[{id:"sf1-1",port:0}]}],status:{wires:[{id:"sf1-1",port:0}]}},
+                {id:"sf1-1",type:"test",z:"sf1",wires:[]},
+                {id:"g1",type:"group",z:"t1",nodes:["t1-1"]},
+                {id:"t1-1",type:"test",z:"t1",g:"g1",wires:[["t1-2"]]},
+                {id:"t1-2",type:"link out",z:"t1",links:["t1-3"],wires:[]},
+                {id:"t1-3",type:"link in",z:"t1",links:["t1-2"],wires:[]},
+                {id:"t1-4",type:"subflow:sf1",z:"t1",wires:[]},
+                {id:"t1-5",type:"test",z:"t1",name:"constructor",topic:"__proto__",wires:[]}
+            ]);
+            flowUtil.validateConfig(undefined);
+        });
+
+        it('rejects unsafe ids', function() {
+            var invalidConfigs = {
+                "id": [{id:"__proto__",type:"test"}],
+                "z": [{id:"n1",type:"test",z:"constructor"}],
+                "g": [{id:"n1",type:"test",z:"t1",g:"prototype"}],
+                "type": [{id:"n1",type:"constructor",z:"t1"}],
+                "subflow type": [{id:"n1",type:"subflow:__proto__",z:"t1"}],
+                "wires": [{id:"n1",type:"test",z:"t1",wires:[["n2","__proto__"]]}],
+                "links": [{id:"n1",type:"link in",z:"t1",links:["__proto__"]}],
+                "group nodes": [{id:"g1",type:"group",z:"t1",nodes:["__proto__"]}],
+                "subflow in": [{id:"sf1",type:"subflow",in:[{wires:[{id:"__proto__"}]}]}],
+                "subflow out": [{id:"sf1",type:"subflow",out:[{wires:[{id:"constructor",port:0}]}]}],
+                "subflow status": [{id:"sf1",type:"subflow",status:{wires:[{id:"prototype",port:0}]}}]
+            };
+            Object.keys(invalidConfigs).forEach(function(field) {
+                try {
+                    flowUtil.validateConfig(invalidConfigs[field]);
+                } catch(err) {
+                    err.should.have.property("code","invalid_flow_id");
+                    err.should.have.property("status",400);
+                    return;
+                }
+                throw new Error("Did not reject unsafe "+field);
+            });
+        });
+    });
+
     describe('#parseConfig',function() {
+        it('does not modify Object.prototype via link node ids', function() {
+            var originalConfig = [
+                {id:"t1",type:"tab"},
+                {id:"pollutedA",type:"link in",x:10,y:10,z:"t1",links:["__proto__"],wires:[]},
+                {id:"__proto__",type:"link out",x:10,y:10,z:"t1",links:["pollutedB"],wires:[]}
+            ];
+            try {
+                flowUtil.parseConfig(originalConfig);
+                should.not.exist({}.pollutedA);
+                should.not.exist({}.pollutedB);
+            } finally {
+                delete Object.prototype.pollutedA;
+                delete Object.prototype.pollutedB;
+            }
+        });
 
         it('parses a single-tab flow', function() {
             var originalConfig = [

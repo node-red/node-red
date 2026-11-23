@@ -190,6 +190,17 @@ describe('flows/index', function() {
             });
         });
 
+        it('rejects a flow containing an unsafe node id', async function() {
+            var originalConfig = [
+                {id:"__proto__",x:10,y:10,z:"t1",type:"test",wires:[]},
+                {id:"t1",type:"tab"}
+            ];
+            flows.init({log:mockLog, settings:{},storage:storage});
+            await flows.setFlows(originalConfig).should.be.rejectedWith({code:"invalid_flow_id"});
+            credentialsClean.called.should.be.false();
+            storage.hasOwnProperty('conf').should.be.false();
+        });
+
         it('sets the full flow including credentials', function(done) {
             var originalConfig = [
                 {id:"t1-1",x:10,y:10,z:"t1",type:"test",wires:[]},
@@ -304,6 +315,19 @@ describe('flows/index', function() {
                 flows.getFlows().flows.should.eql(originalConfig);
                 done();
             });
+        });
+        it('does not load a flow config containing an unsafe node id', async function() {
+            var originalConfig = [
+                {id:"t1-1",x:10,y:10,z:"t1",type:"test",wires:[]},
+                {id:"constructor",type:"tab"}
+            ];
+            storage.getFlows = function() {
+                return Promise.resolve({flows:originalConfig});
+            }
+            flows.init({log:mockLog, settings:{},storage:storage});
+            await flows.load().should.be.rejectedWith({code:"invalid_flow_id"});
+            credentialsLoad.called.should.be.false();
+            should.not.exist(flows.getFlows());
         });
     });
 
@@ -666,6 +690,18 @@ describe('flows/index', function() {
     })
     describe('#removeFlow', function() {
         it.skip("removeFlow");
+        it('does not remove a flow using an inherited property name', async function() {
+            var originalConfig = [
+                {id:"t1-1",x:10,y:10,z:"t1",type:"test",wires:[]},
+                {id:"t1",type:"tab"}
+            ];
+            flows.init({log:mockLog, settings:{},storage:storage});
+            await flows.setFlows(originalConfig);
+            should.not.exist(flows.getFlow("constructor"));
+            should.not.exist(flows.getFlow("toString"));
+            await flows.removeFlow("constructor").should.be.rejectedWith({code:404});
+            await flows.updateFlow("constructor",{nodes:[]}).should.be.rejectedWith({code:404});
+        });
     })
     describe('#disableFlow', function() {
         it.skip("disableFlow");
