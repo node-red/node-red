@@ -113,6 +113,27 @@ describe('MQTT Nodes', function () {
             }
         });
     });
+    it('should not modify Object.prototype when subscribing to an unsafe topic', function (done) {
+        const { flow } = buildBasicMQTTSendRecvFlow({ id: "mqtt.broker", name: "mqtt_broker", autoConnect: false }, { id: "mqtt.in", topic: "in_topic" }, { id: "mqtt.out", topic: "out_topic" });
+        helper.load(mqttNodes, flow, function () {
+            try {
+                const mqttBroker = helper.getNode("mqtt.broker");
+                mqttBroker.subscribe("__proto__", { qos: 0 }, function () { }, "pollutedRef");
+                mqttBroker.subscribe("constructor", { qos: 0 }, function () { }, "pollutedRef");
+                should.not.exist({}.pollutedRef);
+                should.not.exist(Object.pollutedRef);
+                Object.prototype.hasOwnProperty.call(mqttBroker.subscriptions, "__proto__").should.be.true();
+                Object.prototype.hasOwnProperty.call(mqttBroker.subscriptions, "constructor").should.be.true();
+                done();
+            } catch (err) {
+                done(err);
+            } finally {
+                delete Object.prototype.pollutedRef;
+                delete Object.pollutedRef;
+            }
+        });
+    });
+
     it('should use the url from a repeated "connect" action', function (done) {
         const { flow } = buildBasicMQTTSendRecvFlow({ id: "mqtt.broker", name: "mqtt_broker", broker: "localhost", port: 1883, autoConnect: false }, { id: "mqtt.in", topic: "in_topic" }, { id: "mqtt.out", topic: "out_topic" });
         helper.load(mqttNodes, flow, function () {

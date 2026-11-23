@@ -46,6 +46,31 @@ describe('SORT node', function() {
         });
     });
 
+    it('should sort a sequence with an unsafe msg.parts.id', function(done) {
+        var flow = [{id:"n1", type:"sort", order:"ascending", as_num:false, targetType:"seq", seqKey:"payload", seqKeyType:"msg", wires:[["n2"]]},
+                    {id:"n2", type:"helper"}];
+        helper.load(sortNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            var received = [];
+            n2.on("input", function(msg) {
+                received.push(msg.parts.id+":"+msg.payload);
+                if (received.length === 4) {
+                    try {
+                        received.should.eql(["__proto__:A","__proto__:B","constructor:A","constructor:B"]);
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                }
+            });
+            ["__proto__","constructor"].forEach(function(id) {
+                n1.receive({payload:"B", parts:{id:id, index:0, count:2}});
+                n1.receive({payload:"A", parts:{id:id, index:1, count:2}});
+            });
+        });
+    });
+
     it('should be loaded', function(done) {
         var flow = [{id:"n1", type:"sort", order:"ascending", as_num:false, name: "SortNode", wires:[["n2"]]},
                     {id:"n2", type:"helper"}];
