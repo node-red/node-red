@@ -85,7 +85,7 @@ describe('red/runtime/nodes/credentials', function() {
         }).then(function() {
             credentials.dirty().should.be.true();
             return credentials.export().then(function(exported) {
-                exported.should.eql(creds);
+                exported.should.eql({"a":{"b":1,"c":2},"b":{"foo":"bar"}});
                 credentials.dirty().should.be.false();
             })
         });
@@ -195,6 +195,45 @@ describe('red/runtime/nodes/credentials', function() {
             newCreds.should.have.a.property("password3","newPassword");
 
             done();
+        });
+    });
+    it('extract ignores credentials for nodes with unsafe ids', function() {
+        credentials.init({
+            log: log,
+            settings: encryptionDisabledSettings,
+            nodes: { getType: () => undefined }
+        });
+        return credentials.load({}).then(function() {
+            sinon.spy(log,"warn");
+            try {
+                ["__proto__","constructor","prototype"].forEach(function(id) {
+                    var node = {id:id,type:"unknown-type",credentials:{pollutedCred:{user:"admin",scope:"*"}}};
+                    credentials.extract(node);
+                    should.not.exist(node.credentials);
+                });
+                log.warn.callCount.should.equal(3);
+                should.not.exist({}.pollutedCred);
+                should.not.exist(credentials.get("__proto__"));
+                should.not.exist(credentials.get("constructor"));
+                should.not.exist(credentials.get("pollutedCred"));
+                credentials.dirty().should.be.false();
+            } finally {
+                delete Object.prototype.pollutedCred;
+                log.warn.restore();
+            }
+        });
+    });
+    it('add ignores credentials for nodes with unsafe ids', function() {
+        credentials.init({
+            log: log,
+            settings: encryptionDisabledSettings,
+            nodes: { getType: () => undefined }
+        });
+        return credentials.load({}).then(function() {
+            return credentials.add("__proto__", {other:{password:"abc"}});
+        }).then(function() {
+            should.not.exist(credentials.get("other"));
+            credentials.dirty().should.be.false();
         });
     });
     it('extract ignores node without credentials', function(done) {

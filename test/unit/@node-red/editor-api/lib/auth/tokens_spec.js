@@ -116,6 +116,28 @@ describe("api/auth/tokens", function() {
             });
 
         });
+
+        it('does not return a token inherited from Object.prototype', async function() {
+            await Tokens.init({
+                tokens: [{
+                    token: "1234",
+                    user: "fred",
+                }]
+            },{
+                getSessions:function() {
+                    return Promise.resolve({"5678":{"user":"fred","expires":Date.now()+10000}});
+                }
+            });
+            Object.prototype.pollutedToken = { user: "admin", scope: "*", expires: Date.now()+10000 };
+            try {
+                should.not.exist(await Tokens.get("pollutedToken"));
+                should.not.exist(await Tokens.get("constructor"));
+                should.not.exist(await Tokens.get("__proto__"));
+                should.not.exist(await Tokens.get("hasOwnProperty"));
+            } finally {
+                delete Object.prototype.pollutedToken;
+            }
+        });
     });
 
     describe("#create",function() {
@@ -264,6 +286,23 @@ describe("api/auth/tokens", function() {
             }).then(done).catch(err => {
                 done(err)
             })
+        })
+        it('cannot exchange a code inherited from Object.prototype', async function () {
+            await Tokens.init({sessionExpiryTime: 10, exchangeCodeExpiryTime: 0.5},{
+                getSessions:function() {
+                    return Promise.resolve({});
+                },
+                saveSessions:function(sess) {
+                    return Promise.resolve();
+                }
+            });
+            Object.prototype.pollutedCode = { accessToken: "pollutedToken", user: "admin", scope: "*", exchangeCodeExpires: Date.now()+10000 };
+            try {
+                await Tokens.exchangeCodeForToken("pollutedCode").should.be.rejectedWith(/Invalid exchange code/);
+                await Tokens.exchangeCodeForToken("__proto__").should.be.rejectedWith(/Invalid exchange code/);
+            } finally {
+                delete Object.prototype.pollutedCode;
+            }
         })
     })
 
