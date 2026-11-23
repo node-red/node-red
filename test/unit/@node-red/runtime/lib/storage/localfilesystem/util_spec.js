@@ -17,7 +17,7 @@
 const should = require("should");
 const NR_TEST_UTILS = require("nr-test-utils");
 const util = NR_TEST_UTILS.require("@node-red/runtime/lib/storage/localfilesystem/util");
-const { mkdtemp, readFile } = require('fs/promises');
+const { mkdtemp, readFile, writeFile: writeFileAsync, symlink, lstat } = require('fs/promises');
 const { join } = require('path');
 const { tmpdir } = require('os');
 
@@ -39,6 +39,26 @@ describe('storage/localfilesystem/util', function() {
 
             const result = await readFile(testFile, { encoding: 'utf-8' })
             result.should.equal('update-2')
+        })
+        it('does not write through a symlinked temp file', async function () {
+            if (process.platform === 'win32') {
+                // Creating symlinks on Windows requires extra privileges
+                this.skip()
+            }
+            const testDirectory = await mkdtemp(join(tmpdir(), 'nr-test-'))
+            const testFile = join(testDirectory, 'flows.json')
+            const targetFile = join(testDirectory, 'target.txt')
+            await writeFileAsync(targetFile, 'original')
+            await symlink(targetFile, testFile + '.$$$')
+
+            await util.writeFile(testFile, 'new content')
+
+            const target = await readFile(targetFile, { encoding: 'utf-8' })
+            target.should.equal('original')
+            const result = await readFile(testFile, { encoding: 'utf-8' })
+            result.should.equal('new content')
+            const stat = await lstat(testFile)
+            stat.isSymbolicLink().should.be.false()
         })
     })
     describe('parseJSON', function() {
