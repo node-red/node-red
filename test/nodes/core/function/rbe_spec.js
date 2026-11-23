@@ -17,6 +17,30 @@ describe('rbe node', function() {
         });
     });
 
+    it('should not be affected by an unsafe topic (rbe)', function(done) {
+        var flow = [{"id":"n1", "type":"rbe", func:"rbe", septopics:true, topi:"topic", property:"payload", wires:[["n2"]] },
+            {id:"n2", type:"helper"} ];
+        helper.load(testNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            var received = [];
+            n2.on("input", function(msg) {
+                received.push(msg.topic);
+                if (received.length === 3) {
+                    try {
+                        received.should.eql(["__proto__","sensorA","constructor"]);
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                }
+            });
+            n1.receive({topic:"__proto__", payload:{sensorA:5}});
+            n1.receive({topic:"sensorA", payload:5});
+            n1.receive({topic:"constructor", payload:5});
+        });
+    });
+
     it("should be loaded with correct defaults", function(done) {
         var flow = [{"id":"n1", "type":"rbe", "name":"rbe1", "wires":[[]]}];
         helper.load(testNode, flow, function() {

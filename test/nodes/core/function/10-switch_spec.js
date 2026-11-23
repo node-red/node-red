@@ -54,6 +54,35 @@ describe('switch Node', function() {
         });
     });
 
+    it('should handle a sequence with an unsafe msg.parts.id when repairing', function(done) {
+        var flow = [{id:"switchNode1",type:"switch",name:"switchNode",property:"payload",rules:[{"t":"nnull"}],checkall:false,repair:true,outputs:1,wires:[["helperNode1"]]},
+                    {id:"helperNode1", type:"helper", wires:[]}];
+        helper.load(switchNode, flow, function() {
+            var switchNode1 = helper.getNode("switchNode1");
+            var helperNode1 = helper.getNode("helperNode1");
+            var received = [];
+            var ids = [];
+            helperNode1.on("input", function(msg) {
+                // Repaired sequences are given a new id
+                received.push(msg.parts.index+"/"+msg.parts.count);
+                if (ids.indexOf(msg.parts.id) === -1) { ids.push(msg.parts.id); }
+                if (received.length === 4) {
+                    try {
+                        received.should.eql(["0/2","1/2","0/2","1/2"]);
+                        ids.should.have.length(2);
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                }
+            });
+            ["__proto__","constructor"].forEach(function(id) {
+                switchNode1.receive({payload:1, parts:{id:id, index:0, count:2}});
+                switchNode1.receive({payload:2, parts:{id:id, index:1, count:2}});
+            });
+        });
+    });
+
     it('should be loaded with some defaults', function(done) {
         var flow = [{"id":"switchNode1","type":"switch","name":"switchNode"}];
         helper.load(switchNode, flow, function() {

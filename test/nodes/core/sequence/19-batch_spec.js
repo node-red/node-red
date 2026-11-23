@@ -330,6 +330,31 @@ describe('BATCH node', function() {
     });
 
     describe('mode: concat', function() {
+        it('should concat sequences with unsafe msg.parts.id values', function(done) {
+            var flow = [{id:"n1", type:"batch", name: "BatchNode", mode: "concat", count: 0, overlap: 0, interval: 1, allowEmptySequence: false, topics: [{topic: "TA"}, {topic: "TB"}], wires:[["n2"]]},
+                        {id:"n2", type:"helper"}];
+            helper.load(batchNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                var received = [];
+                n2.on("input", function(msg) {
+                    received.push(msg.payload);
+                    if (received.length === 4) {
+                        try {
+                            received.should.eql([2, 3, 0, 1]);
+                            done();
+                        } catch(err) {
+                            done(err);
+                        }
+                    }
+                });
+                n1.receive({topic:"TB", payload:0, parts:{id:"__proto__", index:0, count:2}});
+                n1.receive({topic:"TB", payload:1, parts:{id:"__proto__", index:1, count:2}});
+                n1.receive({topic:"TA", payload:2, parts:{id:"constructor", index:0, count:2}});
+                n1.receive({topic:"TA", payload:3, parts:{id:"constructor", index:1, count:2}});
+            });
+        });
+
         it('should concat two seq. (series)', function(done) {
             var flow = [{id:"n1", type:"batch", name: "BatchNode", mode: "concat", count: 0, overlap: 0, interval: 1, allowEmptySequence: false, topics: [{topic: "TA"}, {topic: "TB"}], wires:[["n2"]]},
                         {id:"n2", type:"helper"}];

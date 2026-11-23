@@ -465,6 +465,50 @@ describe('JOIN node', function() {
         });
     });
 
+    it('should not modify Object.prototype with an unsafe msg.parts.id', function(done) {
+        var flow = [{id:"n1", type:"join", wires:[["n2"]], mode:"custom", build:"array", count:"", timeout:5},
+                    {id:"n2", type:"helper"}];
+        helper.load(joinNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function(msg) {
+                try {
+                    should.not.exist({}.timeout);
+                    msg.should.have.property("payload", [1,2]);
+                    done();
+                } catch(err) {
+                    done(err);
+                } finally {
+                    delete Object.prototype.timeout;
+                }
+            });
+            n1.receive({payload:1, parts:{id:"__proto__", index:0, count:2}, restartTimeout:true});
+            n1.receive({payload:2, parts:{id:"__proto__", index:1, count:2}});
+        });
+    });
+
+    it('should keep an unsafe key as an own property when building an object', function(done) {
+        var flow = [{id:"n1", type:"join", wires:[["n2"]], mode:"custom", build:"object", count:2},
+                    {id:"n2", type:"helper"}];
+        helper.load(joinNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function(msg) {
+                try {
+                    Object.getPrototypeOf(msg.payload).should.equal(Object.prototype);
+                    Object.keys(msg.payload).should.eql(["__proto__","a"]);
+                    should.not.exist(msg.payload.isAdmin);
+                    msg.payload.a.should.equal(1);
+                    done();
+                } catch(err) {
+                    done(err);
+                }
+            });
+            n1.receive({topic:"__proto__", payload:{isAdmin:true}});
+            n1.receive({topic:"a", payload:1});
+        });
+    });
+
     it('should be loaded', function(done) {
         var flow = [{id:"joinNode1", type:"join", name:"joinNode" }];
         helper.load(joinNode, flow, function() {
