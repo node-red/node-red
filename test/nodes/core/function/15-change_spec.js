@@ -1515,6 +1515,26 @@ describe('change Node', function() {
             });
         });
 
+        it('replaces matching text with a boolean in flow context like it does in msg', function(done) {
+            var flow = [{"id":"changeNode1","type":"change",rules:[{ "t": "change", "p": "payload", "pt": "flow", "from": "^on$", "fromt": "re", "to": "true", "tot": "bool" }],"reg":false,"name":"changeNode","wires":[["helperNode1"]],"z":"flow"},
+                        {id:"helperNode1", type:"helper", wires:[],"z":"flow"}];
+            helper.load(changeNode, flow, function() {
+                var changeNode1 = helper.getNode("changeNode1");
+                var helperNode1 = helper.getNode("helperNode1");
+                helperNode1.on("input", function(msg) {
+                    try {
+                        var val = helperNode1.context().flow.get("payload");
+                        val.should.equal(true);
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                changeNode1.context().flow.set("payload","on");
+                changeNode1.receive({payload:""});
+            });
+        });
+
         it('changes the value using boolean - boolean persistable flow context', function(done) {
             var flow = [{"id":"changeNode1","type":"change",rules:[{ "t": "change", "p": "#:(memory1)::payload", "pt": "flow", "from": "true", "fromt": "bool", "to": "abc", "tot": "str" }],"reg":false,"name":"changeNode","wires":[["helperNode1"]],"z":"flow"},
                         {id:"helperNode1", type:"helper", wires:[],"z":"flow"}];
