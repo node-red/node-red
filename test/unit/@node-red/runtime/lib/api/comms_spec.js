@@ -220,7 +220,13 @@ describe("runtime-api/comms", function() {
                 return comms.subscribe({client: clientConnection, topic: "status/#"}).then(function() {
                     messages.should.have.length(1);
                     messages[0].should.have.property("topic","status/node1234");
-                    messages[0].should.have.property("data",{text:"hello", fill: undefined, shape: undefined});
+                    messages[0].should.have.property("data", {
+                        text: "hello",
+                        fill: undefined,
+                        shape: undefined,
+                        duration: undefined,
+                        ephemeral: undefined
+                    });
                     done();
                 });
             }).catch(done);
