@@ -72,7 +72,38 @@ describe("telemetry", function() {
         telemetryApi.isEnabled().should.be.false()
         messages.should.have.length(0)
     })
-    
+
+    it('Locked runtime settings - user setting cannot override', function () {
+        telemetryApi.init(getMockRuntime({
+            telemetry: { enabled: false, locked: true },
+            telemetryEnabled: true
+        }))
+        telemetryApi.isLocked().should.be.true()
+        telemetryApi.isEnabled().should.be.false()
+        messages.should.have.length(0)
+    })
+
+    it('Locked runtime settings - cannot enable telemetry', function () {
+        const settings = {
+            telemetry: { enabled: false, locked: true }
+        }
+        telemetryApi.init(getMockRuntime(settings))
+        telemetryApi.enable()
+        telemetryApi.isEnabled().should.be.false()
+        settings.should.not.have.property('telemetryEnabled')
+        messages.should.have.length(1)
+        ;/Telemetry enabled/.test(messages[0]).should.be.false()
+    })
+
+    it('Locked only applies when telemetry is disabled', function () {
+        telemetryApi.init(getMockRuntime({
+            telemetry: { enabled: true, locked: true },
+            telemetryEnabled: false
+        }))
+        telemetryApi.isLocked().should.be.false()
+        telemetryApi.isEnabled().should.be.false()
+    })
+
     it('Can enable/disable telemetry', function () {
         const settings = {}
         telemetryApi.init(getMockRuntime(settings))

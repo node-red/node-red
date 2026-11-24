@@ -58,7 +58,7 @@ describe("runtime-api/settings", function() {
                 },
                 library: {getLibraries: () => ["lib1"] },
                 storage: {},
-                telemetry: { isEnabled: () => true }
+                telemetry: { isEnabled: () => true, isLocked: () => false }
             })
             return settings.getRuntimeSettings({}).then(result => {
                 result.should.have.property("httpNodeRoot","testHttpNodeRoot");
@@ -72,6 +72,8 @@ describe("runtime-api/settings", function() {
                 result.should.not.have.property("user");
                 result.should.have.property("externalModules");
                 result.externalModules.should.eql({palette:{allowInstall:false, allowUpload: false}});
+                result.should.have.property("telemetryEnabled",true);
+                result.should.not.have.property("telemetryLocked");
 
             })
         });
@@ -98,7 +100,7 @@ describe("runtime-api/settings", function() {
                 },
                 library: {getLibraries: () => { ["lib1"]} },
                 storage: {},
-                telemetry: { isEnabled: () => true }
+                telemetry: { isEnabled: () => true, isLocked: () => false }
             })
             return settings.getRuntimeSettings({
                 user: {
@@ -148,7 +150,7 @@ describe("runtime-api/settings", function() {
                         getGlobalGitUser: () => {return {name:'foo',email:'foo@example.com'}}
                     }
                 },
-                telemetry: { isEnabled: () => true }
+                telemetry: { isEnabled: () => true, isLocked: () => false }
             })
             return settings.getRuntimeSettings({
                 user: {
@@ -206,7 +208,7 @@ describe("runtime-api/settings", function() {
                         getGlobalGitUser: () => {return {name:'foo',email:'foo@example.com'}}
                     }
                 },
-                telemetry: { isEnabled: () => true }
+                telemetry: { isEnabled: () => true, isLocked: () => false }
             })
             return settings.getRuntimeSettings({
                 user: {
@@ -255,7 +257,7 @@ describe("runtime-api/settings", function() {
                         getGlobalGitUser: () => {return {name:'foo',email:'foo@example.com'}}
                     }
                 },
-                telemetry: { isEnabled: () => true }
+                telemetry: { isEnabled: () => true, isLocked: () => false }
             })
             return settings.getRuntimeSettings({
                 user: {
@@ -307,7 +309,7 @@ describe("runtime-api/settings", function() {
                         getGlobalGitUser: () => {return {name:'foo',email:'foo@example.com'}}
                     }
                 },
-                telemetry: { isEnabled: () => true }
+                telemetry: { isEnabled: () => true, isLocked: () => false }
             })
             return settings.getRuntimeSettings({
                 user: {
