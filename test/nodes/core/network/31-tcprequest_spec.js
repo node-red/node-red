@@ -351,5 +351,34 @@ describe('TCP Request Node', function() {
                 topic: 'quux'
             }, done);
         });
+
+        it('should handle payload mutation to number during connection without crashing and log an error', function(done) {
+            var flow = [{id:"n1", type:"tcp request", server:"localhost", port:port, out:"time", splitc: "0", wires:[["n2"]] },
+                        {id:"n2", type:"helper"}];
+            helper.load(tcpinNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var msg = { payload: Buffer.from("foo") };
+                n1.receive(msg);
+                // Mutate the payload to a number synchronously after enqueue but before connection callback runs
+                msg.payload = 2;
+
+                setTimeout(function() {
+                    try {
+                        helper.log().called.should.be.true();
+                        var logEvents = helper.log().args.filter(function (evt) {
+                            return evt[0].type == "tcp request";
+                        });
+                        logEvents.should.have.length(1);
+                        var logMsg = logEvents[0][0];
+                        logMsg.should.have.property('level', helper.log().ERROR);
+                        logMsg.should.have.property('id', 'n1');
+                        logMsg.msg.should.containEql('Invalid payload type: number');
+                        done();
+                    } catch (err) {
+                        done(err);
+                    }
+                }, 100);
+            });
+        });
     });
 });
