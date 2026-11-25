@@ -286,6 +286,27 @@ describe("runtime-api/comms", function() {
             }).catch(done);
         })
 
+        it('retains non-blank status message with parameters', function(done) {
+            eventHandlers['node-status']({
+                id: "node1234",
+                status: {
+                    text: "path.to.status.locale",
+                    params: {
+                        myParam0: "test"
+                    }
+                }
+            });
+            messages.should.have.length(0);
+            comms.addConnection({client: clientConnection}).then(function() {
+                return comms.subscribe({client: clientConnection, topic: "status/#"}).then(function() {
+                    messages.should.have.length(1);
+                    messages[0].should.have.property("topic","status/node1234");
+                    messages[0].should.have.property("data",{text:"path.to.status.locale", fill: undefined, shape: undefined, params: { myParam0: "test"} });
+                    done();
+                });
+            }).catch(done);
+        });
+
         it('retained messages get cleared',function(done) {
             eventHandlers['comms']({
                 topic: "my-event",
