@@ -152,6 +152,34 @@ describe("@node-red/util/util", function() {
             cloned.req.should.equal(msg.req);
             cloned.res.should.equal(msg.res);
         });
+        it('isolates Buffer bytes between cloned messages', function() {
+            var msg = {payload:Buffer.from([1,2,3,4])};
+            var cloned = util.cloneMessage(msg);
+            cloned.payload[0] = 99;
+            msg.payload[1] = 88;
+            msg.payload[0].should.equal(1);
+            cloned.payload[1].should.equal(2);
+        });
+        it('isolates nested Buffers while preserving cycles and HTTP objects', function() {
+            var msg = {
+                payload:{items:[Buffer.from([1,2,3])]},
+                map:new Map([["data",Buffer.from([4,5,6])]]),
+                set:new Set([Buffer.from([7,8,9])]),
+                req:{body:Buffer.from([10])},
+                res:{}
+            };
+            msg.self = msg;
+            var cloned = util.cloneMessage(msg);
+            cloned.payload.items[0][0] = 99;
+            cloned.map.get("data")[0] = 99;
+            cloned.set.values().next().value[0] = 99;
+            msg.payload.items[0][0].should.equal(1);
+            msg.map.get("data")[0].should.equal(4);
+            msg.set.values().next().value[0].should.equal(7);
+            cloned.self.should.equal(cloned);
+            cloned.req.should.equal(msg.req);
+            cloned.res.should.equal(msg.res);
+        });
         it('handles undefined values without throwing an error', function() {
             var result = util.cloneMessage(undefined);
             should.not.exist(result);
