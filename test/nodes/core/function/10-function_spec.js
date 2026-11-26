@@ -58,6 +58,31 @@ describe('function node', function() {
         });
     });
 
+    it('isolates Buffer mutations between fan-out destinations', function(done) {
+        var flow = [
+            {id:"source",type:"function",wires:[["mutate","read"]],func:"msg.payload = Buffer.from([1,2,3,4]); return msg;"},
+            {id:"mutate",type:"helper"},
+            {id:"read",type:"helper"}
+        ];
+        helper.load(functionNode, flow, function() {
+            var mutated = false;
+            helper.getNode("mutate").on("input", function(msg) {
+                msg.payload[0] = 99;
+                mutated = true;
+            });
+            helper.getNode("read").on("input", function(msg) {
+                try {
+                    mutated.should.equal(true);
+                    msg.payload[0].should.equal(1);
+                    done();
+                } catch (err) {
+                    done(err);
+                }
+            });
+            helper.getNode("source").receive({});
+        });
+    });
+
     it('should send returned message using send()', function(done) {
         var flow = [{id:"n1",type:"function",wires:[["n2"]],func:"node.send(msg);"},
         {id:"n2", type:"helper"}];
