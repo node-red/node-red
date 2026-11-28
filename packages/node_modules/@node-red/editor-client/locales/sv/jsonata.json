@@ -1,0 +1,278 @@
+{
+    "$string": {
+        "args": "arg[, prettify]",
+        "desc": "Omvandlar parametern `arg` till en sträng med följande omvandlingsregler:\n\n - Strängar lämnas oförändrade\n - Funktioner omvandlas till en tom sträng\n - Numerisk oändlighet och NaN ger ett fel eftersom de inte kan representeras som ett JSON-tal\n - Alla andra värden omvandlas till en JSON-sträng med funktionen `JSON.stringify`. Om `prettify` är sant skapas \"snyggformaterad\" JSON, det vill säga en rad per fält med indrag enligt fältdjupet."
+    },
+    "$length": {
+        "args": "str",
+        "desc": "Returnerar antalet tecken i strängen `str`. Ett fel utlöses om `str` inte är en sträng."
+    },
+    "$substring": {
+        "args": "str, start[, length]",
+        "desc": "Returnerar en sträng med tecknen i den första parametern `str` från positionen `start` (nollbaserad). Om `length` anges innehåller delsträngen som mest `length` tecken. Om `start` är negativt anger det antalet tecken från slutet av `str`."
+    },
+    "$substringBefore": {
+        "args": "str, chars",
+        "desc": "Returnerar delsträngen före den första förekomsten av teckensekvensen `chars` i `str`. Om `str` inte innehåller `chars` returneras `str`."
+    },
+    "$substringAfter": {
+        "args": "str, chars",
+        "desc": "Returnerar delsträngen efter den första förekomsten av teckensekvensen `chars` i `str`. Om `str` inte innehåller `chars` returneras `str`."
+    },
+    "$uppercase": {
+        "args": "str",
+        "desc": "Returnerar en sträng där alla tecken i `str` har omvandlats till versaler."
+    },
+    "$lowercase": {
+        "args": "str",
+        "desc": "Returnerar en sträng där alla tecken i `str` har omvandlats till gemener."
+    },
+    "$trim": {
+        "args": "str",
+        "desc": "Normaliserar och tar bort omgivande blanktecken i `str` genom följande steg:\n\n - Alla tabbar, vagnreturer och radbrytningar ersätts med mellanslag.\n- Sammanhängande sekvenser av mellanslag reduceras till ett enda mellanslag.\n- Inledande och avslutande mellanslag tas bort.\n\n Om `str` inte anges, det vill säga funktionen anropas utan argument, används kontextvärdet som värde för `str`. Ett fel utlöses om `str` inte är en sträng."
+    },
+    "$contains": {
+        "args": "str, pattern",
+        "desc": "Returnerar `true` om `str` matchar `pattern`, annars returneras `false`. Om `str` inte anges, det vill säga funktionen anropas med ett argument, används kontextvärdet som värde för `str`. Parametern `pattern` kan vara antingen en sträng eller ett reguljärt uttryck."
+    },
+    "$split": {
+        "args": "str[, separator][, limit]",
+        "desc": "Delar parametern `str` i en matris av delsträngar. Det är ett fel om `str` inte är en sträng. Den valfria parametern `separator` anger tecknen i `str` där delningen ska ske, som en sträng eller ett reguljärt uttryck. Om `separator` inte anges antas en tom sträng och `str` delas i en matris av enskilda tecken. Den valfria parametern `limit` är det högsta antal delsträngar som får ingå i resultatet. Ytterligare delsträngar förkastas."
+    },
+    "$join": {
+        "args": "array[, separator]",
+        "desc": "Sammanfogar en matris av komponentsträngar till en enda sträng, med varje komponentsträng åtskild av den valfria parametern `separator`. Det är ett fel om indatamatrisen innehåller ett objekt som inte är en sträng. Om `separator` inte anges antas en tom sträng, alltså ingen avgränsare mellan komponentsträngarna."
+    },
+    "$match": {
+        "args": "str, pattern [, limit]",
+        "desc": "Tillämpar det reguljära uttrycket `pattern` på strängen `str` och returnerar en matris av objekt, där varje objekt innehåller information om varje matchning i `str`."
+    },
+    "$replace": {
+        "args": "str, pattern, replacement [, limit]",
+        "desc": "Hittar förekomster av `pattern` i `str` och ersätter dem med `replacement`.\n\nDen valfria parametern `limit` är det högsta antalet ersättningar."
+    },
+    "$now": {
+        "args": "$[picture [, timezone]]",
+        "desc": "Skapar en tidsstämpel i ISO 8601-kompatibelt format och returnerar den som en sträng. Om de valfria parametrarna `picture` och `timezone` anges formateras den aktuella tidsstämpeln enligt funktionen `$fromMillis()`."
+    },
+    "$base64encode": {
+        "args": "string",
+        "desc": "Omvandlar en ASCII-sträng till en base64-representation. Varje tecken i strängen behandlas som en byte binärdata. Detta kräver att alla tecken i strängen ligger inom intervallet 0x00 till 0xFF, vilket omfattar alla tecken i URI-kodade strängar. Unicode-tecken utanför intervallet stöds inte."
+    },
+    "$base64decode": {
+        "args": "string",
+        "desc": "Omvandlar base64-kodade byte till en sträng med UTF-8 Unicode-kodsida."
+    },
+    "$number": {
+        "args": "arg",
+        "desc": "Omvandlar parametern `arg` till ett tal med följande omvandlingsregler:\n\n - Tal lämnas oförändrade\n - Strängar som innehåller en teckensekvens som representerar ett giltigt JSON-tal omvandlas till det talet\n - Alla andra värden ger ett fel."
+    },
+    "$abs": {
+        "args": "number",
+        "desc": "Returnerar absolutvärdet för parametern `number`."
+    },
+    "$floor": {
+        "args": "number",
+        "desc": "Returnerar värdet av `number` avrundat nedåt till närmaste heltal som är mindre än eller lika med `number`."
+    },
+    "$ceil": {
+        "args": "number",
+        "desc": "Returnerar värdet av `number` avrundat uppåt till närmaste heltal som är större än eller lika med `number`."
+    },
+    "$round": {
+        "args": "number [, precision]",
+        "desc": "Returnerar värdet av parametern `number` avrundat till det antal decimaler som anges med den valfria parametern `precision`."
+    },
+    "$power": {
+        "args": "base, exponent",
+        "desc": "Returnerar värdet av `base` upphöjt till `exponent`."
+    },
+    "$sqrt": {
+        "args": "number",
+        "desc": "Returnerar kvadratroten ur värdet `number`."
+    },
+    "$random": {
+        "args": "",
+        "desc": "Returnerar ett pseudoslumptal som är större än eller lika med noll och mindre än ett."
+    },
+    "$millis": {
+        "args": "",
+        "desc": "Returnerar antalet millisekunder sedan Unix-epoken (1 januari 1970 UTC) som ett tal. Alla anrop av `$millis()` vid utvärdering av ett uttryck returnerar samma värde."
+    },
+    "$sum": {
+        "args": "array",
+        "desc": "Returnerar den aritmetiska summan av en `array` med tal. Det är ett fel om indatamatrisen innehåller ett objekt som inte är ett tal."
+    },
+    "$max": {
+        "args": "array",
+        "desc": "Returnerar det största talet i en `array` med tal. Det är ett fel om indatamatrisen innehåller ett objekt som inte är ett tal."
+    },
+    "$min": {
+        "args": "array",
+        "desc": "Returnerar det minsta talet i en `array` med tal. Det är ett fel om indatamatrisen innehåller ett objekt som inte är ett tal."
+    },
+    "$average": {
+        "args": "array",
+        "desc": "Returnerar medelvärdet av en `array` med tal. Det är ett fel om indatamatrisen innehåller ett objekt som inte är ett tal."
+    },
+    "$count": {
+        "args": "array",
+        "desc": "Returnerar antalet objekt i matrisen."
+    },
+    "$append": {
+        "args": "array, array",
+        "desc": "Lägger samman två matriser."
+    },
+    "$reverse": {
+        "args": "array",
+        "desc": "Returnerar en matris med alla värden från parametern `array`, men i omvänd ordning."
+    },
+    "$shuffle": {
+        "args": "array",
+        "desc": "Returnerar en matris med alla värden från parametern `array`, men blandade i slumpmässig ordning."
+    },
+    "$zip": {
+        "args": "array, ...",
+        "desc": "Returnerar en sammanslagen (zippad) matris med grupperade värdematriser från argumenten `array1` … `arrayN` med index 0, 1, 2 …"
+    },
+    "$keys": {
+        "args": "object",
+        "desc": "Returnerar en matris med nycklarna i objektet. Om argumentet är en matris av objekt innehåller den returnerade matrisen en dubblettfri lista över alla nycklar i samtliga objekt."
+    },
+    "$lookup": {
+        "args": "object, key",
+        "desc": "Returnerar värdet som hör till nyckeln i objektet. Om det första argumentet är en matris av objekt genomsöks alla objekt i matrisen och värdena för alla förekomster av nyckeln returneras."
+    },
+    "$spread": {
+        "args": "object",
+        "desc": "Delar ett objekt med nyckel/värde-par i en matris av objekt, där varje objekt har ett enda nyckel/värde-par från indatat. Om parametern är en matris av objekt innehåller resultatet ett objekt för varje nyckel/värde-par i varje angivet objekt."
+    },
+    "$merge": {
+        "args": "array&lt;object&gt;",
+        "desc": "Slår samman en matris av `objects` till ett enda `object` med alla nyckel/värde-par från varje objekt i indatamatrisen. Om några av indataobjekten har samma nyckel innehåller det returnerade `object` värdet från det sista objektet i matrisen. Det är ett fel om indatamatrisen innehåller ett objekt som inte är ett objekt."
+    },
+    "$each": {
+        "args": "object, function",
+        "desc": "Returnerar en matris med de värden som returneras av `function` när den tillämpas på varje nyckel/värde-par i `object`."
+    },
+    "$flowContext": {
+        "args": "string[, string]",
+        "desc": "Hämtar en egenskap från flödeskontexten.\n\nDetta är en funktion definierad av Node-RED."
+    },
+    "$globalContext": {
+        "args": "string[, string]",
+        "desc": "Hämtar en egenskap från den globala kontexten.\n\nDetta är en funktion definierad av Node-RED."
+    },
+    "$env": {
+        "args": "arg",
+        "desc": "Returnerar värdet av en miljövariabel.\n\nDetta är en funktion definierad av Node-RED."
+    },
+    "$distinct": {
+        "args": "array",
+        "desc": "Returnerar en matris där dubblettvärden har tagits bort från `array`."
+    },
+    "$type": {
+        "args": "value",
+        "desc": "Returnerar typen för `value` som en sträng. Om `value` är odefinierat returneras `undefined`."
+    },
+    "$clone": {
+        "args": "value",
+        "desc": "Klonar ett objekt på ett säkert sätt."
+    },
+    "$boolean": {
+        "args": "arg",
+        "desc": "Omvandlar argumentet till ett booleskt värde med följande regler:\n\n - `Boolean`: oförändrat\n - `string`: tom: `false`\n - `string`: icke-tom: `true`\n - `number`: `0`: `false`\n - `number`: skilt från noll: `true`\n - `null`: `false`\n - `array`: tom: `false`\n - `array`: innehåller en medlem som omvandlas till `true`: `true`\n - `array`: alla medlemmar omvandlas till `false`: `false`\n - `object`: tomt: `false`\n - `object`: icke-tomt: `true`\n - `function`: `false`"
+    },
+    "$not": {
+        "args": "arg",
+        "desc": "Returnerar booleskt INTE för argumentet. `arg` omvandlas först till ett booleskt värde."
+    },
+    "$exists": {
+        "args": "arg",
+        "desc": "Returnerar booleskt `true` om uttrycket `arg` utvärderas till ett värde, eller `false` om uttrycket inte matchar något, till exempel en sökväg till en fältreferens som saknas."
+    },
+    "$sort": {
+        "args": "array [, function]",
+        "desc": "Returnerar en matris med alla värden i parametern `array`, men sorterade.\n\nOm en jämförelsefunktion `function` anges måste den vara en funktion som tar två parametrar:\n\n`function(left, right)`\n\nFunktionen anropas av sorteringsalgoritmen för att jämföra värdena `left` och `right`. Om `left` ska placeras efter `right` i den önskade sorteringsordningen måste funktionen returnera booleskt `true` för att ange ett byte. Annars ska den returnera `false`."
+    },
+    "$sift": {
+        "args": "object, function",
+        "desc": "Returnerar ett objekt som endast innehåller de nyckel/värde-par från parametern `object` som uppfyller predikatet `function` i den andra parametern.\n\nFunktionen `function` i den andra parametern måste ha följande signatur:\n\n`function(value [, key [, object]])`"
+    },
+    "$map": {
+        "args": "array, function",
+        "desc": "Returnerar en matris med resultaten av att tillämpa parametern `function` på varje värde i parametern `array`.\n\nFunktionen `function` i den andra parametern måste ha följande signatur:\n\n`function(value [, index [, array]])`"
+    },
+    "$filter": {
+        "args": "array, function",
+        "desc": "Returnerar en matris som endast innehåller de värden i parametern `array` som uppfyller predikatet `function`.\n\nFunktionen `function` i den andra parametern måste ha följande signatur:\n\n`function(value [, index [, array]])`"
+    },
+    "$reduce": {
+        "args": "array, function [, init]",
+        "desc": "Returnerar ett aggregerat värde som härleds genom att tillämpa parametern `function` successivt på varje värde i `array` tillsammans med resultatet av föregående funktionsanrop.\n\nFunktionen måste ta två argument och fungerar som en infixoperator mellan varje värde i `array`. Signaturen för `function` måste ha formen: `myfunc($accumulator, $value[, $index[, $array]])`\n\nDen valfria parametern `init` används som startvärde i aggregeringen."
+    },
+    "$pad": {
+        "args": "string, width [, char]",
+        "desc": "Returnerar en kopia av `string` med extra utfyllnad vid behov, så att det totala antalet tecken minst är absolutvärdet av parametern `width`.\n\nOm `width` är positivt fylls strängen ut till höger, om den är negativ fylls den ut till vänster.\n\nDet valfria argumentet `char` anger tecknet eller tecknen som ska användas för utfyllnad. Om det inte anges används mellanslag."
+    },
+    "$fromMillis": {
+        "args": "number, [, picture [, timezone]]",
+        "desc": "Omvandlar `number`, som representerar millisekunder sedan Unix-epoken (1 januari 1970 UTC), till en formaterad strängrepresentation av tidsstämpeln enligt strängen `picture`.\n\nOm den valfria parametern `picture` utelämnas formateras tidsstämpeln enligt ISO 8601.\n\nOm den valfria strängen `picture` anges formateras tidsstämpeln enligt den representation som anges där. Funktionen har samma beteende som tvåargumentsversionen av XPath/XQuery-funktionen `format-dateTime` i XPath F&O 3.1-specifikationen.\n\nOm den valfria strängen `timezone` anges använder den formaterade tidsstämpeln den tidszonen. `timezone` ska ha formatet '±HHMM', där ± är plus eller minus och HHMM är förskjutningen från UTC i timmar och minuter. Positiv förskjutning används för tidszoner öster om UTC och negativ för tidszoner väster om UTC."
+    },
+    "$formatNumber": {
+        "args": "number, picture [, options]",
+        "desc": "Omvandlar `number` till en sträng och formaterar den som ett decimaltal enligt strängen `picture`.\n\nFunktionen har samma beteende som XPath/XQuery-funktionen `fn:format-number` i XPath F&O 3.1-specifikationen. Den valfria tredje parametern `options` åsidosätter lokalspecifika formateringstecken, som decimaltecknet."
+    },
+    "$formatBase": {
+        "args": "number [, radix]",
+        "desc": "Omvandlar `number` till en sträng och formaterar den som ett heltal i talbasen som anges med `radix`. Om `radix` inte anges används bas 10. `radix` kan vara mellan 2 och 36, annars utlöses ett fel."
+    },
+    "$toMillis": {
+        "args": "timestamp",
+        "desc": "Omvandlar en ISO 8601-formaterad sträng `timestamp` till antalet millisekunder sedan Unix-epoken (1 januari 1970 UTC). Ett fel utlöses om strängen inte har rätt format."
+    },
+    "$eval": {
+        "args": "expr [, context]",
+        "desc": "Tolkar och utvärderar strängen `expr`, som innehåller litteral JSON eller ett JSONata-uttryck, med den aktuella kontexten som utvärderingskontext."
+    },
+    "$formatInteger": {
+        "args": "number, picture",
+        "desc": "Omvandlar `number` till en sträng och formaterar den som ett heltal enligt strängen `picture`. Strängen `picture` anger hur talet formateras och har samma syntax som `fn:format-integer` i XPath F&O 3.1-specifikationen."
+    },
+    "$parseInteger": {
+        "args": "string, picture",
+        "desc": "Tolkar innehållet i parametern `string` som ett heltal, ett JSON-tal, med formatet i strängen `picture`. `picture` har samma format som `$formatInteger`."
+    },
+    "$error": {
+        "args": "[str]",
+        "desc": "Utlöser ett fel med ett meddelande. Den valfria parametern `str` ersätter standardmeddelandet från funktionen `$error()`."
+    },
+    "$assert": {
+        "args": "arg, str",
+        "desc": "Om `arg` är `true` returnerar funktionen `undefined`. Om `arg` är `false` utlöses ett undantag med `str` som undantagets meddelande."
+    },
+    "$single": {
+        "args": "array, function",
+        "desc": "Returnerar det enda värdet i parametern `array` som uppfyller predikatet `function`, det vill säga `function` returnerar booleskt `true` när den får värdet. Ett undantag utlöses om antalet matchande värden inte är exakt ett.\n\nFunktionen ska ha följande signatur: `function(value [, index [, array]])`, där value är varje indata i matrisen, index är värdets position och hela matrisen skickas som tredje argument."
+    },
+    "$encodeUrlComponent": {
+        "args": "str",
+        "desc": "Kodifierar en URL-komponent genom att ersätta varje förekomst av vissa tecken med en, två, tre eller fyra escape-sekvenser som representerar tecknets UTF-8-kodning.\n\nExempel: `$encodeUrlComponent(\"?x=test\")` => `\"%3Fx%3Dtest\"`"
+    },
+    "$encodeUrl": {
+        "args": "str",
+        "desc": "Kodifierar en URL genom att ersätta varje förekomst av vissa tecken med en, två, tre eller fyra escape-sekvenser som representerar tecknets UTF-8-kodning.\n\nExempel: `$encodeUrl(\"https://mozilla.org/?x=шеллы\")` => `\"https://mozilla.org/?x=%D1%88%D0%B5%D0%BB%D0%BB%D1%8B\"`"
+    },
+    "$decodeUrlComponent": {
+        "args": "str",
+        "desc": "Avkodar en URL-komponent som tidigare skapats av encodeUrlComponent.\n\nExempel: `$decodeUrlComponent(\"%3Fx%3Dtest\")` => `\"?x=test\"`"
+    },
+    "$decodeUrl": {
+        "args": "str",
+        "desc": "Avkodar en URL som tidigare skapats av encodeUrl.\n\nExempel: `$decodeUrl(\"https://mozilla.org/?x=%D1%88%D0%B5%D0%BB%D0%BB%D1%8B\")` => `\"https://mozilla.org/?x=шеллы\"`"
+    },
+    "$moment": {
+        "args": "[str]",
+        "desc": "Hämtar ett datumobjekt med biblioteket Moment."
+    }
+}
